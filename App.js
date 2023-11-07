@@ -1,12 +1,22 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import Login from './screens/Login'
+import Profile from './screens/Profile';
+import AddRecipe from './screens/AddRecipe';
+import RecipeDetails from './screens/RecipeDetails';
+import SearchRecipe from './screens/SearchRecipe';
+import Welcome from './screens/Welcome';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+
+//const Stack = createNativeStackNavigator()
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <Login/>
+    </SafeAreaView>
+
   );
 }
 
