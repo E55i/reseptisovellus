@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import { Platform, StyleSheet, Text, View, SafeAreaView } from 'react-native';
 import Login from './screens/Login'
+import CreateUser from './screens/CreateUser';
 import Profile from './screens/Profile';
 import AddRecipe from './screens/AddRecipe';
 import RecipeDetails from './screens/RecipeDetails';
@@ -24,6 +25,8 @@ export default function App() {
               />
             }
           </Stack.Screen>
+
+          <Stack.Screen name="CreateUser" component={CreateUser} />
           <Stack.Screen name="Welcome">
             {(props) =>
               <Welcome

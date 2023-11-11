@@ -1,0 +1,6 @@
+Muistakaa ladata Expo aina omalle koneelle.  (Npm Expo Install)
+Myös Firebase tarvii ladata. (Npm Install Firebase) tai (Expo install Firebase)
+Myös React core tarvii ladata. (npm install @react-native-material/core)
+Contan tarvii asennuksen. (expo install expo-constants / npm install expo-constants)
+
+npx expo start Käynnistää ohjelman.
