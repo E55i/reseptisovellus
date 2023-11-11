@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, Button, Alert } from 'react-native';
-import firebase from './FirebaseConfig'; // Oletetaan, että tämä on tiedostosi nimi
+import { auth, signInWithEmailAndPassword } from './FirebaseConfig'; // Päivitetty polku
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(email, password)
+    signInWithEmailAndPassword(auth, email, password)
       .then(() => {
-        // Kirjautuminen onnistui, ohjaa käyttäjä päänäkymään
-        navigation.navigate('Main');
+        // Kirjautuminen onnistui
+        navigation.navigate('Welcome'); // Olettaen, että haluat ohjata käyttäjän etusivulle
       })
       .catch(error => {
-        // Kirjautumisvirhe, näytä virheviesti
+        // Kirjautumisvirhe
         Alert.alert('Kirjautumisvirhe', error.message);
       });
   };
@@ -37,7 +35,12 @@ const LoginScreen = ({ navigation }) => {
         secureTextEntry
         autoCapitalize="none"
       />
-      <Button title="Kirjaudu sisään" onPress={handleLogin} />
+      <View style={styles.buttonContainer}>
+        <Button title="Kirjaudu sisään" onPress={handleLogin} />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="Ei tiliä? Luo tili" onPress={() => navigation.navigate('CreateUser')} />
+      </View>
     </View>
   );
 };
@@ -53,6 +56,9 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 20,
+  },
+  buttonContainer: {
+    marginBottom: 10, // Lisää marginaali jokaisen View:n alapuolelle
   },
   // Lisää tähän muita tyylejä tarvittaessa
 });
