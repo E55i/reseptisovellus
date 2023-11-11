@@ -25,6 +25,7 @@ export default function App() {
               />
             }
           </Stack.Screen>
+
           <Stack.Screen name="CreateUser" component={CreateUser} />
           <Stack.Screen name="Welcome">
             {(props) =>
