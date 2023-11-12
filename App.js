@@ -26,10 +26,7 @@ export default function App() {
               />
             }
           </Stack.Screen>
-<<<<<<< Updated upstream
-=======
           <Stack.Screen name="StartScreen" component={StartScreen} />
->>>>>>> Stashed changes
           <Stack.Screen name="CreateUser" component={CreateUser} />
           <Stack.Screen name="Welcome">
             {(props) =>
