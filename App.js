@@ -7,6 +7,7 @@ import AddRecipe from './screens/AddRecipe';
 import RecipeDetails from './screens/RecipeDetails';
 import SearchRecipe from './screens/SearchRecipe';
 import Welcome from './screens/Welcome';
+import StartScreen from './screens/StartScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Constants from 'expo-constants';
@@ -25,7 +26,7 @@ export default function App() {
               />
             }
           </Stack.Screen>
-
+          <Stack.Screen name="StartScreen" component={StartScreen} />
           <Stack.Screen name="CreateUser" component={CreateUser} />
           <Stack.Screen name="Welcome">
             {(props) =>
