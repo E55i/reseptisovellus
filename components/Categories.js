@@ -1,14 +1,28 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import React from 'react'
+import React, {useState} from 'react'
 
 export default function Categories() {
+
+    const [isClicked, setIsClicked] = useState(false)
+    //tee ominaisuus, että mainos näytetään kategorioiden jälkeenvain jos  käyttäjällä ei ole premium tilausta
+    // säädä elementtien varjostusta, tutki sekä androidin että iosin varjostukset
+
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.button}>
                 <Text style={styles.text}>Herkut</Text>
             </TouchableOpacity>            
-            <TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
                 <Text style={styles.text}>Välipalat</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+                <Text style={styles.text}>Klassikot</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+                <Text style={styles.text}>Kasvisruoat</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+                <Text style={styles.text}>kanaruoat</Text>
             </TouchableOpacity>
         </View>
     )
@@ -26,6 +40,10 @@ const styles = StyleSheet.create({
         shadowColor: '#000000',
         overflow: 'hidden',
         borderRadius:10,
+        marginRight: 10,
+        marginLeft: 10,
+        marginBottom: 4,
+        marginTop: 8,
       },
       text: {
         paddingLeft: 10,
