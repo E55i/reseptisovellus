@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, Button, Alert } from 'react-native';
-import { auth, signInWithEmailAndPassword, signInWithGoogle } from './FirebaseConfig'; // Oletan, että olet lisännyt signInWithGoogle-funktion konfiguraatioosi
+import { auth, signInWithEmailAndPassword, signInWithGoogle } from '../components/FirebaseConfig'; // Oletan, että olet lisännyt signInWithGoogle-funktion konfiguraatioosi
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 const LoginScreen = ({ navigation }) => {
