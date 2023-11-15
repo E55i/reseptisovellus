@@ -6,13 +6,23 @@ import {
   StyleSheet,
   Platform,
   ScrollView,
+  Alert,
 } from "react-native";
 import DefaultAppBar from "../components/DefaultAppBar";
 import ButtonWithIcon from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
 import { useNavigation } from "@react-navigation/native";
-import CustomCheckBox from "../components/CustomCheckBox";
-import { auth } from "../components/FirebaseConfig";
+import {
+  SelectList,
+  MultipleSelectList,
+} from "react-native-dropdown-select-list";
+import {
+  auth,
+  firestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "../components/FirebaseConfig";
 
 export default function AddRecipe({ ...props }) {
   const [recipeData, setRecipeData] = useState({
@@ -20,11 +30,11 @@ export default function AddRecipe({ ...props }) {
     title: "",
     incredients: "",
     instructions: "",
-    course: "", // aamiainen/välipala...
+    course: "",
     mainIngredient: "",
     diet: "",
-    source: "", // kirjan nimi/nettisivu...
-    servingSize: "", // annoskoko
+    source: "",
+    servingSize: "",
     prepTime: "",
     cookTime: "",
     caloriesKj: "",
@@ -35,7 +45,9 @@ export default function AddRecipe({ ...props }) {
     sugar: "",
     protein: "",
     salt: "",
-    rating: "",
+    photo: "",
+    rating: 0,
+    healthyRating: 0,
     comments: "",
   });
 
@@ -43,60 +55,72 @@ export default function AddRecipe({ ...props }) {
   const [selectedMainIngredients, setSelectedMainIngredients] = useState([]);
   const [selectedDiets, setSelectedDiets] = useState([]);
 
+  const timeOptions = [
+    { key: "1", value: "alle 15 min" },
+    { key: "2", value: "alle 30 min" },
+    { key: "3", value: "30-60 min" },
+    { key: "4", value: "yli 60 min" },
+  ];
+
   const courseOptions = [
-    "Aamiainen",
-    "Alkupala",
-    "Pääruoka",
-    "Jälkiruoka",
-    "Salaatti",
-    "Keitto",
-    "Lisuke",
-    "Juoma",
+    { key: "1", value: "Aamiainen" },
+    { key: "2", value: "Alkupala" },
+    { key: "3", value: "Pääruoka" },
+    { key: "4", value: "Jälkiruoka" },
+    { key: "5", value: "Salaatti" },
+    { key: "6", value: "Keitto" },
+    { key: "7", value: "Lisuke" },
+    { key: "8", value: "Juoma" },
   ];
 
   const mainIngredientOptions = [
-    "Nauta",
-    "Sika",
-    "Makkara",
-    "Broileri",
-    "Kala",
-    "Äyriäiset",
-    "Kananmuna",
-    "Kasviproteiini",
+    { key: "1", value: "Nauta" },
+    { key: "2", value: "Sika" },
+    { key: "3", value: "Makkara" },
+    { key: "4", value: "Broileri" },
+    { key: "5", value: "Kala" },
+    { key: "6", value: "Äyriäiset" },
+    { key: "7", value: "Kananmuna" },
+    { key: "8", value: "Kasviproteiini" },
   ];
 
   const dietOptions = [
-    "Kasvis",
-    "Vegaaninen",
-    "Gluteeniton",
-    "Laktoositon",
-    "Maidoton",
-    "Kananmunaton",
-    "Vähähiilihydraattinen",
+    { key: "1", value: "Kasvis" },
+    { key: "2", value: "Vegaaninen" },
+    { key: "3", value: "Gluteeniton" },
+    { key: "4", value: "Laktoositon" },
+    { key: "5", value: "Maidoton" },
+    { key: "6", value: "Kananmunaton" },
+    { key: "7", value: "Vähähiilihydraattinen" },
   ];
 
-  const handleCourseSelect = (course) => {
-    setSelectedCourses(course);
-    setRecipeData({ ...recipeData, course: course });
+  const handleCourseSelect = () => {
+    setRecipeData({ ...recipeData, course: selectedCourses });
   };
 
-  const handleMainIngredientSelect = (ingredient) => {
-    setSelectedMainIngredients(ingredient);
-    setRecipeData({ ...recipeData, mainIngredient: ingredient });
+  const handleMainIngredientSelect = () => {
+    setRecipeData({ ...recipeData, mainIngredient: selectedMainIngredients });
   };
 
-  const handleDietSelect = (diet) => {
-    setSelectedDiets(diet);
-    setRecipeData({ ...recipeData, diet: diet });
+  const handleDietSelect = () => {
+    setRecipeData({ ...recipeData, diet: selectedDiets });
   };
 
-  // save the data
+  // navigate to main screen after after save
   const navigation = useNavigation();
+
+  // save the recipeData
   const save = async () => {
-    console.log("saved");
+    const docRef = await addDoc(collection(firestore, "recipes"), {
+      recipeData,
+      created: serverTimestamp(),
+    }).catch((error) => console.log(error)); // TODO: error handling!
+    setRecipeData({});
+    Alert.alert("Resepti tallennettu!");
+    console.log("Data saved");
   };
 
-  // monitor changes in the form
+  // monitor changes in the form (remove from final app)
   useEffect(() => {
     console.log(recipeData);
   }, [recipeData]);
@@ -170,52 +194,74 @@ export default function AddRecipe({ ...props }) {
 
           <View style={styles.section}>
             <Text style={styles.header}>Valmisteluaika</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Minuuttia"
-              keyboardType="numeric"
-              onChangeText={(text) =>
-                setRecipeData({ ...recipeData, prepTime: text })
+            <SelectList
+              boxStyles={styles.input}
+              placeholder="Valitse"
+              setSelected={(val) =>
+                setRecipeData({ ...recipeData, prepTime: val })
               }
-            ></TextInput>
+              data={timeOptions}
+              search={false}
+              save="value"
+            />
           </View>
 
           <View style={styles.section}>
             <Text style={styles.header}>Kokkausaika</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Minuuttia"
-              keyboardType="numeric"
-              onChangeText={(text) =>
-                setRecipeData({ ...recipeData, cookTime: text })
+            <SelectList
+              boxStyles={styles.input}
+              placeholder="Valitse"
+              setSelected={(val) =>
+                setRecipeData({ ...recipeData, cookTime: val })
               }
-            ></TextInput>
+              data={timeOptions}
+              search={false}
+              save="value"
+            />
           </View>
 
           <View style={styles.section}>
             <Text style={styles.header}>Ruokalaji</Text>
-            <CustomCheckBox
-              options={courseOptions}
-              selectedItems={selectedCourses}
+            <MultipleSelectList
+              boxStyles={[styles.input, { height: null }]}
+              placeholder="Valitse"
+              badgeStyles={{ backgroundColor: Colors.secondary }}
+              setSelected={(val) => setSelectedCourses(val)}
+              data={courseOptions}
+              search={false}
+              save="value"
               onSelect={handleCourseSelect}
+              label="Omat valinnat"
             />
           </View>
 
           <View style={styles.section}>
             <Text style={styles.header}>Pääraaka-aine</Text>
-            <CustomCheckBox
-              options={mainIngredientOptions}
-              selectedItems={selectedMainIngredients}
+            <MultipleSelectList
+              boxStyles={[styles.input, { height: null }]}
+              placeholder="Valitse"
+              badgeStyles={{ backgroundColor: Colors.secondary }}
+              setSelected={(val) => setSelectedMainIngredients(val)}
+              data={mainIngredientOptions}
+              search={false}
+              save="value"
               onSelect={handleMainIngredientSelect}
+              label="Omat valinnat"
             />
           </View>
 
           <View style={styles.section}>
             <Text style={styles.header}>Ruokavalio</Text>
-            <CustomCheckBox
-              options={dietOptions}
-              selectedItems={selectedDiets}
+            <MultipleSelectList
+              boxStyles={[styles.input, { height: null }]}
+              placeholder="Valitse"
+              badgeStyles={{ backgroundColor: Colors.secondary }}
+              setSelected={(val) => setSelectedDiets(val)}
+              data={dietOptions}
+              search={false}
+              save="value"
               onSelect={handleDietSelect}
+              label="Omat valinnat"
             />
           </View>
 
@@ -328,6 +374,7 @@ export default function AddRecipe({ ...props }) {
               width={140}
               title="Peruuta"
               onPress={() => {
+                setRecipeData({});
                 navigation.goBack();
               }}
             />
@@ -338,6 +385,7 @@ export default function AddRecipe({ ...props }) {
               title="Tallenna"
               onPress={() => {
                 save();
+                setRecipeData({});
                 navigation.goBack();
               }}
             />
@@ -373,7 +421,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   input: {
-    height: 40,
+    height: 44,
     marginLeft: 12,
     marginRight: 12,
     borderWidth: 1,
