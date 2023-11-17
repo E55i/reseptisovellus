@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, FlatList, Button } from 'react-native';
+import GoBackAppBar from '../components/GoBackAppBar';
 
 const dummyProfileData = [
     { id: '1', name: 'Pasta', rating: 5 },
@@ -7,9 +8,10 @@ const dummyProfileData = [
     // ... more data
   ];
 
-export default function Profile() {
+export default function Profile({ ...props }) {
     return (
         <View>
+          <GoBackAppBar { ...props }/>
           <Text>User's Profile</Text>
           <Text>Email: user@example.com</Text>
           <Text>My Recipes:</Text>

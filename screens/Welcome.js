@@ -14,6 +14,7 @@ export default function Welcome({ ...props }) {
       <Text style={styles.welcomeText}>Tervetuloa Essi</Text>
       <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
       <Categories/>
+      <Text>Mainos jos kyseessä maksuton käyttäjä</Text>
       <Text>Suosituimmat reseptit</Text>
       <Text>RecipeCard</Text>
     </View>
@@ -26,15 +27,17 @@ const styles = StyleSheet.create({
   },
   welcomeText:{
     marginLeft: 8,
-    marginTop: 8,
-    marginBottom: 8,
+    marginTop: 20,
+    marginBottom: 16,
     fontSize: 16,
+    textAlign: 'center',
   },
   infoText:{
     marginLeft: 8,
     marginTop: 8,
-    marginBottom: 8,
+    marginBottom: 26,
     fontSize: 20,
-    color: 'gray'
+    color: 'gray',
+    textAlign: 'center',
   }
 })

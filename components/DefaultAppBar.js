@@ -1,8 +1,7 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import React from 'react'
 import { AppBar, HStack, IconButton } from '@react-native-material/core'
-import { FontAwesome } from '@expo/vector-icons'
-import { Ionicons } from '@expo/vector-icons'
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
 
 export default function DefaultAppBar({backgroundColor, navigation}) {
