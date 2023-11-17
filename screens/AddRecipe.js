@@ -8,7 +8,6 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import DefaultAppBar from "../components/DefaultAppBar";
 import ButtonWithIcon from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
 import { useNavigation } from "@react-navigation/native";
@@ -23,6 +22,7 @@ import {
   addDoc,
   serverTimestamp,
 } from "../components/FirebaseConfig";
+import GoBackAppBar from '../components/GoBackAppBar';
 
 export default function AddRecipe({ ...props }) {
   const [recipeData, setRecipeData] = useState({
@@ -127,7 +127,7 @@ export default function AddRecipe({ ...props }) {
 
   return (
     <>
-      <DefaultAppBar {...props} />
+      <GoBackAppBar { ...props }/>
       <ScrollView>
         <View style={styles.container}>
           <View style={styles.sectionTitle}>
