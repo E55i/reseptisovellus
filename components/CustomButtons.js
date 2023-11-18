@@ -8,7 +8,7 @@ export default function ButtonWithIcon({ icon, color, width, title, onPress }) {
       style={{
         ...styles.buttonContainer,
         backgroundColor: color,
-        width: width || { alignSelf: "flex-start" },
+        width: width || { width: "auto" },
       }}
       onPress={onPress}
     >
@@ -24,7 +24,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 4,
-    padding: 4,
+    paddingTop: 8,
+    paddingBottom: 8,
     paddingLeft: 16,
     paddingRight: 16,
     borderRadius: 10,

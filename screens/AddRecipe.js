@@ -22,7 +22,7 @@ import {
   addDoc,
   serverTimestamp,
 } from "../components/FirebaseConfig";
-import GoBackAppBar from '../components/GoBackAppBar';
+import GoBackAppBar from "../components/GoBackAppBar";
 
 export default function AddRecipe({ ...props }) {
   const [recipeData, setRecipeData] = useState({
@@ -120,14 +120,16 @@ export default function AddRecipe({ ...props }) {
     console.log("Data saved");
   };
 
+  /*
   // monitor changes in the form (remove from final app)
   useEffect(() => {
     console.log(recipeData);
   }, [recipeData]);
+  */
 
   return (
     <>
-      <GoBackAppBar { ...props }/>
+      <GoBackAppBar {...props} />
       <ScrollView>
         <View style={styles.container}>
           <View style={styles.sectionTitle}>
@@ -387,6 +389,23 @@ export default function AddRecipe({ ...props }) {
                 save();
                 setRecipeData({});
                 navigation.goBack();
+              }}
+            />
+          </View>
+          <View
+            style={{
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 20,
+            }}
+          >
+            <ButtonWithIcon
+              icon={"book"}
+              color="deeppink"
+              title="Omat (testaukseen)"
+              onPress={() => {
+                setRecipeData({});
+                navigation.navigate("OwnRecipes");
               }}
             />
           </View>
