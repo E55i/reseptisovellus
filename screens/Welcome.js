@@ -1,29 +1,29 @@
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Image,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import DefaultAppBar from "../components/DefaultAppBar";
 import Categories from "../components/Categories";
 import RecipeCard from "../components/RecipeCard";
-import { getDocs } from 'firebase/firestore';
-import {
-  firestore,
-  collection
-} from "../components/FirebaseConfig";
+import { getDocs } from "firebase/firestore";
+import { firestore, collection } from "../components/FirebaseConfig";
 import ShowAlert from "../components/ShowAlert";
-import { FlatList } from "react-native-gesture-handler";
 
-//Hae käyttäjän nimi tietokannasta
-//Hae suosituimmat reseptit
-
-export default function Welcome({ backgroundColor, navigation }) {
+export default function WelcomeTest({ backgroundColor, navigation }) {
   const [recipes, setRecipes] = useState([]);
-  const [tempRecipes, setTempRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
         const querySnapshot = await getDocs(collection(firestore, "recipes"));
-        const recipeObject =  querySnapshot.docs.map((doc) => ({
+        const recipeObject = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           title: doc.data().recipeData.title,
           servingSize: doc.data().recipeData.servingSize,
@@ -34,46 +34,72 @@ export default function Welcome({ backgroundColor, navigation }) {
 
         setRecipes(recipeObject);
         setIsLoading(false);
-        console.log(recipes[0])
+        console.log(recipes);
       } catch (error) {
         setIsLoading(false);
-        ShowAlert("Virhe","Jotain meni pieleen. Kokeile myöhemmin uudelleen.");
+        ShowAlert("Virhe", "Jotain meni pieleen. Kokeile myöhemmin uudelleen.");
       }
-    }) ()
-  } , []);
+    })();
+  }, []);
 
   return (
     <View style={styles.container}>
-      <DefaultAppBar backgroundColor = {backgroundColor} navigation={navigation} />
-      <Text style={styles.welcomeText}>Tervetuloa Essi</Text>
-      <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
-      <Categories />
-      <Text>Mainos jos kyseessä maksuton käyttäjä</Text>
-      <Text style={styles.textFavourites}>Suosituimmat reseptit</Text>
-      {isLoading && (
-        <ActivityIndicator
-          style={styles.activityIndicator}
-          size="large"
-          color="#47A73E"
-        />
-      )}
-      {!isLoading && (
-        <RecipeCard
-        recipeId={recipes[0].id}
-        prepTime={recipes[0].prepTime}
-        urlToImage = {recipes[0].photo}
-        recipeName={recipes[0].title}
-        cookTime={recipes[0].cookTime}
-        servingSize={recipes[0].servingSize}
-        navigation= {navigation}
-        backgroundColor = {backgroundColor}
+      <DefaultAppBar
+        backgroundColor={backgroundColor}
+        navigation={navigation}
       />
-      )}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.welcomeText}>Tervetuloa Essi</Text>
+        <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
+        <Categories />
+        {!isPremium && (
+          <Image
+            style={styles.add}
+            source={require("../assets/mainos_vaaka.png")}
+          />
+        )}
+        <Text style={styles.textFavourites}>Suosituimmat reseptit</Text>
+        {isLoading && (
+          <ActivityIndicator
+            style={styles.activityIndicator}
+            size="large"
+            color="#47A73E"
+          />
+        )}
+        {!isLoading &&
+          recipes.map((item) => (
+            <RecipeCard
+              key={item.id}
+              recipeId={item.id}
+              prepTime={item.prepTime}
+              urlToImage={item.photo}
+              recipeName={item.title}
+              cookTime={item.cookTime}
+              servingSize={item.servingSize}
+              backgroundColor={backgroundColor}
+            />
+          ))}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  add: {
+    width: 350,
+    height: 100,
+    alignSelf: "center",
+  },
+  image: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 36,
+    marginLeft: 2,
+  },
   container: {
     backgroundColor: "white",
   },
@@ -91,7 +117,7 @@ const styles = StyleSheet.create({
     color: "#8B8B8B",
     textAlign: "center",
   },
-  textFavourites:{
+  textFavourites: {
     marginTop: 8,
     marginBottom: 8,
     fontSize: 20,

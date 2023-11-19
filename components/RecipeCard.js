@@ -1,29 +1,21 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
-export default function RecipeCard({
-  recipeId,
-  urlToImage,
-  recipeName,
-  cookTime,
-  servingSize,
-  prepTime,
-  navigation,
-  backgroundColor,
-}) {
+export default function RecipeCard({...props}) {
+
+  const navigation = useNavigation();
+
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        navigation.navigate("RecipeDetails", {
-          recipeId: recipeId,
-          backgroundColor: backgroundColor,
-        });
+        navigation.navigate("RecipeDetails", {...props});
       }}
     >
-      {urlToImage ? (
-        <Image style={styles.image} source={{ uri: urlToImage }} />
+      {props.urlToImage ? (
+        <Image style={styles.image} source={{ uri: props.urlToImage }} />
       ) : (
         <Image
           style={styles.image}
@@ -31,7 +23,7 @@ export default function RecipeCard({
         />
       )}
       <View style={styles.recipeCardText}>
-        <Text style={styles.recipeName}>{recipeName}</Text>
+        <Text style={styles.recipeName}>{props.recipeId}</Text>
         <View style={styles.recipeInfo}>
           <View style={styles.servingSize}>
         <MaterialCommunityIcons
@@ -40,7 +32,7 @@ export default function RecipeCard({
             size={18}
             color="#8B8B8B"
           />
-          <Text style={styles.infoText}>{servingSize} hlö</Text>
+          <Text style={styles.infoText}>{props.servingSize} hlö</Text>
           </View>
           <View style={styles.iconAndTextTime}>
           <Feather style={styles.icon} 
@@ -48,14 +40,14 @@ export default function RecipeCard({
           size={16} 
           color="#8B8B8B" 
           />
-          <Text style={styles.infoText}>{prepTime}</Text>
+          <Text style={styles.infoText}>{props.prepTime}</Text>
           <MaterialCommunityIcons
             style={styles.icon}
             name="toaster-oven"
             size={18}
             color="#8B8B8B"
           />
-          <Text style={styles.infoText}>{cookTime}</Text>
+          <Text style={styles.infoText}>{props.cookTime}</Text>
           </View>
         </View>
       </View>
