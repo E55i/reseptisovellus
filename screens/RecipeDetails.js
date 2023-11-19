@@ -2,12 +2,15 @@ import React from "react";
 import { View, Text, ScrollView, Button } from "react-native";
 import GoBackAppBar from '../components/GoBackAppBar';
 
-export default function RecipeDetails({ ...props }) {
+export default function RecipeDetails({ route }) {
+
+  const { recipeId, backgroundColor, navigation } = route.params;
+
   return (
     <View>
-      <GoBackAppBar {...props} />
+      <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />
       <ScrollView>
-        <Text>Recipe Name</Text>
+        <Text>Tämä on recipeId: {recipeId}</Text>
         {/* Add an image component for the recipe here */}
         <Text>Ingredients:</Text>
         <Text>Ingredient 1, Ingredient 2, ...</Text>

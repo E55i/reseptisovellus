@@ -2,36 +2,60 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default function RecipeCard({recipeId, urlToImage, recipeName, cookTime, servingSize}) {
- 
+export default function RecipeCard({
+  recipeId,
+  urlToImage,
+  recipeName,
+  cookTime,
+  servingSize,
+  prepTime,
+  navigation,
+  backgroundColor,
+}) {
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        /*Show recipe, use recipeId*/
+        navigation.navigate("RecipeDetails", {
+          recipeId: recipeId,
+          backgroundColor: backgroundColor,
+        });
       }}
     >
-      {urlToImage ? (<Image style={styles.image} source={{ uri: urlToImage }} />) :  <Image style={styles.image} source={require('../assets/image_placeholder.png')} />} 
+      {urlToImage ? (
+        <Image style={styles.image} source={{ uri: urlToImage }} />
+      ) : (
+        <Image
+          style={styles.image}
+          source={require("../assets/image_placeholder.png")}
+        />
+      )}
       <View style={styles.recipeCardText}>
         <Text style={styles.recipeName}>{recipeName}</Text>
         <View style={styles.recipeInfo}>
-          <View style={styles.iconAndTextTime}>
-            <Feather
-              style={styles.icon}
-              name="clock"
-              size={18}
-              color="#8B8B8B"
-            />
-            <Text style={styles.infoText}>{cookTime} h</Text>
+          <View style={styles.servingSize}>
+        <MaterialCommunityIcons
+            style={styles.icon}
+            name="account-group"
+            size={18}
+            color="#8B8B8B"
+          />
+          <Text style={styles.infoText}>{servingSize} hlö</Text>
           </View>
-          <View style={styles.iconAndTextPortion}>
-            <MaterialCommunityIcons
-              style={styles.icon}
-              name="account-group"
-              size={18}
-              color="#8B8B8B"
-            />
-            <Text style={styles.infoText}>{servingSize} hlö</Text>
+          <View style={styles.iconAndTextTime}>
+          <Feather style={styles.icon} 
+          name="clock" 
+          size={16} 
+          color="#8B8B8B" 
+          />
+          <Text style={styles.infoText}>{prepTime}</Text>
+          <MaterialCommunityIcons
+            style={styles.icon}
+            name="toaster-oven"
+            size={18}
+            color="#8B8B8B"
+          />
+          <Text style={styles.infoText}>{cookTime}</Text>
           </View>
         </View>
       </View>
@@ -69,20 +93,20 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   recipeInfo: {
+    flexDirection: "column",
+    justifyContent: 'center'
+  },
+  servingSize: {
     flexDirection: "row",
+    justifyContent:'center',
   },
   iconAndTextTime: {
     flexDirection: "row",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  iconAndTextPortion: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 16,
+    justifyContent:'center',
   },
   infoText: {
     fontSize: 12,
+    paddingRight: 4,
   },
   icon: {
     paddingRight: 4,

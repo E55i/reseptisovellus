@@ -9,17 +9,18 @@ import {
   collection
 } from "../components/FirebaseConfig";
 import ShowAlert from "../components/ShowAlert";
+import { FlatList } from "react-native-gesture-handler";
 
 //Hae käyttäjän nimi tietokannasta
 //Hae suosituimmat reseptit
 
-export default function Welcome({ ...props }) {
+export default function Welcome({ backgroundColor, navigation }) {
   const [recipes, setRecipes] = useState([]);
   const [tempRecipes, setTempRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRecipes = async () => {
+    (async () => {
       try {
         const querySnapshot = await getDocs(collection(firestore, "recipes"));
         const recipeObject =  querySnapshot.docs.map((doc) => ({
@@ -27,23 +28,23 @@ export default function Welcome({ ...props }) {
           title: doc.data().recipeData.title,
           servingSize: doc.data().recipeData.servingSize,
           cookTime: doc.data().recipeData.cookTime,
+          prepTime: doc.data().recipeData.prepTime,
           photo: doc.data().recipeData.photo,
         }));
 
         setRecipes(recipeObject);
         setIsLoading(false);
+        console.log(recipes[0])
       } catch (error) {
         setIsLoading(false);
         ShowAlert("Virhe","Jotain meni pieleen. Kokeile myöhemmin uudelleen.");
       }
-    };
-
-    fetchRecipes();
-  }, [setRecipes]);
+    }) ()
+  } , []);
 
   return (
     <View style={styles.container}>
-      <DefaultAppBar {...props} />
+      <DefaultAppBar backgroundColor = {backgroundColor} navigation={navigation} />
       <Text style={styles.welcomeText}>Tervetuloa Essi</Text>
       <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
       <Categories />
@@ -56,14 +57,17 @@ export default function Welcome({ ...props }) {
           color="#47A73E"
         />
       )}
-      {isLoading === false && (
+      {!isLoading && (
         <RecipeCard
-          recipeId={recipes[0].id}
-          urlToImage = {recipes[0].photo}
-          recipeName={recipes[0].title}
-          cookTime={recipes[0].cookTime}
-          servingSize={recipes[0].servingSize}
-        />
+        recipeId={recipes[0].id}
+        prepTime={recipes[0].prepTime}
+        urlToImage = {recipes[0].photo}
+        recipeName={recipes[0].title}
+        cookTime={recipes[0].cookTime}
+        servingSize={recipes[0].servingSize}
+        navigation= {navigation}
+        backgroundColor = {backgroundColor}
+      />
       )}
     </View>
   );
