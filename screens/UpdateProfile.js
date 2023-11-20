@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Button } from 'react-native';
 import GoBackAppBar from '../components/GoBackAppBar';
 import { getAuth } from 'firebase/auth';
-import { getDatabase, ref, set } from 'firebase/database';
+import { getDatabase, ref, onValue, set } from 'firebase/database';
 import DefaultAppBar from "../components/DefaultAppBar";
 
 const UpdateProfile = ({navigation}) => {
@@ -20,9 +20,33 @@ const UpdateProfile = ({navigation}) => {
 
   const auth = getAuth();
   const database = getDatabase();
+  const user = auth.currentUser;
+
+  useEffect(() => {
+    if (user) {
+      const userProfileRef = ref(database, 'users/' + user.uid);
+
+      // Ladataan käyttäjän tiedot tietokannasta
+      onValue(userProfileRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          setUsername(data.username || '');
+          setFirstName(data.firstName || '');
+          setLastName(data.lastName || '');
+          setBirthDate(data.birthDate || '');
+          setAddress(data.address || '');
+          setPreferences(data.preferences || '');
+          setFavorites(data.favorites || '');
+          setAllergies(data.allergies || '');
+          setPrivateDetails(data.privateDetails || '');
+          setPublicDetails(data.publicDetails || '');
+          setPremium(data.premium || '');
+        }
+      });
+    }
+  }, [user, database]);
 
   const handleUpdateProfile = () => {
-    const user = auth.currentUser;
     
     if (!username || !firstName || !lastName || !birthDate || !address || !preferences || !favorites || !allergies) {
       alert('Please fill in all required fields.');
@@ -45,7 +69,7 @@ const UpdateProfile = ({navigation}) => {
           premium,
         }).then(() => {
           // Kun päivitys on valmis, navigoi Welcome-näyttöön
-          navigation.navigate('Profile');
+          navigation.navigate('Welcome');
         }).catch((error) => {
           console.error('Profile update failed:', error);
         });
