@@ -45,6 +45,9 @@ const StartScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate('StartScreen')}>
             <Text style={styles.buttonText}>Kirjaudu sisään</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate('Googlelogin')}>
+            <Text style={styles.buttonText}>Kirjaudu sisään käyttäen Google tiliä</Text>
+          </TouchableOpacity>
         </View>
       )}
     </GestureHandlerRootView>
@@ -105,7 +108,8 @@ const styles = StyleSheet.create({
   logo: {
     width: '100%', // Säädä leveyttä ja korkeutta tarpeen mukaan
     height: '99%',
-    resizeMode: 'center', // Tämä varmistaa, että kuva skaalautuu oikein
+    resizeMode: 'center',
+     // Tämä varmistaa, että kuva skaalautuu oikein
   },
 });
 
