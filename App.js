@@ -16,6 +16,7 @@ import Constants from "expo-constants";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  
   return (
     <SafeAreaView style={styles.container}>
       <NavigationContainer>
