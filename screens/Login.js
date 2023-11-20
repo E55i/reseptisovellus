@@ -45,9 +45,6 @@ const StartScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate('StartScreen')}>
             <Text style={styles.buttonText}>Kirjaudu sisään</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate('Googlelogin')}>
-            <Text style={styles.buttonText}>Kirjaudu sisään käyttäen Google tiliä</Text>
-          </TouchableOpacity>
         </View>
       )}
     </GestureHandlerRootView>
