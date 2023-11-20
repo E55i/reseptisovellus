@@ -16,6 +16,7 @@ const UpdateProfile = ({navigation}) => {
   const [allergies, setAllergies] = useState('');
   const [privateDetails, setPrivateDetails] = useState('');
   const [publicDetails, setPublicDetails] = useState('');
+  const [premium, setPremium] = useState('');
 
   const auth = getAuth();
   const database = getDatabase();
@@ -41,6 +42,7 @@ const UpdateProfile = ({navigation}) => {
           allergies,
           privateDetails,
           publicDetails,
+          premium,
         }).then(() => {
           // Kun päivitys on valmis, navigoi Welcome-näyttöön
           navigation.navigate('Profile');
@@ -65,6 +67,7 @@ const UpdateProfile = ({navigation}) => {
       <TextInput placeholder="Allergies" onChangeText={setAllergies} value={allergies} />
       <TextInput placeholder="Private Details" onChangeText={setPrivateDetails} value={privateDetails} />
       <TextInput placeholder="Public Details" onChangeText={setPublicDetails} value={publicDetails} />
+      <TextInput placeholder="Premium" onChangeText={setPremium} value={premium} />
       <Button title="Update Profile" onPress={handleUpdateProfile} />
     </View>
   );

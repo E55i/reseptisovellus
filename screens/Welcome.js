@@ -53,6 +53,7 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
         if (snapshot.exists()) {
           const userData = snapshot.val();
           setUserName(userData.firstName); // oletetaan, että etunimi on tallennettu firstName-kenttään
+          setIsPremium(userData.premium === 1); // tarkistaa onko käyttäjä premium
         }
       }).catch((error) => {
         console.error("Error fetching user data:", error);
@@ -121,7 +122,6 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
       />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Text style={styles.welcomeText}>{userName ? `Tervetuloa ${userName}` : 'Tervetuloa'}</Text>
-        <Button title="Premium" onPress={() => handleClick()} />
         <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
         <Categories setCategory={setCategory} />
         {!isPremium && (
