@@ -34,7 +34,6 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
 
         setRecipes(recipeObject);
         setIsLoading(false);
-        console.log(recipes);
       } catch (error) {
         setIsLoading(false);
         ShowAlert("Virhe", "Jotain meni pieleen. Kokeile myöhemmin uudelleen.");
@@ -42,6 +41,7 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
     })();
   }, []);
 
+  console.log(recipes);
   return (
     <View style={styles.container}>
       <DefaultAppBar
