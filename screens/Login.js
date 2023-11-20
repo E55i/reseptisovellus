@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Modal, Image } from 'react-native'; // Tuo Image
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 
 const StartScreen = ({ navigation }) => {
@@ -10,7 +10,7 @@ const StartScreen = ({ navigation }) => {
       if (showGreeting) {
         setShowGreeting(false);
       }
-    }, 5000); // Siirry kirjautumisvalikkoon 5 sekunnin kuluttua
+    }, 3000); // Siirry kirjautumisvalikkoon 5 sekunnin kuluttua
 
     return () => clearTimeout(timer);
   }, [showGreeting]);
@@ -30,7 +30,8 @@ const StartScreen = ({ navigation }) => {
         <View style={styles.modalContainer}>
           <Swipeable onSwipeableRightOpen={onSwipeAway}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>Tervetuloa!</Text>
+              {/* Kuvan näyttäminen */}
+              <Image source={require('../assets/Logo001.png')} style={styles.logo} />
             </View>
           </Swipeable>
         </View>
@@ -56,12 +57,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#f5f5f5',
   },
-  modalContainer: {
+  /*modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
+  },*/
   modalView: {
     marginHorizontal: 20,
     backgroundColor: '#fff',
@@ -100,6 +101,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 18,
+  },
+  logo: {
+    width: '100%', // Säädä leveyttä ja korkeutta tarpeen mukaan
+    height: '99%',
+    resizeMode: 'center', // Tämä varmistaa, että kuva skaalautuu oikein
   },
 });
 
