@@ -20,6 +20,8 @@ import DefaultAppBar from "../components/DefaultAppBar";
 import Categories from "../components/Categories";
 import RecipeCard from "../components/RecipeCard";
 import ShowAlert from "../components/ShowAlert";
+import { getAuth } from 'firebase/auth';
+import { getDatabase, ref, get } from 'firebase/database';
 
 
 export default function WelcomeTest({ backgroundColor, navigation }) {
@@ -27,6 +29,7 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [category, setCategory] = useState("");
+  const [userName, setUserName] = useState('');
 
   const handleClick = () => {
     try {
@@ -41,6 +44,20 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
   };
 
   useEffect(() => {
+    const auth = getAuth();
+    const database = getDatabase();
+    const user = auth.currentUser;
+    if (user) {
+      const userRef = ref(database, 'users/' + user.uid);
+      get(userRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          setUserName(userData.firstName); // oletetaan, että etunimi on tallennettu firstName-kenttään
+        }
+      }).catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+    }
     let q;
     if (category === "Jälkiruoka" || category === "Aamiainen") {
       q = query(
@@ -103,7 +120,7 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
         navigation={navigation}
       />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.welcomeText}>Tervetuloa Essi</Text>
+      <Text style={styles.welcomeText}>{userName ? `Tervetuloa ${userName}` : 'Tervetuloa'}</Text>
         <Button title="Premium" onPress={() => handleClick()} />
         <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
         <Categories setCategory={setCategory} />
