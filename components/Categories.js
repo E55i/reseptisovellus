@@ -2,52 +2,45 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import ShowAlert from "./ShowAlert";
 
-export default function Categories() {
-  const [isClicked, setIsClicked] = useState(false);
-  //tee ominaisuus, että mainos näytetään kategorioiden jälkeenvain jos  käyttäjällä ei ole premium tilausta
+export default function Categories({...props}) {
+
+  const handleButtonClick = (value) => {
+    props.setCategory(value)
+    console.log("hakusana: "+value) 
+  }
   // säädä elementtien varjostusta, tutki sekä androidin että iosin varjostukset
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => {
-          /*Do something*/
-        }}
+        onPress={() => handleButtonClick("Jälkiruoka")}
       >
-        <Text style={styles.text}>Herkut</Text>
+        <Text style={styles.text}>Jälkiruoat</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => {
-          /*Do something*/
-        }}
+        onPress={() => handleButtonClick("Aamiainen")}
       >
-        <Text style={styles.text}>Välipalat</Text>
+        <Text style={styles.text}>Aamiainen</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => {
-          /*Do something*/
-        }}
+        onPress={() => handleButtonClick("Nopeat")}
       >
-        <Text style={styles.text}>Klassikot</Text>
+        <Text style={styles.text}>Nopeat</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => {
-          /*Do something*/
-        }}
+        onPress={() => handleButtonClick("Kasvisruoat")}
       >
         <Text style={styles.text}>Kasvisruoat</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => {
-          /*Do something*/
-        }}
+        onPress={() => handleButtonClick("Kanaruoat")}
       >
-        <Text style={styles.text}>kanaruoat</Text>
+        <Text style={styles.text}>Kanaruoat</Text>
       </TouchableOpacity>
     </View>
   );
@@ -60,15 +53,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   button: {
-    backgroundColor: "white",
-    elevation: 7,
-    shadowColor: "#000000",
-    overflow: "hidden",
     borderRadius: 10,
     marginRight: 10,
     marginLeft: 10,
     marginBottom: 16,
     marginTop: 8,
+    backgroundColor: "white",
+    shadowColor: "#000000",
+    ...Platform.select({
+      android: {
+        elevation: 7,
+        overflow: "hidden",
+      },
+    }),
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   text: {
     paddingLeft: 10,
@@ -78,11 +78,5 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#47A73E",
     borderRadius: 10,
-    //Shadow properties for
-    //shadowColor: '#000',
-    //Shadow properties for iOS
-    //shadowOffset: { width: 0, height: 2 },
-    //shadowOpacity: 0.2,
-    //shadowRadius: 2,
   },
 });
