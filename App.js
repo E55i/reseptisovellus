@@ -3,6 +3,7 @@ import { Platform, StyleSheet, Text, View, SafeAreaView } from "react-native";
 import Login from "./screens/Login";
 import CreateUser from "./screens/CreateUser";
 import Profile from "./screens/Profile";
+import UpdateProfile from "./screens/UpdateProfile";
 import AddRecipe from "./screens/AddRecipe";
 import RecipeDetails from "./screens/RecipeDetails";
 import SearchRecipe from "./screens/SearchRecipe";
@@ -30,6 +31,9 @@ export default function App() {
           </Stack.Screen>
           <Stack.Screen name="StartScreen" component={StartScreen} />
           <Stack.Screen name="CreateUser" component={CreateUser} />
+          <Stack.Screen name="UpdateProfile" >
+          {(props) => <UpdateProfile backgroundColor="#FF9C00" {...props} />}
+          </Stack.Screen>
           <Stack.Screen name="Welcome">
             {(props) => <Welcome backgroundColor="#FF9C00" {...props} />}
           </Stack.Screen>

@@ -12,7 +12,7 @@ const CreateUser = ({ navigation }) => {
       .then((userCredential) => {
         // Rekisteröinti onnistui
         Alert.alert('Rekisteröinti onnistui', 'Tili luotu onnistuneesti!');
-        navigation.navigate('Login'); // Olettaen, että haluat ohjata käyttäjän takaisin kirjautumissivulle
+        navigation.navigate('UpdateProfile'); // Olettaen, että haluat ohjata käyttäjän takaisin kirjautumissivulle
       })
       .catch((error) => {
         // Virhe rekisteröinnissä

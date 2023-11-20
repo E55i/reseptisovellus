@@ -7,7 +7,7 @@ const GoogleLogin = ({ navigation }) => {
   const googleLogin = async () => {
     try {
       await GoogleSignIn.initAsync({
-        clientId: '773290742758-3jgmb4ma29gr8pglj2sinml2rrfb60o6.apps.googleusercontent.com',
+        clientId: '// Tähän Google Client ID',
         // iosClientId: 'YOUR_IOS_CLIENT_ID', // Jos käytät iOS:ää, laita tämä
       });
       const result = await GoogleSignIn.signInAsync();
