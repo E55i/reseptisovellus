@@ -10,7 +10,7 @@ export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToIm
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        navigation.navigate("RecipeDetails", {recipeId, backgroundColor, navigation});
+        navigation.navigate("RecipeDetails", {recipeId, backgroundColor});
       }}
     >
       {urlToImage ? (

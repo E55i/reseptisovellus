@@ -2,10 +2,12 @@ import React from "react";
 import { View, Text, ScrollView, Button } from "react-native";
 import GoBackAppBar from '../components/GoBackAppBar';
 import RatingBar from "../components/RatingBar";
+import { useNavigation } from "@react-navigation/native";
 
 export default function RecipeDetails({route}) {
 
-  const { recipeId, backgroundColor, navigation } = route.params;
+  const { recipeId, backgroundColor } = route.params;
+  const navigation = useNavigation();
 
   return (
     <View>
