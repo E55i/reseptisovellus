@@ -52,26 +52,30 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
     if (category === "Jälkiruoka" || category === "Aamiainen") {
       q = query(
         collection(firestore, "recipes"),
-        where("recipeData.course", "array-contains", category)
+        where("recipeData.course", "array-contains", category),
+        orderBy("created", "desc")
       );
     } else if (category === "Kanaruoat") {
       q = query(
         collection(firestore, "recipes"),
-        where("recipeData.mainIngredient", "array-contains", "Broileri")
+        where("recipeData.mainIngredient", "array-contains", "Broileri"),
+        orderBy("created", "desc")
       );
     } else if (category === "Kasvisruoat") {
       q = query(
         collection(firestore, "recipes"),
-        where("recipeData.diet", "array-contains", "Kasvis")
+        where("recipeData.diet", "array-contains", "Kasvis"),
+        orderBy("created", "desc")
       );
     } else if (category === "Nopeat") {
       q = query(
         collection(firestore, "recipes"),
         where("recipeData.cookTime", "==", "alle 15 min"),
-        where("recipeData.prepTime", "==", "alle 15 min")
+        where("recipeData.prepTime", "==", "alle 15 min"),
+        orderBy("created", "desc")
       );
     } else {
-      q = query(collection(firestore, "recipes"));
+      q = query(collection(firestore, "recipes"), orderBy("created", "desc"));
     }
 
     let unsubscribe;
