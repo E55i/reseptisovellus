@@ -10,6 +10,7 @@ import SearchRecipe from "./screens/SearchRecipe";
 import Welcome from "./screens/Welcome";
 import StartScreen from "./screens/StartScreen";
 import OwnRecipes from "./screens/OwnRecipes";
+import CameraScreen from "./screens/CameraScreen";
 //import GoogleLogin from "./screens/Googlelogin";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -52,6 +53,7 @@ export default function App() {
           <Stack.Screen name="OwnRecipes">
             {(props) => <OwnRecipes backgroundColor="#FF9C00" {...props} />}
           </Stack.Screen>
+          <Stack.Screen name="CameraScreen" component={CameraScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>
