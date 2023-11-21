@@ -105,7 +105,8 @@ const styles = StyleSheet.create({
   logo: {
     width: '100%', // Säädä leveyttä ja korkeutta tarpeen mukaan
     height: '99%',
-    resizeMode: 'center', // Tämä varmistaa, että kuva skaalautuu oikein
+    resizeMode: 'center',
+     // Tämä varmistaa, että kuva skaalautuu oikein
   },
 });
 
