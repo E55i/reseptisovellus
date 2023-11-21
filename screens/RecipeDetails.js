@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView, Button } from "react-native";
 import GoBackAppBar from '../components/GoBackAppBar';
+import RatingBar from "../components/RatingBar";
 
 export default function RecipeDetails({route}) {
 
@@ -17,6 +18,7 @@ export default function RecipeDetails({route}) {
         <Text>Ingredient 1, Ingredient 2, ...</Text>
         <Text>Instructions:</Text>
         <Text>Step-by-step instructions go here...</Text>
+        <RatingBar/>
         <Text>Comments:</Text>
         {/* List comments here */}
         <Text>Add Comment:</Text>
