@@ -46,7 +46,8 @@ export default function AddRecipe({ ...props }) {
     protein: "",
     salt: "",
     photo: "",
-    rating: 0,
+    rating: [],
+    userRated: [],
     healthyRating: 0,
     comments: "",
   });

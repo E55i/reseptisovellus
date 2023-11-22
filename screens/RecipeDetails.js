@@ -20,7 +20,7 @@ export default function RecipeDetails({route}) {
         <Text>Ingredient 1, Ingredient 2, ...</Text>
         <Text>Instructions:</Text>
         <Text>Step-by-step instructions go here...</Text>
-        <RatingBar/>
+        <RatingBar recipeId={recipeId}/>
         <Text>Comments:</Text>
         {/* List comments here */}
         <Text>Add Comment:</Text>
