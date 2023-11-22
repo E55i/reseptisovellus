@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
-  Button,
 } from "react-native";
 import {
   firestore,
