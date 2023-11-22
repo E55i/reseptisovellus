@@ -106,6 +106,10 @@ export default function AddRecipe({ ...props }) {
     setRecipeData({ ...recipeData, diet: selectedDiets });
   };
 
+  const handlePictureTaken = (imageUri) => {
+    setRecipeData({ ...recipeData, photo: imageUri });
+  };
+
   // navigate to main screen after after save
   const navigation = useNavigation();
 
@@ -169,6 +173,28 @@ export default function AddRecipe({ ...props }) {
                 setRecipeData({ ...recipeData, instructions: text })
               }
             ></TextInput>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.header}>Lisää kuva</Text>
+            <View style={styles.sectionButtons}>
+              <ButtonWithIcon
+                onPress={() => {}}
+                icon={"picture"}
+                width={140}
+                color={Colors.grey}
+                title="Valitse"
+              />
+              <ButtonWithIcon
+                onPress={() => {
+                  navigation.navigate("CameraScreen");
+                }}
+                icon={"camera"}
+                width={140}
+                color={Colors.secondary}
+                title="Ota kuva"
+              />
+            </View>
           </View>
 
           <View style={styles.section}>
@@ -369,7 +395,15 @@ export default function AddRecipe({ ...props }) {
             </View>
           </View>
 
-          <View style={styles.sectionButtons}>
+          <View
+            style={{
+              ...styles.sectionButtons,
+              marginLeft: 12,
+              marginRight: 12,
+              marginTop: 40,
+              marginBottom: 40,
+            }}
+          >
             <ButtonWithIcon
               icon={"back"}
               color={Colors.grey}
@@ -382,7 +416,7 @@ export default function AddRecipe({ ...props }) {
             />
             <ButtonWithIcon
               icon={"arrowdown"}
-              color={Colors.secondary}
+              color={Colors.primary}
               width={140}
               title="Tallenna"
               onPress={() => {
@@ -392,13 +426,8 @@ export default function AddRecipe({ ...props }) {
               }}
             />
           </View>
-          <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 20,
-            }}
-          >
+
+          <View style={styles.oneButton}>
             <ButtonWithIcon
               icon={"book"}
               color="deeppink"
@@ -484,11 +513,18 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     marginRight: 12,
   },
+  oneButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 12,
+    marginRight: 12,
+  },
   sectionButtons: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 40,
-    marginBottom: 40,
+    alignContent: "center",
     gap: 8,
+    marginLeft: 12,
+    marginRight: 12,
   },
 });
