@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, Button } from 'react-native';
+import { StyleSheet, View, TextInput, Button, ScrollView } from 'react-native';
 import GoBackAppBar from '../components/GoBackAppBar';
 import { getAuth } from 'firebase/auth';
 import { getDatabase, ref, onValue, set } from 'firebase/database';
 import DefaultAppBar from "../components/DefaultAppBar";
 
-const UpdateProfile = ({navigation}) => {
+const UpdateProfile = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -47,90 +47,69 @@ const UpdateProfile = ({navigation}) => {
   }, [user, database]);
 
   const handleUpdateProfile = () => {
-    
     if (!username || !firstName || !lastName || !birthDate || !address || !preferences || !favorites || !allergies) {
-      alert('Please fill in all required fields.');
+      alert('Täytä kaikki pakolliset kentät.');
       return;
     }
 
     if (user) {
       const userProfileRef = ref(database, 'users/' + user.uid);
-        set(userProfileRef, {
-          username,
-          firstName,
-          lastName,
-          birthDate,
-          address,
-          preferences,
-          favorites,
-          allergies,
-          privateDetails,
-          publicDetails,
-          premium,
-        }).then(() => {
-          // Kun päivitys on valmis, navigoi Welcome-näyttöön
+      set(userProfileRef, {
+        username,
+        firstName,
+        lastName,
+        birthDate,
+        address,
+        preferences,
+        favorites,
+        allergies,
+        privateDetails,
+        publicDetails,
+        premium,
+      })
+        .then(() => {
+          // Kun päivitys on valmis, navigoi Tervetuloa-näyttöön
           navigation.navigate('Welcome');
-        }).catch((error) => {
-          console.error('Profile update failed:', error);
+        })
+        .catch((error) => {
+          console.error('Profiilin päivitys epäonnistui:', error);
         });
-      } else {
-        console.error('User not signed in');
-      }
+    } else {
+      console.error('Käyttäjä ei ole kirjautunut sisään');
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <GoBackAppBar />
-      <TextInput placeholder="Username" onChangeText={setUsername} value={username} />
-      <TextInput placeholder="First Name" onChangeText={setFirstName} value={firstName} />
-      <TextInput placeholder="Last Name" onChangeText={setLastName} value={lastName} />
-      <TextInput placeholder="Birth Date" onChangeText={setBirthDate} value={birthDate} />
-      <TextInput placeholder="Address" onChangeText={setAddress} value={address} />
-      <TextInput placeholder="Preferences" onChangeText={setPreferences} value={preferences} />
-      <TextInput placeholder="Favorites" onChangeText={setFavorites} value={favorites} />
-      <TextInput placeholder="Allergies" onChangeText={setAllergies} value={allergies} />
-      <TextInput placeholder="Private Details" onChangeText={setPrivateDetails} value={privateDetails} />
-      <TextInput placeholder="Public Details" onChangeText={setPublicDetails} value={publicDetails} />
-      <TextInput placeholder="Premium" onChangeText={setPremium} value={premium} />
-      <Button title="Update Profile" onPress={handleUpdateProfile} />
-    </View>
+    <ScrollView style={styles.container}>
+      <GoBackAppBar backgroundColor="orange" navigation={navigation} />
+      <TextInput placeholder="Käyttäjänimi" onChangeText={setUsername} value={username} style={styles.input} />
+      <TextInput placeholder="Etunimi" onChangeText={setFirstName} value={firstName} style={styles.input} />
+      <TextInput placeholder="Sukunimi" onChangeText={setLastName} value={lastName} style={styles.input} />
+      <TextInput placeholder="Syntymäaika" onChangeText={setBirthDate} value={birthDate} style={styles.input} />
+      <TextInput placeholder="Osoite" onChangeText={setAddress} value={address} style={styles.input} />
+      <TextInput placeholder="Mieltymykset" onChangeText={setPreferences} value={preferences} style={styles.input} />
+      <TextInput placeholder="Suosikit" onChangeText={setFavorites} value={favorites} style={styles.input} />
+      <TextInput placeholder="Allergiat" onChangeText={setAllergies} value={allergies} style={styles.input} />
+      <TextInput placeholder="Yksityiskohdat" onChangeText={setPrivateDetails} value={privateDetails} style={styles.input} />
+      <TextInput placeholder="Julkinen Profiili" onChangeText={setPublicDetails} value={publicDetails} style={styles.input} />
+      <TextInput placeholder="Premium" onChangeText={setPremium} value={premium} style={styles.input} />
+      <Button title="Päivitä Profiili" onPress={handleUpdateProfile} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: 'white',
   },
-  add: {
-    width: 350,
-    height: 100,
-    alignSelf: "center",
-    marginTop: 16,
-    marginBottom: 16,
-  },
-   container: {
-    backgroundColor: "white",
-  },
-  welcomeText: {
-    marginLeft: 8,
-    marginTop: 20,
-    marginBottom: 16,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  infoText: {
-    marginTop: 8,
-    marginBottom: 26,
-    fontSize: 20,
-    color: "#8B8B8B",
-    textAlign: "center",
-  },
-  textFavourites: {
-    marginTop: 8,
+  input: {
     marginBottom: 8,
-    fontSize: 20,
-    color: "#8B8B8B",
-    textAlign: "center",
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
   },
 });
 
