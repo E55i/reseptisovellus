@@ -4,8 +4,7 @@ import GoBackAppBar from '../components/GoBackAppBar';
 import { getAuth } from 'firebase/auth';
 import { getDatabase, ref, get } from 'firebase/database';
 
-
-const Profile = ({navigation}) => {
+const Profile = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -16,17 +15,19 @@ const Profile = ({navigation}) => {
   useEffect(() => {
     if (user) {
       const userProfileRef = ref(database, 'users/' + user.uid);
-      get(userProfileRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          setUserData(snapshot.val());
-        } else {
-          console.error('User data not found');
-        }
-        setLoading(false);
-      }).catch((error) => {
-        console.error('Error fetching user data:', error);
-        setLoading(false);
-      });
+      get(userProfileRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            setUserData(snapshot.val());
+          } else {
+            console.error('Käyttäjätietoja ei löydy');
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Virhe haettaessa käyttäjätietoja:', error);
+          setLoading(false);
+        });
     }
   }, [user]);
 
@@ -41,29 +42,48 @@ const Profile = ({navigation}) => {
   if (!userData) {
     return (
       <View style={styles.container}>
-        <Text>No user data found. Please update your profile.</Text>
-        <Button title="Update Profile" onPress={navigateToUpdateProfile} />
+        <Text>Käyttäjätietoja ei löydy. Ole hyvä ja päivitä profiilisi.</Text>
+        <Button title="Päivitä Profiili" onPress={navigateToUpdateProfile} />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <GoBackAppBar backgroundColor="orange" navigation={navigation} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <GoBackAppBar />
-      {userData ? (
-        <View style={styles.userData}>
-          {Object.entries(userData).map(([key, value]) => (
-            <View style={styles.dataBox} key={key}>
-              <Text style={styles.dataTitle}>{key}: </Text>
-              <Text style={styles.dataValue}>{value}</Text>
-            </View>
-          ))}
-          <Button title="Update Profile" onPress={navigateToUpdateProfile} style={styles.updateButton} />
-        </View>
-      ) : (
-        <Text>User data not available</Text>
-      )}
+        {userData ? (
+          <View style={styles.userData}>
+            {Object.entries(userData).map(([key, value]) => {
+              const fieldMappings = {
+                username: 'Käyttäjänimi',
+                firstName: 'Etunimi',
+                lastName: 'Sukunimi',
+                birthDate: 'Syntymäaika',
+                address: 'Osoite',
+                preferences: 'Mieltymykset',
+                favorites: 'Suosikit',
+                allergies: 'Allergiat',
+                privateDetails: 'Yksityiskohdat',
+                publicDetails: 'Julkinen Profiili',
+                premium: 'Premium',
+              };
+
+              // Tarkista, onko avain kenttämappauksessa ja käytä sen mukaista nimeä
+              const displayName = fieldMappings[key] || key;
+
+              return (
+                <View style={styles.dataBox} key={key}>
+                  <Text style={styles.dataTitle}>{displayName}: </Text>
+                  <Text style={styles.dataValue}>{value}</Text>
+                </View>
+              );
+            })}
+            <Button title="Päivitä Profiili" onPress={navigateToUpdateProfile} style={styles.updateButton} />
+          </View>
+        ) : (
+          <Text>Käyttäjätietoja ei ole saatavilla</Text>
+        )}
       </ScrollView>
     </View>
   );
@@ -73,37 +93,11 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
   },
-  add: {
-    width: 350,
-    height: 100,
-    alignSelf: "center",
-    marginTop: 16,
-    marginBottom: 16,
-  },
-   container: {
+  container: {
+    flex: 1, // Lisää tämä rivi
     backgroundColor: "white",
   },
-  welcomeText: {
-    marginLeft: 8,
-    marginTop: 20,
-    marginBottom: 16,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  infoText: {
-    marginTop: 8,
-    marginBottom: 26,
-    fontSize: 20,
-    color: "#8B8B8B",
-    textAlign: "center",
-  },
-  textFavourites: {
-    marginTop: 8,
-    marginBottom: 8,
-    fontSize: 20,
-    color: "#8B8B8B",
-    textAlign: "center",
-  },userData: {
+  userData: {
     padding: 10,
   },
   dataBox: {
@@ -130,6 +124,3 @@ const styles = StyleSheet.create({
 });
 
 export default Profile;
-
-
-
