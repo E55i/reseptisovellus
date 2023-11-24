@@ -13,6 +13,12 @@ import {
   orderBy,
   where,
 } from "firebase/firestore";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_APIKEY,
@@ -28,11 +34,13 @@ const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 const firestore = getFirestore();
+const fbStorage = getStorage();
 
 export {
   auth,
   signInWithEmailAndPassword,
   firestore,
+  fbStorage,
   collection,
   doc,
   addDoc,
@@ -43,4 +51,7 @@ export {
   onSnapshot,
   orderBy,
   where,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
 };

@@ -7,6 +7,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Image,
 } from "react-native";
 import ButtonWithIcon from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
@@ -24,7 +25,7 @@ import {
 } from "../components/FirebaseConfig";
 import GoBackAppBar from "../components/GoBackAppBar";
 
-export default function AddRecipe({ ...props }) {
+export default function AddRecipe({ route, ...props }) {
   const [recipeData, setRecipeData] = useState({
     userId: auth.currentUser.uid,
     title: "",
@@ -107,8 +108,8 @@ export default function AddRecipe({ ...props }) {
     setRecipeData({ ...recipeData, diet: selectedDiets });
   };
 
-  const handlePictureTaken = (imageUri) => {
-    setRecipeData({ ...recipeData, photo: imageUri });
+  const handlePhoto = (photo) => {
+    setRecipeData({ ...recipeData, photo: photo });
   };
 
   // navigate to main screen after after save
@@ -125,12 +126,12 @@ export default function AddRecipe({ ...props }) {
     console.log("Data saved");
   };
 
-  /*
   // monitor changes in the form (remove from final app)
   useEffect(() => {
     console.log(recipeData);
   }, [recipeData]);
-  */
+
+  const selectPicture = () => {};
 
   return (
     <>
@@ -180,7 +181,9 @@ export default function AddRecipe({ ...props }) {
             <Text style={styles.header}>Lisää kuva</Text>
             <View style={styles.sectionButtons}>
               <ButtonWithIcon
-                onPress={() => {}}
+                onPress={() => {
+                  selectPicture();
+                }}
                 icon={"picture"}
                 width={140}
                 color={Colors.grey}
@@ -196,6 +199,15 @@ export default function AddRecipe({ ...props }) {
                 title="Ota kuva"
               />
             </View>
+            {route.params?.photoUrl && (
+              <View style={styles.section}>
+                <Image
+                  style={styles.recipeImage}
+                  source={{ uri: route.params.photoUrl }}
+                  onLoad={() => handlePhoto(route.params.photoUrl)}
+                />
+              </View>
+            )}
           </View>
 
           <View style={styles.section}>
@@ -464,6 +476,15 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     marginRight: 12,
   },
+  sectionButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignContent: "center",
+    gap: 8,
+    marginBottom: 20,
+    marginLeft: 12,
+    marginRight: 12,
+  },
   header: {
     height: 40,
     fontSize: 20,
@@ -489,6 +510,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+  },
+  recipeImage: {
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    alignSelf: "center",
   },
   multilineInput: {
     paddingTop: 8,
@@ -517,14 +544,6 @@ const styles = StyleSheet.create({
   oneButton: {
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 12,
-    marginRight: 12,
-  },
-  sectionButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignContent: "center",
-    gap: 8,
     marginLeft: 12,
     marginRight: 12,
   },
