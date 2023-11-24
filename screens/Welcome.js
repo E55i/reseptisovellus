@@ -14,6 +14,7 @@ import {
   onSnapshot,
   orderBy,
   where,
+  fbStorage,
 } from "../components/FirebaseConfig";
 import React, { useEffect, useState } from "react";
 import DefaultAppBar from "../components/DefaultAppBar";
@@ -21,6 +22,7 @@ import Categories from "../components/Categories";
 import RecipeCard from "../components/RecipeCard";
 import ShowAlert from "../components/ShowAlert";
 import { getDatabase, ref, get } from "firebase/database";
+
 
 export default function Welcome({ backgroundColor, navigation }) {
   const [recipes, setRecipes] = useState([]);
@@ -49,7 +51,6 @@ export default function Welcome({ backgroundColor, navigation }) {
           console.error("Error fetching user data:", error);
         });
     
-
     // Fetch top recipes
     try {
       onSnapshot(query(collection(firestore, "recipes")), (querySnapshot) => {
@@ -147,6 +148,7 @@ export default function Welcome({ backgroundColor, navigation }) {
     })();
   }, [category]);
 
+  
   console.log(recipes);
   return (
     <View style={styles.container}>
@@ -158,7 +160,7 @@ export default function Welcome({ backgroundColor, navigation }) {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.welcomeText}>
           {userName ? `Tervetuloa ${userName}` : "Tervetuloa"}
-        </Text>
+        </Text>        
         <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
         {/* Categories component */}
         <Categories setCategory={setCategory} />
