@@ -10,7 +10,7 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
-        navigation.navigate('Welcome'); // Kirjautuminen onnistui
+        navigation.replace('Welcome'); // Kirjautuminen onnistui
       })
       .catch(error => {
         Alert.alert('Kirjautumisvirhe', error.message);
