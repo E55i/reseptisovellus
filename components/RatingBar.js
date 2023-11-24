@@ -62,9 +62,9 @@ export default function RatingBar({ recipeId }) {
       const currentRating =
         currentData.recipeData && Array.isArray(currentData.recipeData.rating)
           ? currentData.recipeData.rating
-          : [0, 0];
-      currentRating[0] = currentRating[0] + value;
-      currentRating[1] = currentRating[1] + 1;
+          : [];
+          currentRating[0] = currentRating[0] ? currentRating[0] + value : value;
+          currentRating[1] = currentRating[1] ? currentRating[1] + 1 : 1;
 
       const currentUserRated =
         currentData.recipeData &&
