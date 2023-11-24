@@ -497,12 +497,12 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   caloriesInput: {
-    width: 80,
+    width: 76,
     marginLeft: 0,
     marginRight: 0,
   },
   rowInput: {
-    width: 168,
+    width: 160,
     marginLeft: 0,
     marginRight: 0,
   },
