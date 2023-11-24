@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: 60,
     height: 60,
-    borderRadius: 50,
+    borderRadius: 30,
     borderWidth: 2,
     ...Platform.select({
       android: {
