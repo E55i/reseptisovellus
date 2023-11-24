@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import {
   firestore,
+  auth,
   collection,
   query,
   onSnapshot,
@@ -19,10 +20,9 @@ import DefaultAppBar from "../components/DefaultAppBar";
 import Categories from "../components/Categories";
 import RecipeCard from "../components/RecipeCard";
 import ShowAlert from "../components/ShowAlert";
-import { getAuth } from "firebase/auth";
 import { getDatabase, ref, get } from "firebase/database";
 
-export default function WelcomeTest({ backgroundColor, navigation }) {
+export default function Welcome({ backgroundColor, navigation }) {
   const [recipes, setRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPremium, setIsPremium] = useState("0");
@@ -31,12 +31,11 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
 
   // Fetch user data and top recipes when component is shown first time
   useEffect(() => {
-    const auth = getAuth();
-    const database = getDatabase();
-    const user = auth.currentUser;
-    if (user) {
+    if (auth.currentUser) {
+
+      const database = getDatabase();
       // Fetch user data
-      const userRef = ref(database, "users/" + user.uid);
+      const userRef = ref(database, "users/" + auth.currentUser.uid);
       get(userRef)
         .then((snapshot) => {
           if (snapshot.exists()) {
@@ -49,7 +48,7 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
           ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
           console.error("Error fetching user data:", error);
         });
-    }
+    
 
     // Fetch top recipes
     try {
@@ -82,13 +81,18 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
         "Reseptien hakemisessa ilmeni virhe. Yritä myöhemmin uudelleen."
       );
     }
+  } else {
+    navigation.replace("Login");
+  }
+  
   }, []);
 
   // Fetch recipes based on category change
   useEffect(() => {
     (() => {
-      try {
-        let q;
+        if(category !== ""){
+          try{
+          let q;
         if (category === "Jälkiruoka" || category === "Aamiainen") {
           q = query(
             collection(firestore, "recipes"),
@@ -135,6 +139,11 @@ export default function WelcomeTest({ backgroundColor, navigation }) {
         setIsLoading(false);
         console.log("Virhe kategorioiden haussa: " + error);
       }
+        }
+        else {
+          console.log("Kategoriaa ei ole valittu")
+        }
+        
     })();
   }, [category]);
 
