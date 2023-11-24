@@ -1,19 +1,12 @@
-import { StatusBar } from "expo-status-bar";
-import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  Button,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import ShowAlert from "../components/ShowAlert";
 import { AntDesign } from "@expo/vector-icons";
+import { RoundButtonWithIcon } from "../components/CustomButtons";
+import { Colors } from "../styles/Colors";
 
 export default function CameraScreen() {
   let cameraRef = useRef();
@@ -89,17 +82,40 @@ export default function CameraScreen() {
     };
 
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Image
           style={styles.preview}
           source={{ uri: "data:image/jpg;base64," + photo.base64 }}
         />
-        {allowMediaLibrary && (
-          <Button title="Tallenna kuviin" onPress={savePhoto} />
-        )}
-        <Button title="Ota uusi kuva" onPress={() => setPhoto(undefined)} />
-        <Button title="Sulje kamera" onPress={() => navigation.goBack()} />
-      </SafeAreaView>
+        <View style={styles.buttonContainer}>
+          {allowMediaLibrary && (
+            <RoundButtonWithIcon
+              icon="save"
+              iconColor="#fff"
+              color={Colors.primary}
+              onPress={savePhoto}
+            />
+          )}
+          <RoundButtonWithIcon
+            icon="back"
+            iconColor="#fff"
+            color={Colors.primary}
+            onPress={() => navigation.goBack()}
+          />
+          <RoundButtonWithIcon
+            icon="reload1"
+            iconColor="#fff"
+            color={Colors.primary}
+            onPress={() => setPhoto(undefined)}
+          />
+          <RoundButtonWithIcon
+            icon="upload"
+            iconColor="#fff"
+            color={Colors.secondary}
+            onPress={{}}
+          />
+        </View>
+      </View>
     );
   }
 
@@ -127,7 +143,6 @@ export default function CameraScreen() {
       >
         <Text style={{ fontSize: 20 }}>⚡️</Text>
       </TouchableOpacity>
-      <StatusBar style="auto" />
     </Camera>
   ) : null;
 }
@@ -135,8 +150,8 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    width: "100%",
+    backgroundColor: "#fff",
   },
   preview: {
     alignSelf: "stretch",
@@ -162,7 +177,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: "5%",
     top: "10%",
-    borderRadius: 50, 
+    borderRadius: 50,
     height: 25,
     width: 25,
   },
@@ -170,5 +185,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: "5%",
     top: "5%",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    alignSelf: "auto",
+    justifyContent: "space-evenly",
+    alignContent: "center",
+    marginTop: 8,
+    marginBottom: 8,
   },
 });
