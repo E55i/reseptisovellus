@@ -1,12 +1,11 @@
-import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
-  Button,
   Image,
   TouchableOpacity,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -14,6 +13,14 @@ import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import ShowAlert from "../components/ShowAlert";
 import { AntDesign } from "@expo/vector-icons";
+import { RoundButtonWithIcon } from "../components/CustomButtons";
+import { Colors } from "../styles/Colors";
+import {
+  fbStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "../components/FirebaseConfig";
 
 export default function CameraScreen() {
   let cameraRef = useRef();
@@ -21,6 +28,7 @@ export default function CameraScreen() {
   const [allowCamera, setAllowCamera] = useState(false);
   const [allowMediaLibrary, setAllowMediaLibrary] = useState(false);
   const [flashMode, setFlashMode] = useState("off");
+  const [loading, setLoading] = useState(true);
 
   // navigate back from camera after save or cancel
   const navigation = useNavigation();
@@ -81,6 +89,36 @@ export default function CameraScreen() {
     }
   };
 
+  const uploadToStorage = async (uri, name, onProgress) => {
+    const fetchResponse = await fetch(uri);
+    const theBlob = await fetchResponse.blob();
+    const imageRef = ref(fbStorage, `images/${name}`);
+
+    const uploadTask = uploadBytesResumable(imageRef, theBlob);
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          onProgress && onProgress(progress);
+        },
+        (error) => {
+          // handle errors
+          reject(error);
+        },
+        async () => {
+          // handle successful uploads on complete
+          const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve({
+            downloadUrl,
+            metadata: uploadTask.snapshot.metadata,
+          });
+        }
+      );
+    });
+  };
+
   if (photo) {
     let savePhoto = () => {
       MediaLibrary.saveToLibraryAsync(photo.uri).then(() => {
@@ -88,18 +126,92 @@ export default function CameraScreen() {
       });
     };
 
+    let upload = async () => {
+      try {
+        const photoUri = photo.uri;
+        const fileName = photoUri.split("/").pop();
+        const uploadResp = await uploadToStorage(photoUri, fileName, (value) =>
+          console.log(value)
+        );
+        console.log(uploadResp);
+        navigation.navigate({
+          name: "AddRecipe",
+          params: {
+            photoUrl: uploadResp.downloadUrl,
+            photoName: uploadResp.metadata.fullPath,
+          },
+          merge: true, // merge params to addrecipe screen
+        });
+      } catch (error) {
+        Alert.alert("Error Uploading Image " + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    let uploadToForm = () => {
+      Alert.alert(
+        "Kuva lisätään reseptiin",
+        "Tallennetaanko myös puhelimen kuviin?",
+        [
+          {
+            text: "Kyllä",
+            onPress: () => {
+              MediaLibrary.saveToLibraryAsync(photo.uri).then(upload());
+            },
+          },
+          {
+            text: "Ei",
+            onPress: async () => upload(),
+            style: "cancel",
+          },
+          {
+            text: "Peruuta",
+            onPress: () => {
+              setPhoto(undefined);
+            },
+            style: "cancel",
+          },
+        ]
+      );
+    };
+
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
+        {loading && <ActivityIndicator size="large" animating={true} />}
         <Image
           style={styles.preview}
           source={{ uri: "data:image/jpg;base64," + photo.base64 }}
         />
-        {allowMediaLibrary && (
-          <Button title="Tallenna kuviin" onPress={savePhoto} />
-        )}
-        <Button title="Ota uusi kuva" onPress={() => setPhoto(undefined)} />
-        <Button title="Sulje kamera" onPress={() => navigation.goBack()} />
-      </SafeAreaView>
+        <View style={styles.buttonContainer}>
+          {allowMediaLibrary && (
+            <RoundButtonWithIcon
+              icon="save"
+              iconColor="#fff"
+              color={Colors.primary}
+              onPress={savePhoto}
+            />
+          )}
+          <RoundButtonWithIcon
+            icon="back"
+            iconColor="#fff"
+            color={Colors.primary}
+            onPress={() => navigation.goBack()}
+          />
+          <RoundButtonWithIcon
+            icon="reload1"
+            iconColor="#fff"
+            color={Colors.primary}
+            onPress={() => setPhoto(undefined)}
+          />
+          <RoundButtonWithIcon
+            icon="upload"
+            iconColor="#fff"
+            color={Colors.secondary}
+            onPress={() => uploadToForm()}
+          />
+        </View>
+      </View>
     );
   }
 
@@ -127,7 +239,6 @@ export default function CameraScreen() {
       >
         <Text style={{ fontSize: 20 }}>⚡️</Text>
       </TouchableOpacity>
-      <StatusBar style="auto" />
     </Camera>
   ) : null;
 }
@@ -135,8 +246,8 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    width: "100%",
+    backgroundColor: "#fff",
   },
   preview: {
     alignSelf: "stretch",
@@ -162,7 +273,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: "5%",
     top: "10%",
-    borderRadius: "50%",
+    borderRadius: 50,
     height: 25,
     width: 25,
   },
@@ -170,5 +281,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: "5%",
     top: "5%",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    alignSelf: "auto",
+    justifyContent: "space-evenly",
+    alignContent: "center",
+    marginTop: 8,
+    marginBottom: 8,
   },
 });

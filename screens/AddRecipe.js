@@ -7,7 +7,11 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Image,
+  TouchableOpacity,
+  KeyboardAvoidingView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import ButtonWithIcon from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
 import { useNavigation } from "@react-navigation/native";
@@ -21,10 +25,14 @@ import {
   collection,
   addDoc,
   serverTimestamp,
+  fbStorage,
+  ref,
+  deleteObject,
 } from "../components/FirebaseConfig";
 import GoBackAppBar from "../components/GoBackAppBar";
+import ShowAlert from "../components/ShowAlert";
 
-export default function AddRecipe({ ...props }) {
+export default function AddRecipe({ route, ...props }) {
   const [recipeData, setRecipeData] = useState({
     userId: auth.currentUser.uid,
     title: "",
@@ -46,7 +54,9 @@ export default function AddRecipe({ ...props }) {
     protein: "",
     salt: "",
     photo: "",
-    rating: 0,
+    photoName: "",
+    rating: [],
+    userRated: [],
     healthyRating: 0,
     comments: "",
   });
@@ -106,8 +116,8 @@ export default function AddRecipe({ ...props }) {
     setRecipeData({ ...recipeData, diet: selectedDiets });
   };
 
-  const handlePictureTaken = (imageUri) => {
-    setRecipeData({ ...recipeData, photo: imageUri });
+  const handlePhoto = (photo, photoName) => {
+    setRecipeData({ ...recipeData, photo: photo, photoName: photoName });
   };
 
   // navigate to main screen after after save
@@ -115,13 +125,50 @@ export default function AddRecipe({ ...props }) {
 
   // save the recipeData
   const save = async () => {
-    const docRef = await addDoc(collection(firestore, "recipes"), {
-      recipeData,
-      created: serverTimestamp(),
-    }).catch((error) => console.log(error)); // TODO: error handling!
-    setRecipeData({});
-    Alert.alert("Resepti tallennettu!");
-    console.log("Data saved");
+    if (
+      !recipeData.title ||
+      !recipeData.incredients ||
+      !recipeData.instructions ||
+      !recipeData.servingSize ||
+      !recipeData.prepTime ||
+      !recipeData.cookTime
+    ) {
+      Alert.alert("Täytä kaikki pakolliset kentät.");
+      return;
+    } else {
+      const docRef = await addDoc(collection(firestore, "recipes"), {
+        recipeData,
+        created: serverTimestamp(),
+      }).catch((error) => {
+        console.log(error);
+        ShowAlert("Error", error);
+      });
+
+      setRecipeData({});
+      Alert.alert("Resepti tallennettu!");
+      console.log("Data saved");
+      navigation.goBack();
+    }
+  };
+
+  const selectPicture = () => {};
+
+  const deletePhoto = () => {
+    const photoName = recipeData.photoName;
+    let imageRef = ref(fbStorage, photoName);
+
+    // Delete the file
+    deleteObject(imageRef)
+      .then(() => {
+        setRecipeData({ ...recipeData, photo: "", photoName: "" });
+        if (route.params) {
+          props.navigation.setParams({ photoUrl: "", photoName: "" });
+        }
+      })
+      .catch((error) => {
+        console.log(`Error deleting the photo: ${error}`);
+        Alert.alert("Virhe poistettaessa kuvaa! Yritä myöhemmin uudelleen.");
+      });
   };
 
   /*
@@ -134,312 +181,343 @@ export default function AddRecipe({ ...props }) {
   return (
     <>
       <GoBackAppBar {...props} />
-      <ScrollView>
-        <View style={styles.container}>
-          <View style={styles.sectionTitle}>
-            <Text style={{ fontSize: 28 }}>Lisää resepti</Text>
-          </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        <ScrollView>
+          <View style={styles.container}>
+            <View style={styles.sectionTitle}>
+              <Text style={{ fontSize: 28 }}>Lisää resepti</Text>
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Reseptin nimi</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Reseptin nimi"
-              onChangeText={(text) =>
-                setRecipeData({ ...recipeData, title: text })
-              }
-            ></TextInput>
-          </View>
+            <View style={styles.section}>
+              <View style={styles.headerRequired}>
+                <Text style={styles.header}>Reseptin nimi</Text>
+                <Text style={{ color: Colors.primary, fontSize: 20 }}>*</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Reseptin nimi"
+                onChangeText={(text) =>
+                  setRecipeData({ ...recipeData, title: text })
+                }
+              ></TextInput>
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Ainekset</Text>
-            <TextInput
-              style={[styles.input, styles.multilineInput]}
-              placeholder="Lisää ainekset"
-              multiline
-              onChangeText={(text) =>
-                setRecipeData({ ...recipeData, incredients: text })
-              }
-            ></TextInput>
-          </View>
+            <View style={styles.section}>
+              <View style={styles.headerRequired}>
+                <Text style={styles.header}>Ainekset</Text>
+                <Text style={{ color: Colors.primary, fontSize: 20 }}>*</Text>
+              </View>
+              <TextInput
+                style={[styles.input, styles.multilineInput]}
+                placeholder="Lisää ainekset"
+                multiline
+                onChangeText={(text) =>
+                  setRecipeData({ ...recipeData, incredients: text })
+                }
+              ></TextInput>
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Ohjeet</Text>
-            <TextInput
-              style={[styles.input, styles.multilineInput]}
-              placeholder="Lisää ohjeet"
-              multiline
-              onChangeText={(text) =>
-                setRecipeData({ ...recipeData, instructions: text })
-              }
-            ></TextInput>
-          </View>
+            <View style={styles.section}>
+              <View style={styles.headerRequired}>
+                <Text style={styles.header}>Ohjeet</Text>
+                <Text style={{ color: Colors.primary, fontSize: 20 }}>*</Text>
+              </View>
+              <TextInput
+                style={[styles.input, styles.multilineInput]}
+                placeholder="Lisää ohjeet"
+                multiline
+                onChangeText={(text) =>
+                  setRecipeData({ ...recipeData, instructions: text })
+                }
+              ></TextInput>
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Lisää kuva</Text>
-            <View style={styles.sectionButtons}>
-              <ButtonWithIcon
-                onPress={() => {}}
-                icon={"picture"}
-                width={140}
-                color={Colors.grey}
-                title="Valitse"
-              />
-              <ButtonWithIcon
-                onPress={() => {
-                  navigation.navigate("CameraScreen");
-                }}
-                icon={"camera"}
-                width={140}
-                color={Colors.secondary}
-                title="Ota kuva"
+            <View style={styles.section}>
+              <Text style={styles.header}>Lisää kuva</Text>
+              <View style={styles.sectionButtons}>
+                <ButtonWithIcon
+                  onPress={() => {
+                    selectPicture();
+                  }}
+                  icon={"picture"}
+                  width={140}
+                  color={Colors.grey}
+                  title="Valitse"
+                />
+                <ButtonWithIcon
+                  onPress={() => {
+                    navigation.navigate("CameraScreen");
+                  }}
+                  icon={"camera"}
+                  width={140}
+                  color={Colors.secondary}
+                  title="Ota kuva"
+                />
+              </View>
+              {route.params?.photoUrl && (
+                <View style={styles.section}>
+                  <Image
+                    style={styles.recipeImage}
+                    source={{ uri: route.params.photoUrl }}
+                    onLoad={() =>
+                      handlePhoto(route.params.photoUrl, route.params.photoName)
+                    }
+                  />
+                  <View style={styles.trashContainer}>
+                    <TouchableOpacity onPress={() => deletePhoto()}>
+                      <Ionicons
+                        name="trash-sharp"
+                        size={24}
+                        color={Colors.grey}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.section}>
+              <View style={styles.headerRequired}>
+                <Text style={styles.header}>Annoskoko</Text>
+                <Text style={{ color: Colors.primary, fontSize: 20 }}>*</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Henkilömäärä"
+                keyboardType="numeric"
+                onChangeText={(text) =>
+                  setRecipeData({ ...recipeData, servingSize: text })
+                }
+              ></TextInput>
+            </View>
+
+            <View style={styles.section}>
+              <View style={styles.headerRequired}>
+                <Text style={styles.header}>Valmisteluaika</Text>
+                <Text style={{ color: Colors.primary, fontSize: 20 }}>*</Text>
+              </View>
+              <SelectList
+                boxStyles={styles.input}
+                placeholder="Valitse"
+                setSelected={(val) =>
+                  setRecipeData({ ...recipeData, prepTime: val })
+                }
+                data={timeOptions}
+                search={false}
+                save="value"
               />
             </View>
-          </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Lähde</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Kirjan nimi, internet-sivusto, tms..."
-              onChangeText={(text) =>
-                setRecipeData({ ...recipeData, source: text })
-              }
-            ></TextInput>
-          </View>
+            <View style={styles.section}>
+              <View style={styles.headerRequired}>
+                <Text style={styles.header}>Kokkausaika</Text>
+                <Text style={{ color: Colors.primary, fontSize: 20 }}>*</Text>
+              </View>
+              <SelectList
+                boxStyles={styles.input}
+                placeholder="Valitse"
+                setSelected={(val) =>
+                  setRecipeData({ ...recipeData, cookTime: val })
+                }
+                data={timeOptions}
+                search={false}
+                save="value"
+              />
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Annoskoko</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Henkilömäärä"
-              keyboardType="numeric"
-              onChangeText={(text) =>
-                setRecipeData({ ...recipeData, servingSize: text })
-              }
-            ></TextInput>
-          </View>
+            <View style={styles.section}>
+              <Text style={styles.header}>Lähde</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Kirjan nimi, internet-sivusto, tms..."
+                onChangeText={(text) =>
+                  setRecipeData({ ...recipeData, source: text })
+                }
+              ></TextInput>
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Valmisteluaika</Text>
-            <SelectList
-              boxStyles={styles.input}
-              placeholder="Valitse"
-              setSelected={(val) =>
-                setRecipeData({ ...recipeData, prepTime: val })
-              }
-              data={timeOptions}
-              search={false}
-              save="value"
-            />
-          </View>
+            <View style={styles.section}>
+              <Text style={styles.header}>Ruokalaji</Text>
+              <MultipleSelectList
+                boxStyles={[styles.input, { height: null }]}
+                placeholder="Valitse"
+                badgeStyles={{ backgroundColor: Colors.secondary }}
+                setSelected={(val) => setSelectedCourses(val)}
+                data={courseOptions}
+                search={false}
+                save="value"
+                onSelect={handleCourseSelect}
+                label="Omat valinnat"
+              />
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Kokkausaika</Text>
-            <SelectList
-              boxStyles={styles.input}
-              placeholder="Valitse"
-              setSelected={(val) =>
-                setRecipeData({ ...recipeData, cookTime: val })
-              }
-              data={timeOptions}
-              search={false}
-              save="value"
-            />
-          </View>
+            <View style={styles.section}>
+              <Text style={styles.header}>Pääraaka-aine</Text>
+              <MultipleSelectList
+                boxStyles={[styles.input, { height: null }]}
+                placeholder="Valitse"
+                badgeStyles={{ backgroundColor: Colors.secondary }}
+                setSelected={(val) => setSelectedMainIngredients(val)}
+                data={mainIngredientOptions}
+                search={false}
+                save="value"
+                onSelect={handleMainIngredientSelect}
+                label="Omat valinnat"
+              />
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Ruokalaji</Text>
-            <MultipleSelectList
-              boxStyles={[styles.input, { height: null }]}
-              placeholder="Valitse"
-              badgeStyles={{ backgroundColor: Colors.secondary }}
-              setSelected={(val) => setSelectedCourses(val)}
-              data={courseOptions}
-              search={false}
-              save="value"
-              onSelect={handleCourseSelect}
-              label="Omat valinnat"
-            />
-          </View>
+            <View style={styles.section}>
+              <Text style={styles.header}>Ruokavalio</Text>
+              <MultipleSelectList
+                boxStyles={[styles.input, { height: null }]}
+                placeholder="Valitse"
+                badgeStyles={{ backgroundColor: Colors.secondary }}
+                setSelected={(val) => setSelectedDiets(val)}
+                data={dietOptions}
+                search={false}
+                save="value"
+                onSelect={handleDietSelect}
+                label="Omat valinnat"
+              />
+            </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Pääraaka-aine</Text>
-            <MultipleSelectList
-              boxStyles={[styles.input, { height: null }]}
-              placeholder="Valitse"
-              badgeStyles={{ backgroundColor: Colors.secondary }}
-              setSelected={(val) => setSelectedMainIngredients(val)}
-              data={mainIngredientOptions}
-              search={false}
-              save="value"
-              onSelect={handleMainIngredientSelect}
-              label="Omat valinnat"
-            />
-          </View>
+            <View style={styles.section}>
+              <Text style={styles.header}>Ravintosisältö</Text>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Ruokavalio</Text>
-            <MultipleSelectList
-              boxStyles={[styles.input, { height: null }]}
-              placeholder="Valitse"
-              badgeStyles={{ backgroundColor: Colors.secondary }}
-              setSelected={(val) => setSelectedDiets(val)}
-              data={dietOptions}
-              search={false}
-              save="value"
-              onSelect={handleDietSelect}
-              label="Omat valinnat"
-            />
-          </View>
+              <View style={styles.row}>
+                <Text style={{ fontSize: 16 }}>Energia</Text>
+                <View style={{ flexDirection: "row", gap: 4 }}>
+                  <TextInput
+                    style={[styles.input, styles.caloriesInput]}
+                    placeholder="kJ"
+                    keyboardType="numeric"
+                    onChangeText={(text) =>
+                      setRecipeData({ ...recipeData, caloriesKj: text })
+                    }
+                  ></TextInput>
+                  <TextInput
+                    style={[styles.input, styles.caloriesInput]}
+                    placeholder="kcal"
+                    keyboardType="numeric"
+                    onChangeText={(text) =>
+                      setRecipeData({ ...recipeData, caloriesKcal: text })
+                    }
+                  ></TextInput>
+                </View>
+              </View>
 
-          <View style={styles.section}>
-            <Text style={styles.header}>Ravintosisältö</Text>
-
-            <View style={styles.row}>
-              <Text style={{ fontSize: 16 }}>Energia</Text>
-              <View style={{ flexDirection: "row", gap: 8 }}>
+              <View style={styles.row}>
+                <Text style={{ fontSize: 16 }}>Rasva</Text>
                 <TextInput
-                  style={[styles.input, styles.caloriesInput]}
-                  placeholder="kJ"
+                  style={[styles.input, styles.rowInput]}
+                  placeholder="Gramaa (g)"
                   keyboardType="numeric"
                   onChangeText={(text) =>
-                    setRecipeData({ ...recipeData, caloriesKj: text })
+                    setRecipeData({ ...recipeData, totalFat: text })
                   }
                 ></TextInput>
+              </View>
+
+              <View style={styles.row}>
+                <Text style={{ fontSize: 16 }}>
+                  josta tyydyttynyttä
+                </Text>
                 <TextInput
-                  style={[styles.input, styles.caloriesInput]}
-                  placeholder="kcal"
+                  style={[styles.input, styles.rowInput]}
+                  placeholder="Gramaa (g)"
                   keyboardType="numeric"
                   onChangeText={(text) =>
-                    setRecipeData({ ...recipeData, caloriesKcal: text })
+                    setRecipeData({ ...recipeData, saturatedFat: text })
+                  }
+                ></TextInput>
+              </View>
+
+              <View style={styles.row}>
+                <Text style={{ fontSize: 16 }}>Hiilihydraatit</Text>
+                <TextInput
+                  style={[styles.input, styles.rowInput]}
+                  placeholder="Gramaa (g)"
+                  keyboardType="numeric"
+                  onChangeText={(text) =>
+                    setRecipeData({ ...recipeData, totalCarb: text })
+                  }
+                ></TextInput>
+              </View>
+
+              <View style={styles.row}>
+                <Text style={{ fontSize: 16 }}>
+                  josta sokereita
+                </Text>
+                <TextInput
+                  style={[styles.input, styles.rowInput]}
+                  placeholder="Gramaa (g)"
+                  keyboardType="numeric"
+                  onChangeText={(text) =>
+                    setRecipeData({ ...recipeData, sugar: text })
+                  }
+                ></TextInput>
+              </View>
+
+              <View style={styles.row}>
+                <Text style={{ fontSize: 16 }}>Proteiini</Text>
+                <TextInput
+                  style={[styles.input, styles.rowInput]}
+                  placeholder="Gramaa (g)"
+                  keyboardType="numeric"
+                  onChangeText={(text) =>
+                    setRecipeData({ ...recipeData, protein: text })
+                  }
+                ></TextInput>
+              </View>
+
+              <View style={styles.row}>
+                <Text style={{ fontSize: 16 }}>Suola</Text>
+                <TextInput
+                  style={[styles.input, styles.rowInput]}
+                  placeholder="Gramaa (g)"
+                  keyboardType="numeric"
+                  onChangeText={(text) =>
+                    setRecipeData({ ...recipeData, salt: text })
                   }
                 ></TextInput>
               </View>
             </View>
 
-            <View style={styles.row}>
-              <Text style={{ fontSize: 16 }}>Rasva</Text>
-              <TextInput
-                style={[styles.input, styles.rowInput]}
-                placeholder="Gramaa (g)"
-                keyboardType="numeric"
-                onChangeText={(text) =>
-                  setRecipeData({ ...recipeData, totalFat: text })
-                }
-              ></TextInput>
-            </View>
-
-            <View style={styles.row}>
-              <Text style={{ fontSize: 16, marginLeft: 16 }}>
-                josta tyydyttynyttä
-              </Text>
-              <TextInput
-                style={[styles.input, styles.rowInput]}
-                placeholder="Gramaa (g)"
-                keyboardType="numeric"
-                onChangeText={(text) =>
-                  setRecipeData({ ...recipeData, saturatedFat: text })
-                }
-              ></TextInput>
-            </View>
-
-            <View style={styles.row}>
-              <Text style={{ fontSize: 16 }}>Hiilihydraatit</Text>
-              <TextInput
-                style={[styles.input, styles.rowInput]}
-                placeholder="Gramaa (g)"
-                keyboardType="numeric"
-                onChangeText={(text) =>
-                  setRecipeData({ ...recipeData, totalCarb: text })
-                }
-              ></TextInput>
-            </View>
-
-            <View style={styles.row}>
-              <Text style={{ fontSize: 16, marginLeft: 16 }}>
-                josta sokereita
-              </Text>
-              <TextInput
-                style={[styles.input, styles.rowInput]}
-                placeholder="Gramaa (g)"
-                keyboardType="numeric"
-                onChangeText={(text) =>
-                  setRecipeData({ ...recipeData, sugar: text })
-                }
-              ></TextInput>
-            </View>
-
-            <View style={styles.row}>
-              <Text style={{ fontSize: 16 }}>Proteiini</Text>
-              <TextInput
-                style={[styles.input, styles.rowInput]}
-                placeholder="Gramaa (g)"
-                keyboardType="numeric"
-                onChangeText={(text) =>
-                  setRecipeData({ ...recipeData, protein: text })
-                }
-              ></TextInput>
-            </View>
-
-            <View style={styles.row}>
-              <Text style={{ fontSize: 16 }}>Suola</Text>
-              <TextInput
-                style={[styles.input, styles.rowInput]}
-                placeholder="Gramaa (g)"
-                keyboardType="numeric"
-                onChangeText={(text) =>
-                  setRecipeData({ ...recipeData, salt: text })
-                }
-              ></TextInput>
+            <View
+              style={{
+                ...styles.sectionButtons,
+                marginLeft: 12,
+                marginRight: 12,
+                marginTop: 40,
+                marginBottom: 40,
+              }}
+            >
+              <ButtonWithIcon
+                icon={"back"}
+                color={Colors.grey}
+                width={140}
+                title="Peruuta"
+                onPress={() => {
+                  setRecipeData({});
+                  navigation.goBack();
+                }}
+              />
+              <ButtonWithIcon
+                icon={"arrowdown"}
+                color={Colors.primary}
+                width={140}
+                title="Tallenna"
+                onPress={() => {
+                  save();
+                }}
+              />
             </View>
           </View>
-
-          <View
-            style={{
-              ...styles.sectionButtons,
-              marginLeft: 12,
-              marginRight: 12,
-              marginTop: 40,
-              marginBottom: 40,
-            }}
-          >
-            <ButtonWithIcon
-              icon={"back"}
-              color={Colors.grey}
-              width={140}
-              title="Peruuta"
-              onPress={() => {
-                setRecipeData({});
-                navigation.goBack();
-              }}
-            />
-            <ButtonWithIcon
-              icon={"arrowdown"}
-              color={Colors.primary}
-              width={140}
-              title="Tallenna"
-              onPress={() => {
-                save();
-                setRecipeData({});
-                navigation.goBack();
-              }}
-            />
-          </View>
-
-          <View style={styles.oneButton}>
-            <ButtonWithIcon
-              icon={"book"}
-              color="deeppink"
-              title="Omat (testaukseen)"
-              onPress={() => {
-                setRecipeData({});
-                navigation.navigate("OwnRecipes");
-              }}
-            />
-          </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </>
   );
 }
@@ -462,6 +540,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginLeft: 12,
     marginRight: 12,
+  },
+  sectionButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignContent: "center",
+    gap: 8,
+    marginBottom: 20,
+    marginLeft: 12,
+    marginRight: 12,
+  },
+  headerRequired: {
+    flexDirection: "row",
+    gap: 4,
   },
   header: {
     height: 40,
@@ -489,6 +580,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
+  trashContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.grey,
+    backgroundColor: "#fff",
+    position: "absolute",
+    top: "0%",
+    bottom: 0,
+    left: "85%",
+    right: 0,
+  },
+  recipeImage: {
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    alignSelf: "center",
+  },
   multilineInput: {
     paddingTop: 8,
     minHeight: 100,
@@ -496,12 +608,12 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   caloriesInput: {
-    width: 80,
+    width: 58,
     marginLeft: 0,
     marginRight: 0,
   },
   rowInput: {
-    width: 168,
+    width: 120,
     marginLeft: 0,
     marginRight: 0,
   },
@@ -516,14 +628,6 @@ const styles = StyleSheet.create({
   oneButton: {
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 12,
-    marginRight: 12,
-  },
-  sectionButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignContent: "center",
-    gap: 8,
     marginLeft: 12,
     marginRight: 12,
   },

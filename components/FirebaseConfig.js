@@ -3,13 +3,23 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {
   getFirestore,
   collection,
+  doc,
   addDoc,
+  getDoc,
+  updateDoc,
   serverTimestamp,
   query,
   onSnapshot,
   orderBy,
   where,
 } from "firebase/firestore";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject, 
+} from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_APIKEY,
@@ -25,16 +35,25 @@ const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 const firestore = getFirestore();
+const fbStorage = getStorage();
 
 export {
   auth,
   signInWithEmailAndPassword,
   firestore,
+  fbStorage,
   collection,
+  doc,
   addDoc,
+  getDoc,
+  updateDoc,
   serverTimestamp,
   query,
   onSnapshot,
   orderBy,
   where,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject
 };
