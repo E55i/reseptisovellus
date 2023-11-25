@@ -3,7 +3,7 @@ import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Text } from 
 import GoBackAppBar from '../components/GoBackAppBar';
 import { getAuth } from 'firebase/auth';
 import { getDatabase, ref, onValue, set } from 'firebase/database';
-import DateTimePicker from '@react-native-community/datetimepicker';
+//import DateTimePicker from '@react-native-community/datetimepicker';
 
 const UpdateProfile = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -177,13 +177,13 @@ const UpdateProfile = ({ navigation }) => {
   <View style={styles.datePickerContainer}>
           <TouchableOpacity
             style={styles.customButton}
-            onPress={showDatepicker}
+      onPress={()=>{/*showDatepicker*/}}
           >
             <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
           </TouchableOpacity>
         </View>
 
-        {showDatePicker && (
+        {/*showDatePicker && (
           <DateTimePicker
             testID="dateTimePicker"
             value={birthDate}
@@ -191,7 +191,7 @@ const UpdateProfile = ({ navigation }) => {
             display="default"
             onChange={onChangeBirthDate}
           />
-        )}
+        )*/}
 
         <TouchableOpacity
           style={styles.customButton}
