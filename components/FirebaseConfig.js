@@ -18,6 +18,7 @@ import {
   ref,
   uploadBytesResumable,
   getDownloadURL,
+  deleteObject, 
 } from "firebase/storage";
 
 const firebaseConfig = {
@@ -54,4 +55,5 @@ export {
   ref,
   uploadBytesResumable,
   getDownloadURL,
+  deleteObject
 };
