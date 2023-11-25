@@ -68,7 +68,7 @@ export default function CameraScreen() {
     })();
   }, []);
 
-  let takePic = async () => {
+  let takePhoto = async () => {
     let options = {
       quality: 1,
       base64: true,
@@ -218,7 +218,7 @@ export default function CameraScreen() {
   return allowCamera ? (
     <Camera style={styles.container} ref={cameraRef} flashMode={flashMode}>
       <View style={styles.roundButtonContainer}>
-        <TouchableOpacity onPress={takePic} style={styles.roundButton} />
+        <TouchableOpacity onPress={takePhoto} style={styles.roundButton} />
       </View>
 
       <TouchableOpacity

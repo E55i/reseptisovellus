@@ -10,6 +10,7 @@ import {
   Image,
   TouchableOpacity,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ButtonWithIcon from "../components/CustomButtons";
@@ -28,9 +29,12 @@ import {
   fbStorage,
   ref,
   deleteObject,
+  uploadBytesResumable,
+  getDownloadURL,
 } from "../components/FirebaseConfig";
 import GoBackAppBar from "../components/GoBackAppBar";
 import ShowAlert from "../components/ShowAlert";
+import * as ImagePicker from "expo-image-picker";
 
 export default function AddRecipe({ route, ...props }) {
   const [recipeData, setRecipeData] = useState({
@@ -64,6 +68,8 @@ export default function AddRecipe({ route, ...props }) {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [selectedMainIngredients, setSelectedMainIngredients] = useState([]);
   const [selectedDiets, setSelectedDiets] = useState([]);
+  const [showPhoto, setShowPhoto] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const timeOptions = [
     { key: "1", value: "alle 15 min" },
@@ -151,7 +157,79 @@ export default function AddRecipe({ route, ...props }) {
     }
   };
 
-  const selectPicture = () => {};
+  const uploadToStorage = async (uri, name, onProgress) => {
+    const fetchResponse = await fetch(uri);
+    const theBlob = await fetchResponse.blob();
+    const imageRef = ref(fbStorage, `images/${name}`);
+    setLoading(true);
+
+    const uploadTask = uploadBytesResumable(imageRef, theBlob);
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          onProgress && onProgress(progress);
+        },
+        (error) => {
+          // handle errors
+          reject(error);
+        },
+        async () => {
+          // handle successful uploads on complete
+          const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve({
+            downloadUrl,
+            metadata: uploadTask.snapshot.metadata,
+          });
+        }
+      );
+    });
+  };
+
+  const selectPicture = async () => {
+    try {
+      let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== "granted") {
+        return ShowAlert(
+          "Ei lupaa käyttää puhelimen kuvia",
+          "Anna sovellukselle lupa käyttää puhelimen kuvia, mikäli haluat tallentaa kuvan puhelimeesi."
+        );
+      }
+      const photo = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!photo.canceled) {
+        console.log(photo);
+        const fileName = photo.assets[0].uri.split("/").pop();
+        console.log(photo);
+
+        const uploadResp = await uploadToStorage(
+          photo.assets[0].uri,
+          fileName,
+          (value) => console.log(value)
+        );
+
+        console.log(uploadResp);
+
+        const photoUrl = uploadResp.downloadUrl;
+        const photoName = uploadResp.metadata.fullPath;
+
+        handlePhoto(photoUrl, photoName);
+        setShowPhoto(true);
+      }
+    } catch (error) {
+      Alert.alert("Error Uploading Image " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const deletePhoto = () => {
     const photoName = recipeData.photoName;
@@ -160,10 +238,13 @@ export default function AddRecipe({ route, ...props }) {
     // Delete the file
     deleteObject(imageRef)
       .then(() => {
-        setRecipeData({ ...recipeData, photo: "", photoName: "" });
         if (route.params) {
           props.navigation.setParams({ photoUrl: "", photoName: "" });
         }
+        if (showPhoto) {
+          setShowPhoto(false);
+        }
+        setRecipeData({ ...recipeData, photo: "", photoName: "" });
       })
       .catch((error) => {
         console.log(`Error deleting the photo: ${error}`);
@@ -171,12 +252,10 @@ export default function AddRecipe({ route, ...props }) {
       });
   };
 
-  /*
   // monitor changes in the form (remove from final app)
   useEffect(() => {
     console.log(recipeData);
   }, [recipeData]);
-  */
 
   return (
     <>
@@ -257,6 +336,7 @@ export default function AddRecipe({ route, ...props }) {
                   title="Ota kuva"
                 />
               </View>
+
               {route.params?.photoUrl && (
                 <View style={styles.section}>
                   <Image
@@ -265,6 +345,25 @@ export default function AddRecipe({ route, ...props }) {
                     onLoad={() =>
                       handlePhoto(route.params.photoUrl, route.params.photoName)
                     }
+                  />
+                  <View style={styles.trashContainer}>
+                    <TouchableOpacity onPress={() => deletePhoto()}>
+                      <Ionicons
+                        name="trash-sharp"
+                        size={24}
+                        color={Colors.grey}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {loading && <ActivityIndicator size="large" animating={true} />}
+              {showPhoto && (
+                <View style={styles.section}>
+                  <Image
+                    style={styles.recipeImage}
+                    source={{ uri: recipeData.photo }}
                   />
                   <View style={styles.trashContainer}>
                     <TouchableOpacity onPress={() => deletePhoto()}>
@@ -422,9 +521,7 @@ export default function AddRecipe({ route, ...props }) {
               </View>
 
               <View style={styles.row}>
-                <Text style={{ fontSize: 16 }}>
-                  josta tyydyttynyttä
-                </Text>
+                <Text style={{ fontSize: 16 }}>josta tyydyttynyttä</Text>
                 <TextInput
                   style={[styles.input, styles.rowInput]}
                   placeholder="Gramaa (g)"
@@ -448,9 +545,7 @@ export default function AddRecipe({ route, ...props }) {
               </View>
 
               <View style={styles.row}>
-                <Text style={{ fontSize: 16 }}>
-                  josta sokereita
-                </Text>
+                <Text style={{ fontSize: 16 }}>josta sokereita</Text>
                 <TextInput
                   style={[styles.input, styles.rowInput]}
                   placeholder="Gramaa (g)"
