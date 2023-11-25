@@ -4,6 +4,7 @@ import GoBackAppBar from '../components/GoBackAppBar';
 import RatingBar from "../components/RatingBar";
 import { useNavigation } from "@react-navigation/native";
 import Rating from "../components/Rating";
+import CommentBox from "../components/CommentBox";
 
 export default function RecipeDetails({route}) {
 
@@ -26,6 +27,7 @@ export default function RecipeDetails({route}) {
         <Text>Step-by-step instructions go here...</Text>
         <RatingBar recipeId={recipeId}/>
         <Text>Comments:</Text>
+        <CommentBox/>
         {/* List comments here */}
         <Text>Add Comment:</Text>
         {/* Add a TextInput for adding comments here */}
