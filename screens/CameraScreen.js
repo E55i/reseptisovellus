@@ -136,7 +136,10 @@ export default function CameraScreen() {
         console.log(uploadResp);
         navigation.navigate({
           name: "AddRecipe",
-          params: { photoUrl: uploadResp.downloadUrl },
+          params: {
+            photoUrl: uploadResp.downloadUrl,
+            photoName: uploadResp.metadata.fullPath,
+          },
           merge: true, // merge params to addrecipe screen
         });
       } catch (error) {
