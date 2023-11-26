@@ -11,9 +11,7 @@ import {
   auth,
   firestore,
   collection,
-  doc,
-  getDoc,
-  updateDoc,
+  addDoc,
   serverTimestamp,
 } from "../components/FirebaseConfig";
 import GoBackAppBar from "../components/GoBackAppBar";
@@ -29,62 +27,23 @@ export default function RecipeDetails({ route }) {
   const { recipeId, backgroundColor } = route.params;
   const navigation = useNavigation();
  
-  const saveComment = async (commentText) => {
-    const today = new Date();
-    const date =
-      today.getFullYear() +
-      "-" +
-      (today.getMonth() + 1) +
-      "-" +
-      today.getDate();
-    const time =
-      today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    const dateTime = date + " " + time;
-
-    console.log(dateTime);
-    try {
-      // Get reference to Firestore database
-      const recipesCollection = collection(firestore, "recipes");
-      // Specify the recipe document
-      const recipeDoc = doc(recipesCollection, recipeId);
-
-      // Get the current data of the recipe document
-      const recipeSnapshot = await getDoc(recipeDoc);
-      const currentData = recipeSnapshot.data();
-
-      // Extract the current comments array
-      const currentComments =
-        currentData && Array.isArray(currentData.recipeData.comments)
-          ? currentData.recipeData.comments
-          : [];
-
-      // Update the local state with the new comment
-      const updatedComments = [
-        ...currentComments,
-        {
-          commentCreated: dateTime,
-          userId: auth.currentUser.uid,
-          text: commentText,
-          totalLikes: 0,
-          likers: [],
-        },
-      ];
-
-      // Save updated comments data back to Firestore
-      await updateDoc(recipeDoc, {
-        "recipeData.comments": updatedComments,
+  const saveComment = async () => {
+    if (!newComment) {
+      ShowAlert("","Kirjoita kommenttiin teksitä ennen kuin lähetät sen");
+      return;
+    } else {
+      const docRef = await addDoc(collection(firestore, "feedbacks"), {
+        created: serverTimestamp(),
+        recipeId: recipeId,
+        userId: auth.currentUser.uid,
+        comment: newComment,
+        like: "",
+      }).catch((error) => {
+        console.log(error);
+        ShowAlert("Virhe","Virhe kommentin lisäyksessä. Yritä myöhemmin uudelleen.")
       });
-
-      // Tell user that comment is saved
+      console.log("Kommentti lisätty");
       setNewComment("");
-      console.log("comment saved successfully");
-    } catch (error) {
-      // Tell user if there is an error saving the comment
-      ShowAlert(
-        "Virhe",
-        "Kommenttia ei voitu tallentaa. Yritä myöhemmin uudelleen."
-      );
-      console.error("Error saving comment:", error);
     }
   };
   return (
@@ -121,9 +80,7 @@ export default function RecipeDetails({ route }) {
           <TouchableOpacity
             style={styles.sendButton}
             onPress={() => {
-              if (newComment !== "") {
-                saveComment(newComment);
-              }
+                saveComment()
             }}
           >
             <Ionicons name="send-sharp" size={24} color="#FFFFFF" />
