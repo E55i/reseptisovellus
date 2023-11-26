@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  KeyboardAvoidingView
 } from "react-native";
 import {
   auth,
@@ -49,7 +50,10 @@ export default function RecipeDetails({ route }) {
   return (
     <View style={styles.container}>
       <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />
-
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
       <ScrollView>
         <Text>Tämä on recipeId: {recipeId}</Text>
         {/*Tähän tulee tietokannasta haettu rating, 
@@ -68,6 +72,7 @@ export default function RecipeDetails({ route }) {
           <TextInput
             style={styles.input}
             placeholder="Kirjoita kommentti..."
+            multiline={true}
             value={newComment}
             returnKeyType="send"
             onSubmitEditing={() => {
@@ -87,6 +92,7 @@ export default function RecipeDetails({ route }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -94,6 +100,7 @@ export default function RecipeDetails({ route }) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#FFFFFF",
+    flex: 1,
   },
   newComment: {
     flexDirection: "row",
@@ -104,7 +111,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 6,
-    height: 44,
+    height: 'auto',
     marginRight: 8,
     borderWidth: 1,
     paddingLeft: 10,
