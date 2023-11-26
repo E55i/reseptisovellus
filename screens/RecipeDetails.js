@@ -6,14 +6,13 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  KeyboardAvoidingView
 } from "react-native";
 import {
   auth,
   firestore,
   collection,
-  doc,
-  getDoc,
-  updateDoc,
+  addDoc,
   serverTimestamp,
 } from "../components/FirebaseConfig";
 import GoBackAppBar from "../components/GoBackAppBar";
@@ -29,68 +28,32 @@ export default function RecipeDetails({ route }) {
   const { recipeId, backgroundColor } = route.params;
   const navigation = useNavigation();
  
-  const saveComment = async (commentText) => {
-    const today = new Date();
-    const date =
-      today.getFullYear() +
-      "-" +
-      (today.getMonth() + 1) +
-      "-" +
-      today.getDate();
-    const time =
-      today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    const dateTime = date + " " + time;
-
-    console.log(dateTime);
-    try {
-      // Get reference to Firestore database
-      const recipesCollection = collection(firestore, "recipes");
-      // Specify the recipe document
-      const recipeDoc = doc(recipesCollection, recipeId);
-
-      // Get the current data of the recipe document
-      const recipeSnapshot = await getDoc(recipeDoc);
-      const currentData = recipeSnapshot.data();
-
-      // Extract the current comments array
-      const currentComments =
-        currentData && Array.isArray(currentData.recipeData.comments)
-          ? currentData.recipeData.comments
-          : [];
-
-      // Update the local state with the new comment
-      const updatedComments = [
-        ...currentComments,
-        {
-          commentCreated: dateTime,
-          userId: auth.currentUser.uid,
-          text: commentText,
-          totalLikes: 0,
-          likers: [],
-        },
-      ];
-
-      // Save updated comments data back to Firestore
-      await updateDoc(recipeDoc, {
-        "recipeData.comments": updatedComments,
+  const saveComment = async () => {
+    if (!newComment) {
+      ShowAlert("","Kirjoita kommenttiin teksitä ennen kuin lähetät sen");
+      return;
+    } else {
+      const docRef = await addDoc(collection(firestore, "feedbacks"), {
+        created: serverTimestamp(),
+        recipeId: recipeId,
+        userId: auth.currentUser.uid,
+        comment: newComment,
+        like: "",
+      }).catch((error) => {
+        console.log(error);
+        ShowAlert("Virhe","Virhe kommentin lisäyksessä. Yritä myöhemmin uudelleen.")
       });
-
-      // Tell user that comment is saved
+      console.log("Kommentti lisätty");
       setNewComment("");
-      console.log("comment saved successfully");
-    } catch (error) {
-      // Tell user if there is an error saving the comment
-      ShowAlert(
-        "Virhe",
-        "Kommenttia ei voitu tallentaa. Yritä myöhemmin uudelleen."
-      );
-      console.error("Error saving comment:", error);
     }
   };
   return (
     <View style={styles.container}>
       <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />
-
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
       <ScrollView>
         <Text>Tämä on recipeId: {recipeId}</Text>
         {/*Tähän tulee tietokannasta haettu rating, 
@@ -109,6 +72,7 @@ export default function RecipeDetails({ route }) {
           <TextInput
             style={styles.input}
             placeholder="Kirjoita kommentti..."
+            multiline={true}
             value={newComment}
             returnKeyType="send"
             onSubmitEditing={() => {
@@ -121,15 +85,14 @@ export default function RecipeDetails({ route }) {
           <TouchableOpacity
             style={styles.sendButton}
             onPress={() => {
-              if (newComment !== "") {
-                saveComment(newComment);
-              }
+                saveComment()
             }}
           >
             <Ionicons name="send-sharp" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -137,6 +100,7 @@ export default function RecipeDetails({ route }) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#FFFFFF",
+    flex: 1,
   },
   newComment: {
     flexDirection: "row",
@@ -147,7 +111,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 6,
-    height: 44,
+    height: 'auto',
     marginRight: 8,
     borderWidth: 1,
     paddingLeft: 10,
