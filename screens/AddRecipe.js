@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Button,
   View,
   Text,
   TextInput,
@@ -13,6 +14,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import ButtonWithIcon from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
 import { useNavigation } from "@react-navigation/native";
@@ -62,7 +64,6 @@ export default function AddRecipe({ route, ...props }) {
     rating: [],
     userRated: [],
     healthyRating: 0,
-    comments: "",
   });
 
   const [selectedCourses, setSelectedCourses] = useState([]);
@@ -70,6 +71,9 @@ export default function AddRecipe({ route, ...props }) {
   const [selectedDiets, setSelectedDiets] = useState([]);
   const [showPhoto, setShowPhoto] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [newIngredient, setNewIngredient] = useState("");
+  const [tempIngredients, setTempIngredients] = useState([]);
+  const [showInput, setShowInput] = useState(false);
 
   const timeOptions = [
     { key: "1", value: "alle 15 min" },
@@ -124,6 +128,24 @@ export default function AddRecipe({ route, ...props }) {
 
   const handlePhoto = (photo, photoName) => {
     setRecipeData({ ...recipeData, photo: photo, photoName: photoName });
+  };
+
+  // add new ingredient to recipe
+  const addIngredient = () => {
+    //const newKey = String(tempIngredients.length);
+    //const object = { key: newKey, description: newIngredient };
+    const newIngredients = [...tempIngredients, newIngredient];
+    setTempIngredients(newIngredients);
+    setShowInput(false);
+    setRecipeData({ ...recipeData, incredients: newIngredients });
+    setNewIngredient("");
+  };
+
+  // delete specific ingredient
+  const deleteItem = (index) => {
+    const updatedIngredients = tempIngredients.filter((item, i) => i !== index);
+    setTempIngredients(updatedIngredients);
+    setRecipeData({ ...recipeData, incredients: updatedIngredients });
   };
 
   // navigate to main screen after after save
@@ -289,14 +311,38 @@ export default function AddRecipe({ route, ...props }) {
                 <Text style={styles.header}>Ainekset</Text>
                 <Text style={{ color: Colors.primary, fontSize: 20 }}>*</Text>
               </View>
-              <TextInput
-                style={[styles.input, styles.multilineInput]}
-                placeholder="Lisää ainekset"
-                multiline
-                onChangeText={(text) =>
-                  setRecipeData({ ...recipeData, incredients: text })
-                }
-              ></TextInput>
+              {!showInput ? (
+                <TouchableOpacity style={styles.addIngredientButton} onPress={() => setShowInput(true)}>
+                  <Ionicons name="add-circle" size={36} color="#47A73E" />
+                </TouchableOpacity>
+              ) : (
+                <>
+                  <Ionicons style={styles.addIngredientButton} name="add-circle" size={36} color="#8B8B8B" />
+                  <TextInput
+                    placeholder="Enter ingredient"
+                    style={styles.input}
+                    value={newIngredient}
+                    onChangeText={(text) => setNewIngredient(text)}
+                    onSubmitEditing={() => addIngredient()}
+                    returnKeyType="done"
+                  />
+                </>
+              )}
+              {tempIngredients.map((item, index) => (
+                <View 
+                style={styles.ingredient}
+                key={index}>
+                  <Text>{item}</Text>
+                  <TouchableOpacity
+                  onPress={() => deleteItem(index)}>
+                  <Ionicons
+                        name="trash-sharp"
+                        size={24}
+                        color={Colors.grey}
+                      />
+                  </TouchableOpacity>
+                </View>
+              ))}
             </View>
 
             <View style={styles.section}>
@@ -674,6 +720,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+  },
+  addIngredientButton:{
+    marginLeft: 10,
+  },
+  ingredient:{
+    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: 'space-between',
+    marginLeft: 12,
+    marginRight: 12,
+    marginTop: 4,
+    marginBottom: 4,
   },
   trashContainer: {
     justifyContent: "center",
