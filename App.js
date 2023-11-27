@@ -10,7 +10,7 @@ import SearchRecipe from "./screens/SearchRecipe";
 import Welcome from "./screens/Welcome";
 import StartScreen from "./screens/StartScreen";
 import OwnRecipes from "./screens/OwnRecipes";
-import CameraScreen from "./screens/CameraScreen";
+import PhotoScreen from "./screens/PhotoScreen";
 //import GoogleLogin from "./screens/Googlelogin";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -19,7 +19,6 @@ import Constants from "expo-constants";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  
   return (
     <SafeAreaView style={styles.container}>
       <NavigationContainer>
@@ -32,8 +31,8 @@ export default function App() {
           </Stack.Screen>
           <Stack.Screen name="StartScreen" component={StartScreen} />
           <Stack.Screen name="CreateUser" component={CreateUser} />
-          <Stack.Screen name="UpdateProfile" >
-          {(props) => <UpdateProfile backgroundColor="#FF9C00" {...props} />}
+          <Stack.Screen name="UpdateProfile">
+            {(props) => <UpdateProfile backgroundColor="#FF9C00" {...props} />}
           </Stack.Screen>
           <Stack.Screen name="Welcome">
             {(props) => <Welcome backgroundColor="#FF9C00" {...props} />}
@@ -53,7 +52,7 @@ export default function App() {
           <Stack.Screen name="OwnRecipes">
             {(props) => <OwnRecipes backgroundColor="#FF9C00" {...props} />}
           </Stack.Screen>
-          <Stack.Screen name="CameraScreen" component={CameraScreen} />
+          <Stack.Screen name="PhotoScreen" component={PhotoScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>

@@ -13,11 +13,10 @@
     },
     "plugins": [
       [
-        "expo-media-library",
+        "expo-image-picker",
         {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
-          "isAccessMediaLocationEnabled": true
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photo",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
       ]
     ],

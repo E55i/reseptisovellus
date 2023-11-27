@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 
@@ -39,6 +39,28 @@ export function RoundButtonWithIcon({
   );
 }
 
+export function SquareButtonWithIcon({
+  icon,
+  iconColor,
+  color,
+  borderColor,
+  onPress,
+}) {
+  return (
+    <View
+      style={{
+        ...styles.squareButton,
+        backgroundColor: color || "#fff",
+        borderColor: borderColor || "transparent",
+      }}
+    >
+      <TouchableOpacity onPress={onPress}>
+        <AntDesign name={icon} size={80} color={iconColor || "#fff"} />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
@@ -75,6 +97,26 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     borderWidth: 2,
+    ...Platform.select({
+      android: {
+        elevation: 7,
+        overflow: "hidden",
+      },
+      ios: {
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+      },
+    }),
+  },
+  squareButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    borderWidth: 6,
     ...Platform.select({
       android: {
         elevation: 7,
