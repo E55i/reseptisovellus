@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Button,
   View,
   Text,
   TextInput,
@@ -11,10 +10,8 @@ import {
   Image,
   TouchableOpacity,
   KeyboardAvoidingView,
-  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
 import ButtonWithIcon from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
 import { useNavigation } from "@react-navigation/native";
@@ -31,12 +28,9 @@ import {
   fbStorage,
   ref,
   deleteObject,
-  uploadBytesResumable,
-  getDownloadURL,
 } from "../components/FirebaseConfig";
 import GoBackAppBar from "../components/GoBackAppBar";
 import ShowAlert from "../components/ShowAlert";
-import * as ImagePicker from "expo-image-picker";
 
 export default function AddRecipe({ route, ...props }) {
   const [recipeData, setRecipeData] = useState({
@@ -69,11 +63,14 @@ export default function AddRecipe({ route, ...props }) {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [selectedMainIngredients, setSelectedMainIngredients] = useState([]);
   const [selectedDiets, setSelectedDiets] = useState([]);
-  const [showPhoto, setShowPhoto] = useState(false);
-  const [loading, setLoading] = useState(false);
+
   const [newIngredient, setNewIngredient] = useState("");
   const [tempIngredients, setTempIngredients] = useState([]);
   const [showInput, setShowInput] = useState(false);
+
+  const [newStep, setNewStep] = useState("");
+  const [tempSteps, setTempSteps] = useState([]);
+  const [showStepInput, setShowStepInput] = useState(false);
 
   const timeOptions = [
     { key: "1", value: "alle 15 min" },
@@ -141,11 +138,27 @@ export default function AddRecipe({ route, ...props }) {
     setNewIngredient("");
   };
 
+  // add instructions to recipe
+  const addInstructionStep = () => {
+    const newSteps = [...tempSteps, newStep];
+    setTempSteps(newSteps);
+    setShowStepInput(false);
+    setRecipeData({ ...recipeData, instructions: newSteps });
+    setNewStep("");
+  };
+
   // delete specific ingredient
   const deleteItem = (index) => {
     const updatedIngredients = tempIngredients.filter((item, i) => i !== index);
     setTempIngredients(updatedIngredients);
     setRecipeData({ ...recipeData, incredients: updatedIngredients });
+  };
+
+  // delete specific instruction step
+  const deleteStep = (index) => {
+    const updatedSteps = tempSteps.filter((item, i) => i !== index);
+    setTempSteps(updatedSteps);
+    setRecipeData({ ...recipeData, instructions: updatedSteps });
   };
 
   // navigate to main screen after after save
@@ -179,80 +192,6 @@ export default function AddRecipe({ route, ...props }) {
     }
   };
 
-  const uploadToStorage = async (uri, name, onProgress) => {
-    const fetchResponse = await fetch(uri);
-    const theBlob = await fetchResponse.blob();
-    const imageRef = ref(fbStorage, `images/${name}`);
-    setLoading(true);
-
-    const uploadTask = uploadBytesResumable(imageRef, theBlob);
-    return new Promise((resolve, reject) => {
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          onProgress && onProgress(progress);
-        },
-        (error) => {
-          // handle errors
-          reject(error);
-        },
-        async () => {
-          // handle successful uploads on complete
-          const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve({
-            downloadUrl,
-            metadata: uploadTask.snapshot.metadata,
-          });
-        }
-      );
-    });
-  };
-
-  const selectPicture = async () => {
-    try {
-      let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== "granted") {
-        return ShowAlert(
-          "Ei lupaa käyttää puhelimen kuvia",
-          "Anna sovellukselle lupa käyttää puhelimen kuvia, mikäli haluat tallentaa kuvan puhelimeesi."
-        );
-      }
-      const photo = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-
-      if (!photo.canceled) {
-        console.log(photo);
-        const fileName = photo.assets[0].uri.split("/").pop();
-        console.log(photo);
-
-        const uploadResp = await uploadToStorage(
-          photo.assets[0].uri,
-          fileName,
-          (value) => console.log(value)
-        );
-
-        console.log(uploadResp);
-
-        const photoUrl = uploadResp.downloadUrl;
-        const photoName = uploadResp.metadata.fullPath;
-
-        handlePhoto(photoUrl, photoName);
-        setShowPhoto(true);
-      }
-    } catch (error) {
-      Alert.alert("Error Uploading Image " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const deletePhoto = () => {
     const photoName = recipeData.photoName;
     let imageRef = ref(fbStorage, photoName);
@@ -262,9 +201,6 @@ export default function AddRecipe({ route, ...props }) {
       .then(() => {
         if (route.params) {
           props.navigation.setParams({ photoUrl: "", photoName: "" });
-        }
-        if (showPhoto) {
-          setShowPhoto(false);
         }
         setRecipeData({ ...recipeData, photo: "", photoName: "" });
       })
@@ -312,14 +248,26 @@ export default function AddRecipe({ route, ...props }) {
                 <Text style={{ color: Colors.primary, fontSize: 20 }}>*</Text>
               </View>
               {!showInput ? (
-                <TouchableOpacity style={styles.addIngredientButton} onPress={() => setShowInput(true)}>
-                  <Ionicons name="add-circle" size={36} color="#47A73E" />
+                <TouchableOpacity
+                  style={styles.addIngredientButton}
+                  onPress={() => setShowInput(true)}
+                >
+                  <Ionicons
+                    name="add-circle"
+                    size={36}
+                    color={Colors.secondary}
+                  />
                 </TouchableOpacity>
               ) : (
                 <>
-                  <Ionicons style={styles.addIngredientButton} name="add-circle" size={36} color="#8B8B8B" />
+                  <Ionicons
+                    style={styles.addIngredientButton}
+                    name="add-circle"
+                    size={36}
+                    color={Colors.grey}
+                  />
                   <TextInput
-                    placeholder="Enter ingredient"
+                    placeholder="Lisää ainesosa ja määrä, esim. 400 g perunoita..."
                     style={styles.input}
                     value={newIngredient}
                     onChangeText={(text) => setNewIngredient(text)}
@@ -329,17 +277,14 @@ export default function AddRecipe({ route, ...props }) {
                 </>
               )}
               {tempIngredients.map((item, index) => (
-                <View 
-                style={styles.ingredient}
-                key={index}>
+                <View style={styles.ingredient} key={index}>
                   <Text>{item}</Text>
-                  <TouchableOpacity
-                  onPress={() => deleteItem(index)}>
-                  <Ionicons
-                        name="trash-sharp"
-                        size={24}
-                        color={Colors.grey}
-                      />
+                  <TouchableOpacity onPress={() => deleteItem(index)}>
+                    <Ionicons
+                      name="trash-sharp"
+                      size={24}
+                      color={Colors.grey}
+                    />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -347,69 +292,85 @@ export default function AddRecipe({ route, ...props }) {
 
             <View style={styles.section}>
               <View style={styles.headerRequired}>
-                <Text style={styles.header}>Ohjeet</Text>
+                <Text style={styles.header}>Työvaiheet</Text>
                 <Text style={{ color: Colors.primary, fontSize: 20 }}>*</Text>
               </View>
-              <TextInput
-                style={[styles.input, styles.multilineInput]}
-                placeholder="Lisää ohjeet"
-                multiline
-                onChangeText={(text) =>
-                  setRecipeData({ ...recipeData, instructions: text })
-                }
-              ></TextInput>
+              {!showStepInput ? (
+                <TouchableOpacity
+                  style={styles.addIngredientButton}
+                  onPress={() => setShowStepInput(true)}
+                >
+                  <Ionicons
+                    name="add-circle"
+                    size={36}
+                    color={Colors.secondary}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <>
+                  <Ionicons
+                    style={styles.addIngredientButton}
+                    name="add-circle"
+                    size={36}
+                    color={Colors.grey}
+                  />
+                  <TextInput
+                    placeholder="Lisää työvaihe, esim. Keitä perunat..."
+                    style={styles.input}
+                    value={newStep}
+                    onChangeText={(text) => setNewStep(text)}
+                    onSubmitEditing={() => addInstructionStep()}
+                    returnKeyType="done"
+                  />
+                </>
+              )}
+              {tempSteps.map((item, index) => (
+                <View style={styles.ingredient} key={index}>
+                  <Text>{item}</Text>
+                  <TouchableOpacity onPress={() => deleteStep(index)}>
+                    <Ionicons
+                      name="trash-sharp"
+                      size={24}
+                      color={Colors.grey}
+                    />
+                  </TouchableOpacity>
+                </View>
+              ))}
             </View>
-
             <View style={styles.section}>
-              <Text style={styles.header}>Lisää kuva</Text>
-              <View style={styles.sectionButtons}>
-                <ButtonWithIcon
-                  onPress={() => {
-                    selectPicture();
-                  }}
-                  icon={"picture"}
-                  width={140}
-                  color={Colors.grey}
-                  title="Valitse"
-                />
-                <ButtonWithIcon
-                  onPress={() => {
-                    navigation.navigate("CameraScreen");
-                  }}
-                  icon={"camera"}
-                  width={140}
-                  color={Colors.secondary}
-                  title="Ota kuva"
-                />
+              <Text style={styles.header}>Kuva</Text>
+              <View style={{ marginLeft: 12 }}>
+                {route.params?.photoUrl ? (
+                  <ButtonWithIcon
+                    onPress={() => {
+                      navigation.navigate("PhotoScreen");
+                    }}
+                    icon={"sync"}
+                    width={120}
+                    color={Colors.grey}
+                    title="Vaihda"
+                  />
+                ) : (
+                  <ButtonWithIcon
+                    onPress={() => {
+                      navigation.navigate("PhotoScreen");
+                    }}
+                    icon={"plus"}
+                    width={140}
+                    color={Colors.secondary}
+                    title="Lisää kuva"
+                  />
+                )}
               </View>
 
               {route.params?.photoUrl && (
-                <View style={styles.section}>
+                <View style={{ ...styles.section, marginTop: 24 }}>
                   <Image
                     style={styles.recipeImage}
                     source={{ uri: route.params.photoUrl }}
                     onLoad={() =>
                       handlePhoto(route.params.photoUrl, route.params.photoName)
                     }
-                  />
-                  <View style={styles.trashContainer}>
-                    <TouchableOpacity onPress={() => deletePhoto()}>
-                      <Ionicons
-                        name="trash-sharp"
-                        size={24}
-                        color={Colors.grey}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-
-              {loading && <ActivityIndicator size="large" animating={true} />}
-              {showPhoto && (
-                <View style={styles.section}>
-                  <Image
-                    style={styles.recipeImage}
-                    source={{ uri: recipeData.photo }}
                   />
                   <View style={styles.trashContainer}>
                     <TouchableOpacity onPress={() => deletePhoto()}>
@@ -721,13 +682,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
-  addIngredientButton:{
-    marginLeft: 10,
+  addIngredientButton: {
+    marginLeft: 12,
   },
-  ingredient:{
-    flexDirection: 'row',
+  ingredient: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     marginLeft: 12,
     marginRight: 12,
     marginTop: 4,

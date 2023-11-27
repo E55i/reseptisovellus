@@ -18,7 +18,7 @@ import {
   ref,
   uploadBytesResumable,
   getDownloadURL,
-  deleteObject, 
+  deleteObject,
 } from "firebase/storage";
 
 const firebaseConfig = {
@@ -36,6 +36,36 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore();
 const fbStorage = getStorage();
+
+const uploadToStorage = async (uri, name, onProgress) => {
+  const fetchResponse = await fetch(uri);
+  const theBlob = await fetchResponse.blob();
+  const imageRef = ref(getStorage(), `images/${name}`);
+  const uploadTask = uploadBytesResumable(imageRef, theBlob);
+
+  return new Promise((resolve, reject) => {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        onProgress && onProgress(progress);
+      },
+      (error) => {
+        // Handle unsuccessful uploads
+        console.log(error);
+        reject(error);
+      },
+      async () => {
+        const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve({
+          downloadUrl,
+          metadata: uploadTask.snapshot.metadata,
+        });
+      }
+    );
+  });
+};
 
 export {
   auth,
@@ -55,5 +85,6 @@ export {
   ref,
   uploadBytesResumable,
   getDownloadURL,
-  deleteObject
+  deleteObject,
+  uploadToStorage,
 };
