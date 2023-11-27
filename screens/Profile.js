@@ -131,6 +131,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginVertical: 5,
+    borderColor: 'green',
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.22,
@@ -152,15 +154,16 @@ const styles = StyleSheet.create({
   customButton: {
     borderWidth: 1,
     borderColor: 'orange',
-    borderRadius: 4,
+    borderRadius: 10,
     padding: 10,
     backgroundColor: 'orange',
     flex: 1,
-    marginHorizontal: 5
+    marginHorizontal: 5,
   },
   buttonText: {
     color: 'white',
     textAlign: 'center',
+    fontWeight: 'bold',
   },
 });
 

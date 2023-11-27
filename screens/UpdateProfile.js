@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Text, Platform, Alert } from 'react-native';
 import GoBackAppBar from '../components/GoBackAppBar';
 import { getAuth } from 'firebase/auth';
 import { getDatabase, ref, onValue, set } from 'firebase/database';
-//import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker'; 
 
 const UpdateProfile = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -46,9 +46,27 @@ const UpdateProfile = ({ navigation }) => {
     }
   }, [user, database]);
 
+  const validateName = (name, fieldName) => {
+    if (name.length > 20) {
+      Alert.alert('Virhe', `${fieldName} ei voi olla yli 20 merkkiä pitkä.`);
+      return false;
+    }
+
+    if (!/^[a-zA-ZäöüÄÖÜß ]+$/.test(name)) {
+      Alert.alert('Virhe', `${fieldName} voi sisältää vain kirjaimia.`);
+      return false;
+    }
+
+    return true;
+  };
+
   const handleUpdateProfile = () => {
-    if (!username || !firstName || !lastName || !birthDate || !address /* || !preferences || !favorites || !allergies */) {
-      alert('Täytä kaikki pakolliset kentät.');
+    if (!username || !firstName || !lastName || !birthDate || !address) {
+      Alert.alert('Virhe', 'Täytä kaikki pakolliset kentät.');
+      return;
+    }
+
+    if (!validateName(firstName, "Etunimi") || !validateName(lastName, "Sukunimi")) {
       return;
     }
 
@@ -80,19 +98,17 @@ const UpdateProfile = ({ navigation }) => {
 
   const onChangeBirthDate = (event, selectedDate) => {
     const currentDate = selectedDate || birthDate;
-    setShowDatePicker(false);
+    setShowDatePicker(Platform.OS === 'ios'); 
     setBirthDate(currentDate);
-  };
-
-  const showDatepicker = () => {
-    setShowDatePicker(true);
   };
 
   return (
     <View style={styles.fullScreenContainer}>
-      <ScrollView style={styles.container}>
-        <GoBackAppBar backgroundColor="orange" navigation={navigation} />
-  
+      <GoBackAppBar backgroundColor="orange" navigation={navigation} />
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+      >
         <TextInput 
           placeholder="Käyttäjänimi" 
           onChangeText={setUsername} 
@@ -125,7 +141,7 @@ const UpdateProfile = ({ navigation }) => {
           onFocus={() => setAddress('')}
         />
   
-        {/* Commented Input Fields */}
+        {/* Uncomment and use these fields if needed */}
         {/* <TextInput 
           placeholder="Mieltymykset" 
           onChangeText={setPreferences} 
@@ -174,32 +190,33 @@ const UpdateProfile = ({ navigation }) => {
           onFocus={() => setPremium('')} 
         /> */}
   
-  <View style={styles.datePickerContainer}>
-          <TouchableOpacity
-            style={styles.customButton}
-      onPress={()=>{/*showDatepicker*/}}
-          >
-            <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/*showDatePicker && (
+        {/* DateTimePicker Trigger Button */}
+        <TouchableOpacity
+          style={styles.customButton}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
+        </TouchableOpacity>
+  
+        {/* DateTimePicker Component */}
+        {showDatePicker && (
           <DateTimePicker
             testID="dateTimePicker"
             value={birthDate}
             mode="date"
-            display="default"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={onChangeBirthDate}
           />
-        )*/}
-
+        )}
+  
+        {/* Update Profile Button */}
         <TouchableOpacity
           style={styles.customButton}
           onPress={handleUpdateProfile}
         >
           <Text style={styles.customButtonText}>Päivitä Profiili</Text>
         </TouchableOpacity>
-
+  
       </ScrollView>
     </View>
   );
@@ -212,14 +229,18 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 16,
+    padding: 14,
+  },
+  contentContainer: {
+    justifyContent: 'flex-end',
+    flexGrow: 1,
   },
   input: {
-    marginBottom: 8,
-    padding: 8,
+    marginBottom: 10,
+    padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
+    borderColor: 'green',
+    borderRadius: 10,
   },
   datePickerContainer: {
     marginBottom: 8,
@@ -232,14 +253,14 @@ const styles = StyleSheet.create({
   customButton: {
     backgroundColor: 'orange',
     borderColor: 'orange',
-    borderRadius: 4,
+    borderRadius: 10,
     padding: 10,
     alignItems: 'center',
+    marginBottom: 10,
   },
   customButtonText: {
     color: 'white',
     fontWeight: 'bold',
   },
 });
-
 export default UpdateProfile;
