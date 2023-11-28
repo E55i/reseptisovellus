@@ -1,27 +1,103 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Text, Platform, Alert } from 'react-native';
-import GoBackAppBar from '../components/GoBackAppBar';
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  Platform,
+  Alert,
+  ActivityIndicator,
+  Image,
+} from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { getDatabase, ref, onValue, set } from 'firebase/database';
-import DateTimePicker from '@react-native-community/datetimepicker'; 
+import DateTimePicker from '@react-native-community/datetimepicker';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadToStorage, deleteFromStorage } from '../components/FirebaseConfig';
+import ShowAlert from '../components/ShowAlert';
+import { Colors } from '../styles/Colors';
+import { useNavigation } from '@react-navigation/native';
+import GoBackAppBar from '../components/GoBackAppBar';
+import { FontAwesome5 } from '@expo/vector-icons';
 
-const UpdateProfile = ({ navigation }) => {
+const UpdateProfile = () => {
   const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [birthDate, setBirthDate] = useState(new Date());
   const [address, setAddress] = useState('');
-  // const [preferences, setPreferences] = useState('');
-  // const [favorites, setFavorites] = useState('');
-  // const [allergies, setAllergies] = useState('');
-  // const [privateDetails, setPrivateDetails] = useState('');
-  // const [publicDetails, setPublicDetails] = useState('');
-  // const [premium, setPremium] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [profilePictureUri, setProfilePictureUri] = useState('');
+  const [bio, setBio] = useState('');
 
   const auth = getAuth();
   const database = getDatabase();
   const user = auth.currentUser;
+
+  const navigation = useNavigation();
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (status !== 'granted') {
+      ShowAlert(
+        'Ei lupaa käyttää kameraa',
+        'Anna sovellukselle lupa käyttää puhelimen kameraa, mikäli haluat ottaa kuvan.'
+      );
+      return;
+    }
+
+    const cameraResp = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      quality: 1,
+      aspect: [1, 1],
+    });
+
+    if (!cameraResp.canceled) {
+      setLoading(true);
+      const { assets } = cameraResp;
+      const uri = assets[0].uri;
+      const fileName = uri.split('/').pop();
+      const uploadResp = await uploadToStorage(uri, 'profile_images/' + fileName);
+
+      setProfilePictureUri(uploadResp.downloadUrl);
+      setLoading(false);
+    }
+  };
+
+  const selectPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      ShowAlert(
+        'Ei lupaa käyttää puhelimen kuvia',
+        'Anna sovellukselle lupa käyttää puhelimen kuvia, mikäli haluat lisätä kuvan puhelimestasi.'
+      );
+      return;
+    }
+
+    const libraryResp = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      aspect: [1, 1],
+    });
+
+    if (!libraryResp.canceled) {
+      setLoading(true);
+      const { assets } = libraryResp;
+      const uri = assets[0].uri;
+      const fileName = uri.split('/').pop();
+
+      const uploadResp = await uploadToStorage(uri, 'profile_images/' + fileName);
+      setProfilePictureUri(uploadResp.downloadUrl);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -32,15 +108,11 @@ const UpdateProfile = ({ navigation }) => {
           setUsername(data.username || '');
           setFirstName(data.firstName || '');
           setLastName(data.lastName || '');
-          const dbDate = data.birthDate ? new Date(data.birthDate) : new Date();
-          setBirthDate(dbDate);
+          setBirthDate(data.birthDate ? new Date(data.birthDate) : new Date());
           setAddress(data.address || '');
-          // setPreferences(data.preferences || '');
-          // setFavorites(data.favorites || '');
-          // setAllergies(data.allergies || '');
-          // setPrivateDetails(data.privateDetails || '');
-          // setPublicDetails(data.publicDetails || '');
-          // setPremium(data.premium || '');
+          setProfilePictureUri(data.profilePicture || '');
+          setUsername(data.username || '');
+          setBio(data.bio || '');
         }
       });
     }
@@ -60,13 +132,68 @@ const UpdateProfile = ({ navigation }) => {
     return true;
   };
 
+  const handleDeleteProfilePicture = async () => {
+    if (!profilePictureUri) {
+      return;
+    }
+
+    Alert.alert(
+      'Poista profiilikuva',
+      'Haluatko varmasti poistaa profiilikuvan?',
+      [
+        {
+          text: 'Peruuta',
+          style: 'cancel',
+        },
+        {
+          text: 'Poista',
+          onPress: () => confirmDeleteProfilePicture(),
+          style: 'destructive',
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const confirmDeleteProfilePicture = async () => {
+    try {
+      await deleteFromStorage(profilePictureUri);
+      setProfilePictureUri('');
+    } catch (error) {
+      console.error('Error deleting profile picture:', error);
+      ShowAlert('Virhe', 'Profiilikuvan poistaminen epäonnistui.');
+    }
+  };
+
+  const onChangeBirthDate = (event, selectedDate) => {
+    const currentDate = selectedDate || birthDate;
+    setShowDatePicker(Platform.OS === 'ios');
+  
+    // Check if the date is in the future
+    if (currentDate > new Date()) {
+      Alert.alert('Virhe', 'Syntymäaika ei voi olla tulevaisuudessa.');
+      return;
+    }
+  
+    // Check if the date indicates an age over 120 years
+    const maxAgeDate = new Date();
+    maxAgeDate.setFullYear(maxAgeDate.getFullYear() - 120);
+    if (currentDate < maxAgeDate) {
+      Alert.alert('Virhe', 'Syötetty ikä ylittää sovelluksen asettamat rajoitukset. Tarkistathan ikäsi uudelleen.');
+      return;
+    }
+  
+    setBirthDate(currentDate);
+  };
+  
+
   const handleUpdateProfile = () => {
-    if (!username || !firstName || !lastName || !birthDate || !address) {
+    if (!username || !firstName || !lastName || !birthDate || !address || !bio) {
       Alert.alert('Virhe', 'Täytä kaikki pakolliset kentät.');
       return;
     }
 
-    if (!validateName(firstName, "Etunimi") || !validateName(lastName, "Sukunimi")) {
+    if (!validateName(firstName, 'Etunimi') || !validateName(lastName, 'Sukunimi')) {
       return;
     }
 
@@ -78,127 +205,99 @@ const UpdateProfile = ({ navigation }) => {
         lastName,
         birthDate: birthDate.toISOString().split('T')[0],
         address,
-        // preferences,
-        // favorites,
-        // allergies,
-        // privateDetails,
-        // publicDetails,
-        // premium,
+        profilePicture: profilePictureUri,
+        bio,
       })
-      .then(() => {
-        navigation.navigate('Welcome');
-      })
-      .catch((error) => {
-        console.error('Profiilin päivitys epäonnistui:', error);
-      });
-    } else {
-      console.error('Käyttäjä ei ole kirjautunut sisään');
+        .then(() => {
+          navigation.navigate('Profile', { profilePictureUri });
+        })
+        .catch((error) => {
+          console.error('Profiilin päivitys epäonnistui:', error);
+        });
     }
-  };
-
-  const onChangeBirthDate = (event, selectedDate) => {
-    const currentDate = selectedDate || birthDate;
-    setShowDatePicker(Platform.OS === 'ios'); 
-    setBirthDate(currentDate);
   };
 
   return (
     <View style={styles.fullScreenContainer}>
       <GoBackAppBar backgroundColor="orange" navigation={navigation} />
-      <ScrollView 
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
-      >
-        <TextInput 
-          placeholder="Käyttäjänimi" 
-          onChangeText={setUsername} 
-          value={username} 
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+
+        <View style={styles.profileImageContainer}>
+          {profilePictureUri ? (
+            <>
+              <Image source={{ uri: profilePictureUri }} style={styles.profileImage} />
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDeleteProfilePicture()}
+              >
+                <FontAwesome5 name="trash" size={24} color="grey" />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Text style={styles.noImageText}>Ei profiilikuvaa</Text>
+          )}
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
+            <Text style={styles.photoButtonText}>Ota profiilikuva</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.photoButton} onPress={selectPhoto}>
+            <Text style={styles.photoButtonText}>Valitse profiilikuva</Text>
+          </TouchableOpacity>
+        </View>
+        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
+        <Text style={styles.bioLabel}>Bio:</Text>
+        <TextInput
+          placeholder="Kerro jotain itsetäsi"
+          onChangeText={setBio}
+          value={bio}
+          style={styles.bioInput}
+          onFocus={() => setBio('')}
+        />
+        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
+        <Text style={styles.label}>Käyttäjänimi:</Text>
+        <TextInput
+          placeholder="Kirjoita uusi Käyttäjänimesi"
+          onChangeText={setUsername}
+          value={username}
           style={styles.input}
           onFocus={() => setUsername('')}
         />
-  
-        <TextInput 
-          placeholder="Etunimi" 
-          onChangeText={setFirstName} 
-          value={firstName} 
+        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
+        <Text style={styles.label}>Etunimi:</Text>
+        <TextInput
+          placeholder="Kirjoita etunimesi"
+          onChangeText={setFirstName}
+          value={firstName}
           style={styles.input}
           onFocus={() => setFirstName('')}
         />
-  
-        <TextInput 
-          placeholder="Sukunimi" 
-          onChangeText={setLastName} 
-          value={lastName} 
+        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
+        <Text style={styles.label}>Sukunimi:</Text>
+        <TextInput
+          placeholder="Kirjoita sukunimesi"
+          onChangeText={setLastName}
+          value={lastName}
           style={styles.input}
           onFocus={() => setLastName('')}
         />
-  
-        <TextInput 
-          placeholder="Osoite" 
-          onChangeText={setAddress} 
-          value={address} 
+        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
+        <Text style={styles.label}>Osoite:</Text>
+        <TextInput
+          placeholder="Kirjoita osoite muodossa: Katunimi ja numero, postinumero ja -toimipaikka. "
+          onChangeText={setAddress}
+          value={address}
           style={styles.input}
           onFocus={() => setAddress('')}
         />
-  
-        {/* Uncomment and use these fields if needed */}
-        {/* <TextInput 
-          placeholder="Mieltymykset" 
-          onChangeText={setPreferences} 
-          value={preferences} 
-          style={styles.input} 
-          onFocus={() => setPreferences('')} 
-        /> */}
-  
-        {/* <TextInput 
-          placeholder="Suosikit" 
-          onChangeText={setFavorites} 
-          value={favorites} 
-          style={styles.input} 
-          onFocus={() => setFavorites('')} 
-        /> */}
-  
-        {/* <TextInput 
-          placeholder="Allergiat" 
-          onChangeText={setAllergies} 
-          value={allergies} 
-          style={styles.input} 
-          onFocus={() => setAllergies('')} 
-        /> */}
-  
-        {/* <TextInput 
-          placeholder="Yksityiskohdat" 
-          onChangeText={setPrivateDetails} 
-          value={privateDetails} 
-          style={styles.input} 
-          onFocus={() => setPrivateDetails('')} 
-        /> */}
-  
-        {/* <TextInput 
-          placeholder="Julkinen Profiili" 
-          onChangeText={setPublicDetails} 
-          value={publicDetails} 
-          style={styles.input} 
-          onFocus={() => setPublicDetails('')} 
-        /> */}
-  
-        {/* <TextInput 
-          placeholder="Premium" 
-          onChangeText={setPremium} 
-          value={premium} 
-          style={styles.input} 
-          onFocus={() => setPremium('')} 
-        /> */}
-  
-        {/* DateTimePicker Trigger Button */}
-        <TouchableOpacity
-          style={styles.customButton}
-          onPress={() => setShowDatePicker(true)}
-        >
+
+
+        <TouchableOpacity style={styles.customButton} onPress={() => setShowDatePicker(true)}>
           <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
         </TouchableOpacity>
-  
-        {/* DateTimePicker Component */}
+
         {showDatePicker && (
           <DateTimePicker
             testID="dateTimePicker"
@@ -208,15 +307,14 @@ const UpdateProfile = ({ navigation }) => {
             onChange={onChangeBirthDate}
           />
         )}
-  
-        {/* Update Profile Button */}
-        <TouchableOpacity
-          style={styles.customButton}
-          onPress={handleUpdateProfile}
-        >
-          <Text style={styles.customButtonText}>Päivitä Profiili</Text>
+
+        {loading && (
+          <ActivityIndicator size="large" color={Colors.primary} />
+        )}
+
+        <TouchableOpacity style={styles.customButton} onPress={handleUpdateProfile}>
+          <Text style={styles.customButtonText}>Päivitä profiili</Text>
         </TouchableOpacity>
-  
       </ScrollView>
     </View>
   );
@@ -232,8 +330,39 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   contentContainer: {
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     flexGrow: 1,
+  },
+  profileImageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+  },
+  noImageText: {
+    fontSize: 16,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginBottom: 10,
+  },
+  photoButton: {
+    backgroundColor: Colors.primary,
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  photoButtonText: {
+    color: 'white',
+    fontSize: 16,
   },
   input: {
     marginBottom: 10,
@@ -241,14 +370,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'green',
     borderRadius: 10,
-  },
-  datePickerContainer: {
-    marginBottom: 8,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
-    justifyContent: 'center',
   },
   customButton: {
     backgroundColor: 'orange',
@@ -260,7 +381,42 @@ const styles = StyleSheet.create({
   },
   customButtonText: {
     color: 'white',
+    fontSize: 16,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    zIndex: 1,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 5,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'grey', 
+  },
+  bioLabel: {
+    fontSize: 18,
     fontWeight: 'bold',
+    color: 'black',
+    marginBottom: 5,
+  },
+  bioInput: {
+    marginBottom: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'green',
+    borderRadius: 10,
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'black', // Dark text color
+    marginBottom: 5,
   },
 });
+
 export default UpdateProfile;

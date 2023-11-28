@@ -1,3 +1,4 @@
+// FirebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {
@@ -67,6 +68,17 @@ const uploadToStorage = async (uri, name, onProgress) => {
   });
 };
 
+const deleteFromStorage = async (fileUrl) => {
+  try {
+    const storageRef = ref(fbStorage, fileUrl);
+    await deleteObject(storageRef);
+    console.log(`File deleted successfully: ${fileUrl}`);
+  } catch (error) {
+    console.error(`Error deleting file: ${fileUrl}`, error);
+    throw error;
+  }
+};
+
 export {
   auth,
   signInWithEmailAndPassword,
@@ -87,4 +99,5 @@ export {
   getDownloadURL,
   deleteObject,
   uploadToStorage,
+  deleteFromStorage,
 };
