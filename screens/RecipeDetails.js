@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import {
   auth,
@@ -14,6 +15,10 @@ import {
   collection,
   addDoc,
   serverTimestamp,
+  query,
+  onSnapshot,
+  orderBy,
+  where,
 } from "../components/FirebaseConfig";
 import GoBackAppBar from "../components/GoBackAppBar";
 import RatingBar from "../components/RatingBar";
@@ -22,15 +27,52 @@ import Rating from "../components/Rating";
 import CommentBox from "../components/CommentBox";
 import { Ionicons } from "@expo/vector-icons";
 import ShowAlert from "../components/ShowAlert";
+import { convertTimeStampToJS } from "../helpers/Functions";
 
 export default function RecipeDetails({ route }) {
   const [newComment, setNewComment] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [comments, setComments] = useState([]);
   const { recipeId, backgroundColor } = route.params;
   const navigation = useNavigation();
- 
+
+  useEffect(() => {
+    // Fetch comments from Firestore
+    (() => {
+      try {
+        onSnapshot(
+          query(
+            collection(firestore, "feedbacks"),
+            where("recipeId", "==", recipeId),
+            orderBy("created", "desc")
+          ),
+          (querySnapshot) => {
+            const tempComments = [];
+            querySnapshot.forEach((doc) => {
+              const commentObject = {
+                id: doc.id,
+                comment: doc.data().comment,
+                created: convertTimeStampToJS(doc.data().created),
+                likes: doc.data().like,
+                commentUserId: doc.data().userId,
+              };
+              tempComments.push(commentObject);
+            });
+            setComments(tempComments);
+            setIsLoading(false);
+            console.log("Kommentit haettu!");
+          }
+        );
+      } catch (error) {
+        setIsLoading(false);
+        console.log("Virhe kommenttien haussa: " + error);
+      }
+    })();
+  }, []);
+  // Save new comment to Firestore
   const saveComment = async () => {
     if (!newComment) {
-      ShowAlert("","Kirjoita kommenttiin teksitä ennen kuin lähetät sen");
+      ShowAlert("", "Kirjoita kommenttiin teksitä ennen kuin lähetät sen");
       return;
     } else {
       const docRef = await addDoc(collection(firestore, "feedbacks"), {
@@ -41,12 +83,16 @@ export default function RecipeDetails({ route }) {
         like: "",
       }).catch((error) => {
         console.log(error);
-        ShowAlert("Virhe","Virhe kommentin lisäyksessä. Yritä myöhemmin uudelleen.")
+        ShowAlert(
+          "Virhe",
+          "Virhe kommentin lisäyksessä. Yritä myöhemmin uudelleen."
+        );
       });
       console.log("Kommentti lisätty");
       setNewComment("");
     }
   };
+  console.log(comments);
   return (
     <View style={styles.container}>
       <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />
@@ -54,44 +100,60 @@ export default function RecipeDetails({ route }) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-      <ScrollView>
-        <Text>Tämä on recipeId: {recipeId}</Text>
-        {/*Tähän tulee tietokannasta haettu rating, 
+        <ScrollView>
+          {/* Add an image component for the recipe here */}
+          <Text>Tämä on recipeId: {recipeId}</Text>
+
+          {/*Tähän tulee tietokannasta haettu rating, 
         nyt näön vuoksi laitettu jokin arvosana, jotta komponentti näkyy näytöllä*/}
-        <Rating rating={3.2} />
-        {/* Add an image component for the recipe here */}
-        <Text>Ingredients:</Text>
-        <Text>Ingredient 1, Ingredient 2, ...</Text>
-        <Text>Instructions:</Text>
-        <Text>Step-by-step instructions go here...</Text>
-        <RatingBar recipeId={recipeId} />
-        <Text>Comments:</Text>
-        <CommentBox />
-        {/* List comments here */}
-        <View style={styles.newComment}>
-          <TextInput
-            style={styles.input}
-            placeholder="Kirjoita kommentti..."
-            multiline={true}
-            value={newComment}
-            returnKeyType="send"
-            onSubmitEditing={() => {
-              if (newComment !== "") {
-                saveComment(newComment);
-              }
-            }}
-            onChangeText={(text) => setNewComment(text)}
-          />
-          <TouchableOpacity
-            style={styles.sendButton}
-            onPress={() => {
-                saveComment()
-            }}
-          >
-            <Ionicons name="send-sharp" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+          <Rating rating={4.5} />
+          <Text>Ingredients:</Text>
+          <Text>Ingredient 1, Ingredient 2, ...</Text>
+          <Text>Instructions:</Text>
+          <Text>Step-by-step instructions go here...</Text>
+          <RatingBar recipeId={recipeId} />
+          {/* List comments here */}
+          {isLoading && (
+            <ActivityIndicator
+              style={styles.activityIndicator}
+              size="large"
+              color="#47A73E"
+            />
+          )}
+          {!isLoading &&
+            comments.map((item) => (
+              <CommentBox
+                key={item.id}
+                comment={item.comment}
+                created={item.created}
+                likes={item.likes}
+                commentUserId={item.commentUserId}
+              />
+            ))}
+          <View style={styles.newComment}>
+            <TextInput
+              style={styles.input}
+              placeholder="Kirjoita kommentti..."
+              multiline={true}
+              value={newComment}
+              returnKeyType="send"
+              onSubmitEditing={() => {
+                if (newComment !== "") {
+                  saveComment(newComment);
+                }
+              }}
+              onChangeText={(text) => setNewComment(text)}
+            />
+            <TouchableOpacity
+              style={styles.sendButton}
+              onPress={() => {
+                saveComment();
+              }}
+            >
+              <Ionicons name="send-sharp" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
@@ -111,7 +173,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 6,
-    height: 'auto',
+    height: "auto",
     marginRight: 8,
     borderWidth: 1,
     paddingLeft: 10,
