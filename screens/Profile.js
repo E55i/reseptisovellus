@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Image,
+} from 'react-native';
 import GoBackAppBar from '../components/GoBackAppBar';
 import { getAuth, signOut } from 'firebase/auth';
-import { getDatabase, ref, get } from 'firebase/database';
+import { getDatabase, ref, onValue } from 'firebase/database';
+import { useRoute } from '@react-navigation/native';
 
 const Profile = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const route = useRoute();
   const auth = getAuth();
   const database = getDatabase();
   const user = auth.currentUser;
@@ -15,21 +26,21 @@ const Profile = ({ navigation }) => {
   useEffect(() => {
     if (user) {
       const userProfileRef = ref(database, 'users/' + user.uid);
-      get(userProfileRef)
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            setUserData(snapshot.val());
-          } else {
-            console.error('Käyttäjätietoja ei löydy');
-          }
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error('Virhe haettaessa käyttäjätietoja:', error);
-          setLoading(false);
-        });
+      const unsubscribe = onValue(userProfileRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setUserData(snapshot.val());
+        } else {
+          console.error('Käyttäjätietoja ei löydy');
+        }
+        setLoading(false);
+      }, (error) => {
+        console.error('Virhe haettaessa käyttäjätietoja:', error);
+        setLoading(false);
+      });
+
+      return () => unsubscribe();
     }
-  }, [user]);
+  }, [user, database]);
 
   const navigateToUpdateProfile = () => {
     navigation.navigate('UpdateProfile');
@@ -37,33 +48,31 @@ const Profile = ({ navigation }) => {
 
   const confirmLogout = () => {
     Alert.alert(
-      "Kirjaudu ulos", 
-      "Oletko varma että haluat kirjautua ulos?",
+      'Kirjaudu ulos',
+      'Oletko varma että haluat kirjautua ulos?',
       [
         {
-          text: "Ei",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
+          text: 'Ei',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
         },
-        { 
-          text: "Kyllä", 
-          onPress: () => handleLogout()
-        }
+        {
+          text: 'Kyllä',
+          onPress: () => handleLogout(),
+        },
       ]
     );
   };
 
   const handleLogout = () => {
-    signOut(auth).then(() => {
-      navigation.navigate('Login'); 
-    }).catch((error) => {
-      console.error('Logout error:', error);
-    });
+    signOut(auth)
+      .then(() => {
+        navigation.navigate('Login');
+      })
+      .catch((error) => {
+        console.error('Logout error:', error);
+      });
   };
-
-  if (loading) {
-    return <ActivityIndicator size="large" />;
-  }
 
   const renderUserData = (key, value) => {
     const fieldMappings = {
@@ -72,12 +81,6 @@ const Profile = ({ navigation }) => {
       lastName: 'Sukunimi',
       birthDate: 'Syntymäaika',
       address: 'Osoite',
-      // preferences: 'Mieltymykset',
-      // favorites: 'Suosikit',
-      // allergies: 'Allergiat',
-      // privateDetails: 'Yksityiskohdat',
-      // publicDetails: 'Julkinen Profiili',
-      // premium: 'Premium',
     };
 
     if (fieldMappings[key] && value) {
@@ -91,10 +94,19 @@ const Profile = ({ navigation }) => {
     return null;
   };
 
+  if (loading) {
+    return <ActivityIndicator size="large" />;
+  }
+
   return (
     <View style={styles.container}>
       <GoBackAppBar backgroundColor="orange" navigation={navigation} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.profileImageContainer}>
+          {userData?.profilePicture ? (
+            <Image source={{ uri: userData.profilePicture }} style={styles.profileImage} />
+          ) : null}
+        </View>
         {userData ? (
           <View style={styles.userData}>
             {Object.entries(userData).map(([key, value]) => renderUserData(key, value))}
@@ -104,7 +116,7 @@ const Profile = ({ navigation }) => {
         )}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.customButton} onPress={navigateToUpdateProfile}>
-            <Text style={styles.buttonText}>Muokkaa</Text>
+            <Text style={styles.buttonText}>Muokkaa tietoja</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.customButton} onPress={confirmLogout}>
             <Text style={styles.buttonText}>Kirjaudu ulos</Text>
@@ -121,7 +133,18 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: 'white',
+  },
+  profileImageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 275,
+    height: 275,
+    borderRadius: 137.5,
   },
   userData: {
     padding: 10,
@@ -163,7 +186,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     textAlign: 'center',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
