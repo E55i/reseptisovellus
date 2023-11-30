@@ -13,7 +13,9 @@ import {
   auth,
   firestore,
   collection,
+  doc,
   addDoc,
+  getDoc,
   serverTimestamp,
   query,
   onSnapshot,
@@ -33,12 +35,41 @@ export default function RecipeDetails({ route }) {
   const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [comments, setComments] = useState([]);
+  const [title, setTitle] = useState("")
+  const [recipeRating, setRecipeRating] = useState(0);
+
   const { recipeId, backgroundColor } = route.params;
   const navigation = useNavigation();
 
   useEffect(() => {
-    // Fetch comments from Firestore
-    (() => {
+    // Fetch recipes details from Firestore recipes collection
+    const fetchRecipeData = async () => {
+      try {
+        const recipeDocSnapshot = await getDoc(doc(firestore, "recipes", recipeId));
+
+        if (recipeDocSnapshot.exists()) {
+          const recipeData = recipeDocSnapshot.data();
+          console.log("Recipe Data:", recipeData);
+          setTitle(recipeData.recipeData.title)
+          setRecipeRating(recipeData.recipeData.rating[0]/recipeData.recipeData.rating[1])
+          setIsLoading(false);
+          console.log("Rating:"+ recipeRating);
+        } else {
+          console.log("Reseptin tietoja ei löydy");
+          navigation.navigate('Welcome')
+          ShowAlert("Hups!","Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä.")
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Virhe reseptin hakemisessa:", error);
+        navigation.navigate('Welcome')
+        ShowAlert("Hups!","Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä.")
+        setIsLoading(false);
+      }
+    };
+
+    // Fetch comments from Firestore feedbacks collection
+    const fetchComments = async () => {
       try {
         onSnapshot(
           query(
@@ -67,8 +98,11 @@ export default function RecipeDetails({ route }) {
         setIsLoading(false);
         console.log("Virhe kommenttien haussa: " + error);
       }
-    })();
-  }, []);
+    }
+  fetchRecipeData();
+  fetchComments ();
+}, []);
+
   // Save new comment to Firestore
   const saveComment = async () => {
     if (!newComment) {
@@ -94,7 +128,7 @@ export default function RecipeDetails({ route }) {
   };
   console.log(comments);
   return (
-    <View style={styles.container}>
+    <View style={styles.firstContainer}>
       <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -102,11 +136,17 @@ export default function RecipeDetails({ route }) {
       >
         <ScrollView>
           {/* Add an image component for the recipe here */}
-          <Text>Tämä on recipeId: {recipeId}</Text>
-
+          {isLoading && (
+            <ActivityIndicator
+              style={styles.activityIndicator}
+              size="large"
+              color="#47A73E"
+            />
+          )}
+          {!isLoading && (<Text>{title}</Text>)}
           {/*Tähän tulee tietokannasta haettu rating, 
         nyt näön vuoksi laitettu jokin arvosana, jotta komponentti näkyy näytöllä*/}
-          <Rating rating={4.5} />
+          <Rating rating={recipeRating} />
           <Text>Ingredients:</Text>
           <Text>Ingredient 1, Ingredient 2, ...</Text>
           <Text>Instructions:</Text>
@@ -160,9 +200,14 @@ export default function RecipeDetails({ route }) {
 }
 
 const styles = StyleSheet.create({
+  firstContainer: {
+    backgroundColor: "#FFFFFF",
+    flex: 1,
+  },
   container: {
     backgroundColor: "#FFFFFF",
     flex: 1,
+    paddingBottom:48,
   },
   newComment: {
     flexDirection: "row",
