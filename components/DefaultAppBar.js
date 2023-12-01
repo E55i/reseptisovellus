@@ -9,9 +9,10 @@ export default function GoBackAppBar({ backgroundColor, navigation }) {
       backgroundColor={backgroundColor}
       leading={props => (
         <IconButton
-          icon={<Ionicons name="arrow-back" size={28} color="white" />}
-          onPress={() => navigation.goBack()}
-          {...props}
+        style={styles.addIcon}
+        icon={<Ionicons name="add" size={28} color="white" />}
+        onPress={()=>{navigation.navigate('AddRecipe')}}
+        {...props}
         />
       )}
       title={props => (

@@ -58,6 +58,7 @@ export default function AddRecipe({ route, ...props }) {
     rating: [],
     userRated: [],
     healthyRating: 0,
+    premium: "0",
   });
 
   const [selectedCourses, setSelectedCourses] = useState([]);
