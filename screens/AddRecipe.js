@@ -279,7 +279,7 @@ export default function AddRecipe({ route, ...props }) {
               )}
               {tempIngredients.map((item, index) => (
                 <View style={styles.ingredient} key={index}>
-                  <Text>{item}</Text>
+                  <Text style={styles.ingredientAndStepsText}>{item}</Text>
                   <TouchableOpacity onPress={() => deleteItem(index)}>
                     <Ionicons
                       name="trash-sharp"
@@ -327,7 +327,7 @@ export default function AddRecipe({ route, ...props }) {
               )}
               {tempSteps.map((item, index) => (
                 <View style={styles.ingredient} key={index}>
-                  <Text>{item}</Text>
+                  <Text style={styles.ingredientAndStepsText}>{item}</Text>
                   <TouchableOpacity onPress={() => deleteStep(index)}>
                     <Ionicons
                       name="trash-sharp"
@@ -666,6 +666,7 @@ const styles = StyleSheet.create({
     height: 44,
     marginLeft: 12,
     marginRight: 12,
+    marginBottom: 12,
     borderWidth: 1,
     paddingLeft: 10,
     paddingRight: 10,
@@ -685,6 +686,10 @@ const styles = StyleSheet.create({
   },
   addIngredientButton: {
     marginLeft: 12,
+    marginBottom: 12,
+  },
+  ingredientAndStepsText: {
+    width: "90%",
   },
   ingredient: {
     flexDirection: "row",

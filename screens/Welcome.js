@@ -27,7 +27,7 @@ import { getDatabase, ref, get } from "firebase/database";
 export default function Welcome({ backgroundColor, navigation }) {
   const [recipes, setRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isPremium, setIsPremium] = useState("0");
+  const [isUserPremium, setIsUserPremium] = useState("0");
   const [category, setCategory] = useState("");
   const [userName, setUserName] = useState("");
 
@@ -43,7 +43,7 @@ export default function Welcome({ backgroundColor, navigation }) {
           if (snapshot.exists()) {
             const userData = snapshot.val();
             setUserName(userData.firstName); 
-            setIsPremium(userData.premium); 
+            setIsUserPremium(userData.premium); 
           }
         })
         .catch((error) => {
@@ -63,6 +63,7 @@ export default function Welcome({ backgroundColor, navigation }) {
             cookTime: doc.data().recipeData.cookTime,
             prepTime: doc.data().recipeData.prepTime,
             photo: doc.data().recipeData.photo,
+            premium: doc.data().recipeData.premium,
             //recipeRating is the average of the given ratings
             recipeRating: doc.data().recipeData.rating[1]
               ? doc.data().recipeData.rating[0] /
@@ -130,6 +131,7 @@ export default function Welcome({ backgroundColor, navigation }) {
               cookTime: doc.data().recipeData.cookTime,
               prepTime: doc.data().recipeData.prepTime,
               photo: doc.data().recipeData.photo,
+              premium: doc.data().recipeData.premium,
             };
             tempRecipes.push(recipeObject);
           });
@@ -165,7 +167,7 @@ export default function Welcome({ backgroundColor, navigation }) {
         {/* Categories component */}
         <Categories setCategory={setCategory} />
         {/* Show add if user is not premium */}
-        {isPremium === "0" && (
+        {isUserPremium === "0" && (
           <Image
             style={styles.add}
             source={require("../assets/mainos_vaaka.png")}
@@ -200,6 +202,7 @@ export default function Welcome({ backgroundColor, navigation }) {
                 cookTime={item.cookTime}
                 servingSize={item.servingSize}
                 backgroundColor={backgroundColor}
+                premium={item.premium}
               />
             ))}
              {/* If category is selected show recipes based on the category */}
@@ -215,6 +218,7 @@ export default function Welcome({ backgroundColor, navigation }) {
               cookTime={item.cookTime}
               servingSize={item.servingSize}
               backgroundColor={backgroundColor}
+              premium={item.premium}
             />
           ))}
       </ScrollView>

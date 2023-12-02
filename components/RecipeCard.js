@@ -2,8 +2,9 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { SimpleLineIcons } from '@expo/vector-icons';
 
-export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToImage, recipeName, cookTime, servingSize}) {
+export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToImage, recipeName, cookTime, servingSize, premium}) {
 
   const navigation = useNavigation();
   return (
@@ -22,7 +23,10 @@ export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToIm
         />
       )}
       <View style={styles.recipeCardText}>
+        <View style={styles.nameAndIcon}>
         <Text style={styles.recipeName}>{recipeName}</Text>
+        {premium === "1" && <SimpleLineIcons name="diamond" size={18} color="#00C0D6" />}
+        </View>
         <View style={styles.recipeInfo}>
           <View style={styles.servingSize}>
         <MaterialCommunityIcons
@@ -61,7 +65,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: "#47A73E",
     borderWidth: 2,
-    padding: 8,
+    padding: 6,
     marginLeft: 16,
     marginRight: 16,
     marginTop: 16,
@@ -84,6 +88,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 4,
     marginBottom: 12,
+  },
+  nameAndIcon:{
+    flexDirection: "row",
+    alignItems: "center",
   },
   recipeInfo: {
     flexDirection: "column",
