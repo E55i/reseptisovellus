@@ -37,6 +37,10 @@ const StartScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate('StartScreen')}>
             <Text style={styles.buttonText}>Kirjaudu sisään</Text>
           </TouchableOpacity>
+          {/* Linkki tietosuojaselosteeseen */}
+          <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')}>
+            <Text style={styles.privacyPolicyLink}>Tietosuojaseloste</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -81,6 +85,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  privacyPolicyLink: {
+    color: '#007bff',
+    marginTop: 20,
+    textDecorationLine: 'underline',
   },
   optionButton: {
     padding: 15,
