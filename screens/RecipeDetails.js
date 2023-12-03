@@ -58,7 +58,6 @@ export default function RecipeDetails({ route }) {
       })
       .catch((error) => {
         ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
-        console.error("Error fetching user data:", error);
       });
 
     // Fetch recipes details from Firestore recipes collection
@@ -77,7 +76,6 @@ export default function RecipeDetails({ route }) {
             recipeData.recipeData.rating[0] / recipeData.recipeData.rating[1]
           );
           setIsLoading(false);
-          console.log("Rating:" + recipeRating);
         } else {
           console.log("Reseptin tietoja ei löydy");
           navigation.navigate("Welcome");
@@ -88,7 +86,6 @@ export default function RecipeDetails({ route }) {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error("Virhe reseptin hakemisessa:", error);
         navigation.navigate("Welcome");
         ShowAlert(
           "Hups!",
@@ -121,12 +118,10 @@ export default function RecipeDetails({ route }) {
             });
             setComments(tempComments);
             setIsLoading(false);
-            console.log("Kommentit haettu!");
           }
         );
       } catch (error) {
         setIsLoading(false);
-        console.log("Virhe kommenttien haussa: " + error);
       }
     };
     fetchRecipeData();
@@ -146,20 +141,14 @@ export default function RecipeDetails({ route }) {
         comment: newComment,
         like: [],
       }).catch((error) => {
-        console.log(error);
         ShowAlert(
           "Virhe",
           "Virhe kommentin lisäyksessä. Yritä myöhemmin uudelleen."
         );
       });
-      console.log("Kommentti lisätty");
       setNewComment("");
     }
   };
-  console.log(comments);
-  console.log(
-    premiumRecipe + "premiumRecipe" + isUserPremium + "isUserPremium"
-  );
   return (
     <View style={styles.firstContainer}>
       <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />

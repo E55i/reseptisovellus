@@ -14,15 +14,15 @@ import {
   onSnapshot,
   orderBy,
   where,
-  doc,
 } from "../components/FirebaseConfig";
 import React, { useEffect, useState } from "react";
 import DefaultAppBar from "../components/DefaultAppBar";
 import Categories from "../components/Categories";
 import RecipeCard from "../components/RecipeCard";
 import ShowAlert from "../components/ShowAlert";
-import { getDatabase, ref, get } from "firebase/database";
+import { getDatabase, ref, onValue } from "firebase/database";
 import { SimpleLineIcons } from "@expo/vector-icons";
+
 
 export default function Welcome({ backgroundColor, navigation }) {
   const [recipes, setRecipes] = useState([]);
@@ -32,25 +32,20 @@ export default function Welcome({ backgroundColor, navigation }) {
   const [userName, setUserName] = useState("");
 
   
-// Fetch user data and top recipes when component is shown first time
 useEffect(() => {
   if (auth.currentUser) {
 
     const database = getDatabase();
     // Fetch user data
     const userRef = ref(database, "users/" + auth.currentUser.uid);
-    get(userRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          setUserName(userData.firstName); 
-          setIsUserPremium(userData.premium); 
-        }
-      })
-      .catch((error) => {
-        ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
-        console.error("Error fetching user data:", error);
-      });
+    // Fetch firstName and premium from database and update information if it change
+    const unsubscribeUser = onValue(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        setUserName(userData.firstName);
+        setIsUserPremium(userData.premium);
+      }
+    });
   
   // Fetch top recipes
   try {
@@ -141,15 +136,11 @@ useEffect(() => {
           });
         } catch (error) {
           setIsLoading(false);
-          console.log("Virhe kategorioiden haussa: " + error);
         }
-      } else {
-        console.log("Kategoriaa ei ole valittu");
-      }
+      } 
     })();
   }, [category]);
 
-  console.log(recipes);
   return (
     <View style={styles.container}>
       {/* show appbar top of the screen */}
