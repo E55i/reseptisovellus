@@ -341,17 +341,7 @@ export default function AddRecipe({ route, ...props }) {
             <View style={styles.section}>
               <Text style={styles.header}>Kuva</Text>
               <View style={{ marginLeft: 12 }}>
-                {route.params?.photoUrl ? (
-                  <ButtonWithIcon
-                    onPress={() => {
-                      navigation.navigate("PhotoScreen");
-                    }}
-                    icon={"sync"}
-                    width={120}
-                    color={Colors.grey}
-                    title="Vaihda"
-                  />
-                ) : (
+                {!route.params?.photoUrl && (
                   <ButtonWithIcon
                     onPress={() => {
                       navigation.navigate("PhotoScreen");
@@ -373,13 +363,22 @@ export default function AddRecipe({ route, ...props }) {
                       handlePhoto(route.params.photoUrl, route.params.photoName)
                     }
                   />
-                  <View style={styles.trashContainer}>
+                  <View style={styles.roundContainer}>
                     <TouchableOpacity onPress={() => deletePhoto()}>
                       <Ionicons
                         name="trash-sharp"
                         size={24}
                         color={Colors.grey}
                       />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{ ...styles.roundContainer, top: "15%" }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        navigation.navigate("PhotoScreen");
+                      }}
+                    >
+                      <Ionicons name="sync" size={24} color={Colors.grey} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -700,7 +699,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 4,
   },
-  trashContainer: {
+  roundContainer: {
     justifyContent: "center",
     alignItems: "center",
     width: 40,
@@ -712,7 +711,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: "0%",
     bottom: 0,
-    left: "85%",
+    left: "90%",
     right: 0,
   },
   recipeImage: {

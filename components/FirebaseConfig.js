@@ -21,6 +21,7 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
+import { getDatabase, ref as realtimeRef, get } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_APIKEY,
@@ -35,8 +36,28 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
+const realtime = getDatabase();
 const firestore = getFirestore();
 const fbStorage = getStorage();
+
+// Fetch user data
+const getUser = async () => {
+  const userRef = realtimeRef(realtime, "users/" + auth.currentUser.uid);
+  try {
+    const snapshot = await get(userRef);
+
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
+      return userData;
+    } else {
+      console.log("User data not found.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
+  }
+};
 
 const uploadToStorage = async (uri, name, onProgress) => {
   const fetchResponse = await fetch(uri);
@@ -95,9 +116,8 @@ export {
   orderBy,
   where,
   ref,
-  uploadBytesResumable,
-  getDownloadURL,
   deleteObject,
   uploadToStorage,
   deleteFromStorage,
+  getUser,
 };

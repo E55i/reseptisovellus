@@ -1,6 +1,11 @@
 import { Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import React from "react";
-import { AntDesign } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Ionicons,
+  MaterialCommunityIcons,
+  Feather,
+} from "@expo/vector-icons";
 
 export default function ButtonWithIcon({ icon, color, width, title, onPress }) {
   return (
@@ -23,6 +28,7 @@ export function RoundButtonWithIcon({
   iconColor,
   color,
   borderColor,
+  library = "ant",
   onPress,
 }) {
   return (
@@ -34,7 +40,22 @@ export function RoundButtonWithIcon({
       }}
       onPress={onPress}
     >
-      <AntDesign name={icon} size={32} color={iconColor || "#fff"} />
+      {library == "ant" && (
+        <AntDesign name={icon} size={24} color={iconColor || "#fff"} />
+      )}
+      {library == "iconicons" && (
+        <Ionicons name={icon} size={24} color={iconColor || "#fff"} />
+      )}
+      {library == "materialcom" && (
+        <MaterialCommunityIcons
+          name={icon}
+          size={24}
+          color={iconColor || "#fff"}
+        />
+      )}
+      {library == "feather" && (
+        <Feather name={icon} size={24} color={iconColor || "#fff"} />
+      )}
     </TouchableOpacity>
   );
 }
@@ -93,9 +114,9 @@ const styles = StyleSheet.create({
   roundButton: {
     justifyContent: "center",
     alignItems: "center",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     borderWidth: 2,
     ...Platform.select({
       android: {

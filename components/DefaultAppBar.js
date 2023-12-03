@@ -1,33 +1,35 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
-import { AppBar, HStack, IconButton } from '@react-native-material/core';
-import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import React from "react";
+import { StyleSheet } from "react-native";
+import { AppBar, HStack, IconButton } from "@react-native-material/core";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 
 export default function GoBackAppBar({ backgroundColor, navigation }) {
   return (
     <AppBar
       backgroundColor={backgroundColor}
-      leading={props => (
+      leading={(props) => (
         <IconButton
-        style={styles.addIcon}
-        icon={<Ionicons name="add" size={28} color="white" />}
-        onPress={()=>{navigation.navigate('AddRecipe')}}
-        {...props}
+          style={styles.addIcon}
+          icon={<Ionicons name="add" size={28} color="white" />}
+          onPress={() => {
+            navigation.navigate("AddRecipe");
+          }}
+          {...props}
         />
       )}
-      title={props => (
+      title={(props) => (
         <HStack style={styles.centerContainer}>
           <IconButton
             icon={<Ionicons name="search-outline" size={28} color="white" />}
-            onPress={() => navigation.navigate('SearchRecipe')}
+            onPress={() => navigation.navigate("SearchRecipe")}
             {...props}
           />
         </HStack>
       )}
-      trailing={props=>(
+      trailing={(props) => (
         <IconButton
           icon={<FontAwesome name="user-circle-o" size={28} color="white" />}
-        onPress={()=> navigation.navigate('Profile')}
+          onPress={() => navigation.navigate("Profile")}
           {...props}
         />
       )}
@@ -37,7 +39,7 @@ export default function GoBackAppBar({ backgroundColor, navigation }) {
 const styles = StyleSheet.create({
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
