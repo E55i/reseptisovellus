@@ -14,7 +14,7 @@ import {
   onSnapshot,
   orderBy,
   where,
-  fbStorage,
+  doc,
 } from "../components/FirebaseConfig";
 import React, { useEffect, useState } from "react";
 import DefaultAppBar from "../components/DefaultAppBar";
@@ -22,135 +22,133 @@ import Categories from "../components/Categories";
 import RecipeCard from "../components/RecipeCard";
 import ShowAlert from "../components/ShowAlert";
 import { getDatabase, ref, get } from "firebase/database";
-
+import { SimpleLineIcons } from "@expo/vector-icons";
 
 export default function Welcome({ backgroundColor, navigation }) {
   const [recipes, setRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUserPremium, setIsUserPremium] = useState("0");
+  const [isUserPremium, setIsUserPremium] = useState("");
   const [category, setCategory] = useState("");
   const [userName, setUserName] = useState("");
 
-  // Fetch user data and top recipes when component is shown first time
-  useEffect(() => {
-    if (auth.currentUser) {
-
-      const database = getDatabase();
-      // Fetch user data
-      const userRef = ref(database, "users/" + auth.currentUser.uid);
-      get(userRef)
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            const userData = snapshot.val();
-            setUserName(userData.firstName); 
-            setIsUserPremium(userData.premium); 
-          }
-        })
-        .catch((error) => {
-          ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
-          console.error("Error fetching user data:", error);
-        });
-    
-    // Fetch top recipes
-    try {
-      onSnapshot(query(collection(firestore, "recipes")), (querySnapshot) => {
-        const tempRecipes = [];
-        querySnapshot.forEach((doc) => {
-          const recipeObject = {
-            id: doc.id,
-            title: doc.data().recipeData.title,
-            servingSize: doc.data().recipeData.servingSize,
-            cookTime: doc.data().recipeData.cookTime,
-            prepTime: doc.data().recipeData.prepTime,
-            photo: doc.data().recipeData.photo,
-            premium: doc.data().recipeData.premium,
-            //recipeRating is the average of the given ratings
-            recipeRating: doc.data().recipeData.rating[1]
-              ? doc.data().recipeData.rating[0] /
-                doc.data().recipeData.rating[1]
-              : 0,
-          };
-          tempRecipes.push(recipeObject);
-        });
-        tempRecipes.sort((a, b) => b.recipeRating - a.recipeRating);
-        setRecipes(tempRecipes);
-        setIsLoading(false);
-      });
-    } catch (error) {
-      setIsLoading(false);
-      ShowAlert(
-        "Virhe",
-        "Reseptien hakemisessa ilmeni virhe. Yritä myöhemmin uudelleen."
-      );
-    }
-  } else {
-    navigation.replace("Login");
-  }
   
-  }, []);
+// Fetch user data and top recipes when component is shown first time
+useEffect(() => {
+  if (auth.currentUser) {
+
+    const database = getDatabase();
+    // Fetch user data
+    const userRef = ref(database, "users/" + auth.currentUser.uid);
+    get(userRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          setUserName(userData.firstName); 
+          setIsUserPremium(userData.premium); 
+        }
+      })
+      .catch((error) => {
+        ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
+        console.error("Error fetching user data:", error);
+      });
+  
+  // Fetch top recipes
+  try {
+    onSnapshot(query(collection(firestore, "recipes")), (querySnapshot) => {
+      const tempRecipes = [];
+      querySnapshot.forEach((doc) => {
+        const recipeObject = {
+          id: doc.id,
+          title: doc.data().recipeData.title,
+          servingSize: doc.data().recipeData.servingSize,
+          cookTime: doc.data().recipeData.cookTime,
+          prepTime: doc.data().recipeData.prepTime,
+          photo: doc.data().recipeData.photo,
+          premium: doc.data().recipeData.premium,
+          //recipeRating is the average of the given ratings
+          recipeRating: doc.data().recipeData.rating[1]
+            ? doc.data().recipeData.rating[0] /
+              doc.data().recipeData.rating[1]
+            : 0,
+        };
+        tempRecipes.push(recipeObject);
+      });
+      tempRecipes.sort((a, b) => b.recipeRating - a.recipeRating);
+      setRecipes(tempRecipes);
+      setIsLoading(false);
+    });
+  } catch (error) {
+    setIsLoading(false);
+    ShowAlert(
+      "Virhe",
+      "Reseptien hakemisessa ilmeni virhe. Yritä myöhemmin uudelleen."
+    );
+  }
+} else {
+  navigation.replace("Login");
+}
+
+}, []);
 
   // Fetch recipes based on category change
   useEffect(() => {
     (() => {
-        if(category !== ""){
-          try{
+      if (category !== "") {
+        try {
           let q;
-        if (category === "Jälkiruoka" || category === "Aamiainen") {
-          q = query(
-            collection(firestore, "recipes"),
-            where("recipeData.course", "array-contains", category),
-            orderBy("created", "desc")
-          );
-        } else if (category === "Kanaruoat") {
-          q = query(
-            collection(firestore, "recipes"),
-            where("recipeData.mainIngredient", "array-contains", "Broileri"),
-            orderBy("created", "desc")
-          );
-        } else if (category === "Kasvisruoat") {
-          q = query(
-            collection(firestore, "recipes"),
-            where("recipeData.diet", "array-contains", "Kasvis"),
-            orderBy("created", "desc")
-          );
-        } else if (category === "Nopeat") {
-          q = query(
-            collection(firestore, "recipes"),
-            where("recipeData.cookTime", "==", "alle 15 min"),
-            where("recipeData.prepTime", "==", "alle 15 min"),
-            orderBy("created", "desc")
-          );
-        }
-        onSnapshot(q, (querySnapshot) => {
-          const tempRecipes = [];
-          querySnapshot.forEach((doc) => {
-            const recipeObject = {
-              id: doc.id,
-              title: doc.data().recipeData.title,
-              servingSize: doc.data().recipeData.servingSize,
-              cookTime: doc.data().recipeData.cookTime,
-              prepTime: doc.data().recipeData.prepTime,
-              photo: doc.data().recipeData.photo,
-              premium: doc.data().recipeData.premium,
-            };
-            tempRecipes.push(recipeObject);
+          if (category === "Jälkiruoka" || category === "Aamiainen") {
+            q = query(
+              collection(firestore, "recipes"),
+              where("recipeData.course", "array-contains", category),
+              orderBy("created", "desc")
+            );
+          } else if (category === "Kanaruoat") {
+            q = query(
+              collection(firestore, "recipes"),
+              where("recipeData.mainIngredient", "array-contains", "Broileri"),
+              orderBy("created", "desc")
+            );
+          } else if (category === "Kasvisruoat") {
+            q = query(
+              collection(firestore, "recipes"),
+              where("recipeData.diet", "array-contains", "Kasvis"),
+              orderBy("created", "desc")
+            );
+          } else if (category === "Nopeat") {
+            q = query(
+              collection(firestore, "recipes"),
+              where("recipeData.cookTime", "==", "alle 15 min"),
+              where("recipeData.prepTime", "==", "alle 15 min"),
+              orderBy("created", "desc")
+            );
+          }
+          onSnapshot(q, (querySnapshot) => {
+            const tempRecipes = [];
+            querySnapshot.forEach((doc) => {
+              const recipeObject = {
+                id: doc.id,
+                title: doc.data().recipeData.title,
+                servingSize: doc.data().recipeData.servingSize,
+                cookTime: doc.data().recipeData.cookTime,
+                prepTime: doc.data().recipeData.prepTime,
+                photo: doc.data().recipeData.photo,
+                premium: doc.data().recipeData.premium,
+              };
+              tempRecipes.push(recipeObject);
+            });
+            setRecipes(tempRecipes);
+            setIsLoading(false);
           });
-          setRecipes(tempRecipes);
+        } catch (error) {
           setIsLoading(false);
-        });
-      } catch (error) {
-        setIsLoading(false);
-        console.log("Virhe kategorioiden haussa: " + error);
+          console.log("Virhe kategorioiden haussa: " + error);
+        }
+      } else {
+        console.log("Kategoriaa ei ole valittu");
       }
-        }
-        else {
-          console.log("Kategoriaa ei ole valittu")
-        }
-        
     })();
   }, [category]);
 
-  
   console.log(recipes);
   return (
     <View style={styles.container}>
@@ -160,20 +158,25 @@ export default function Welcome({ backgroundColor, navigation }) {
         navigation={navigation}
       />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.nameAndIcon}>
         <Text style={styles.welcomeText}>
           {userName ? `Tervetuloa ${userName}` : "Tervetuloa"}
-        </Text>        
+        </Text>
+        {isUserPremium === "1" && (
+          <SimpleLineIcons name="diamond" size={18} color="#00C0D6" />
+        )}
+        </View>
         <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
         {/* Categories component */}
         <Categories setCategory={setCategory} />
         {/* Show add if user is not premium */}
-        {isUserPremium === "0" && (
+        {isUserPremium !== "1" && (
           <Image
             style={styles.add}
             source={require("../assets/mainos_vaaka.png")}
           />
         )}
-         {/* Show text if no category selected */}
+        {/* Show text if no category selected */}
         {category === "" && (
           <Text style={styles.textFavourites}>
             Top 10 suosituimmat reseptit
@@ -187,7 +190,7 @@ export default function Welcome({ backgroundColor, navigation }) {
             color="#47A73E"
           />
         )}
-         {/* Show top 10 recipes when category is not choosed*/}
+        {/* Show top 10 recipes when category is not choosed*/}
         {!isLoading &&
           category === "" &&
           recipes
@@ -205,7 +208,7 @@ export default function Welcome({ backgroundColor, navigation }) {
                 premium={item.premium}
               />
             ))}
-             {/* If category is selected show recipes based on the category */}
+        {/* If category is selected show recipes based on the category */}
         {!isLoading &&
           category !== "" &&
           recipes.map((item) => (
@@ -241,8 +244,14 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingBottom: 60,
   },
+  nameAndIcon:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   welcomeText: {
     marginLeft: 8,
+    paddingRight: 8,
     marginTop: 20,
     marginBottom: 16,
     fontSize: 16,
