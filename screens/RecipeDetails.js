@@ -144,7 +144,7 @@ export default function RecipeDetails({ route }) {
         recipeId: recipeId,
         userId: auth.currentUser.uid,
         comment: newComment,
-        like: "",
+        like: [],
       }).catch((error) => {
         console.log(error);
         ShowAlert(
@@ -200,6 +200,7 @@ export default function RecipeDetails({ route }) {
                 comments.map((item) => (
                   <CommentBox
                     key={item.id}
+                    commentId={item.id}
                     comment={item.comment}
                     created={item.created}
                     likes={item.likes}

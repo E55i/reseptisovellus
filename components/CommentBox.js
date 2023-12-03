@@ -2,37 +2,88 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
 import { getDatabase, ref, get } from "firebase/database";
 import { AntDesign } from "@expo/vector-icons";
+import {
+  auth,
+  firestore,
+  collection,
+  doc,
+  getDoc,
+  updateDoc,
+} from "./FirebaseConfig";
 
-export default function CommentBox({ comment, created, likes, commentUserId }) {
-  // Tähän komponenttiin pitää lisätä tykkäyksen tallennus ja tykkäysmäärän päivitys kun sydäntä on klikattu
-  const [isClicked, setIsClicked] = useState(false);
+export default function CommentBox({ comment, created, likes, commentUserId, commentId }) {
+  const [isLiked, setIsLiked] = useState(false)
   const [userName, setUserName] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
 
+  const numberOfLikes = likes.length;
+  const likedUserIds = likes;
+
   useEffect(() => {
-    //hae profiilikuva ja username
+    // Check if user has already liked this comment
+    if(likedUserIds.includes(auth.currentUser.uid)){
+      setIsLiked(true);
+    }
+    // Get the username and profile picture of the user who wrote the comment
     const database = getDatabase();
-    // Fetch user data
     const userRef = ref(database, "users/" + commentUserId);
     get(userRef)
       .then((snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
           setUserName(userData.username);
-          setPhotoUrl(userData.photo);
+          setPhotoUrl(userData.profilePicture);
         }
       })
       .catch((error) => {
-        ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
         console.error("Error fetching user data:", error);
       });
+
   }, []);
 
-  const handleLike = () => {
-    if (isClicked) {
-      setIsClicked(false);
-    } else {
-      setIsClicked(true);
+  // Save info that user has liked the comment to database
+  const saveLike = async () => {
+    setIsLiked(true);
+    try {   
+      const recipeDoc = doc(collection(firestore, "feedbacks"), commentId);
+      const feedbackSnapshot = await getDoc(recipeDoc);
+      const currentData = feedbackSnapshot.data();
+ 
+      const currentLikes =
+        currentData.like && Array.isArray(currentData.like)
+          ? currentData.like.slice()
+          : [];
+          currentLikes.push(auth.currentUser.uid)
+
+      await updateDoc(recipeDoc, {
+        "like": currentLikes,
+      });
+
+    } catch (error) {
+      console.error("Error saving like:", error);
+    }
+  };
+
+  // Delete info that user has liked the comment from database
+  deleteLike = async () => {
+    setIsLiked(false);
+    try {
+      const recipeDoc = doc(collection(firestore, "feedbacks"), commentId);
+      const feedbackSnapshot = await getDoc(recipeDoc);
+      const currentData = feedbackSnapshot.data();
+  
+      const currentLikes = currentData.like && Array.isArray(currentData.like)
+        ? currentData.like.slice()
+        : [];
+  
+      const updatedLikes = currentLikes.filter(userId => userId !== auth.currentUser.uid);
+  
+      await updateDoc(recipeDoc, {
+        "like": updatedLikes,
+      });
+  
+    } catch (error) {
+      console.error("Error deleting like:", error);
     }
   };
 
@@ -54,14 +105,16 @@ export default function CommentBox({ comment, created, likes, commentUserId }) {
       {/*Tee tähän päivämäärän näyttäminen */}
       <Text style={styles.commentText}>{comment}</Text>
       <View style={styles.likeInfo}>
-        <Text style={styles.likerText}>{likes ? likes : "0"} tykkää tästä</Text>
-        <TouchableOpacity onPress={handleLike}>
-          {isClicked ? (
+        <Text style={styles.likerText}>{numberOfLikes ? numberOfLikes : "0"} tykkää tästä</Text>
+          {isLiked ? (
+            <TouchableOpacity onPress={deleteLike}>
             <AntDesign name="heart" size={30} color="#FF573A" />
+            </TouchableOpacity>
           ) : (
+            <TouchableOpacity onPress={saveLike}>
             <AntDesign name="hearto" size={30} color="#8B8B8B" />
+            </TouchableOpacity>
           )}
-        </TouchableOpacity>
       </View>
     </View>
   );
