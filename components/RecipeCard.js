@@ -24,10 +24,8 @@ export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToIm
         />
       )}
       <View style={styles.recipeCardText}>
-        <View style={styles.nameAndIcon}>
         <Text style={styles.recipeName}>{recipeName}</Text>
-        {premium === "1" && <SimpleLineIcons name="diamond" size={18} color="#00C0D6" />}
-        </View>
+        <View style={styles.recipeInfoAndDiamond}>
         <View style={styles.recipeInfo}>
           <View style={styles.servingSize}>
         <MaterialCommunityIcons
@@ -53,6 +51,10 @@ export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToIm
           />
           <Text style={styles.infoText}>{cookTime}</Text>
           </View>
+        </View>
+        <View style={styles.diamond}> 
+        {premium === "1" && <SimpleLineIcons name="diamond" size={18} color="#00C0D6" />}
+        </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -101,10 +103,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 4,
     marginBottom: 12,
+    maxWidth: "80%",
+    alignSelf:'center'
   },
-  nameAndIcon:{
+  diamond:{
+    marginLeft: 10,
+    marginRght: "auto",
+    justifyContent: "center",
+  },
+  recipeInfoAndDiamond:{
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center", // Align items vertically within the container
+    justifyContent: "space-between", // Add space between the recipe info and the diamond
+    maxWidth: "80%",
   },
   recipeInfo: {
     flexDirection: "column",
