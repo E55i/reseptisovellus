@@ -2,11 +2,12 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import { AppBar, HStack, IconButton } from "@react-native-material/core";
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Colors } from "../styles/Colors";
 
-export default function GoBackAppBar({ backgroundColor, navigation }) {
+export default function GoBackAppBar({ navigation }) {
   return (
     <AppBar
-      backgroundColor={backgroundColor}
+      backgroundColor={Colors.primary}
       title={(props) => (
         <HStack style={styles.centerContainer}>
           <IconButton

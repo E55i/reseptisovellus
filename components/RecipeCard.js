@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { SimpleLineIcons } from '@expo/vector-icons';
+import { Colors } from "../styles/Colors";
 
 export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToImage, recipeName, cookTime, servingSize, premium}) {
 
@@ -63,12 +64,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexWrap: "wrap",
     borderRadius: 10,
-    borderColor: "#47A73E",
+    borderColor: Colors.secondary,
     borderWidth: 2,
     padding: 6,
     marginLeft: 16,
     marginRight: 16,
-    marginTop: 16,
+    marginTop: 14,
+    marginBottom: 4,
+    backgroundColor: 'white',
+    shadowColor: "#000000",
+    ...Platform.select({
+      android: {
+        elevation: 7,
+        overflow: "hidden",
+      },
+    }),
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   image: {
     width: 80,
