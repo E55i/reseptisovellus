@@ -4,12 +4,16 @@ import {
   collection,
   query,
   onSnapshot,
+  orderBy,
 } from "../components/FirebaseConfig";
 import { convertTimeStampToJS } from "../helpers/Functions";
 
 export default function GetRecipes({ setData }) {
   useEffect(() => {
-    const q = query(collection(firestore, "recipes"));
+    const q = query(
+      collection(firestore, "recipes"),
+      orderBy("recipeData.title", "asc")
+    );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const tempRecipes = [];
       querySnapshot.forEach((doc) => {
@@ -38,15 +42,6 @@ export default function GetRecipes({ setData }) {
           photo: doc.data().recipeData.photo,
         };
         tempRecipes.push(recipeObject);
-      });
-
-      // sort the recipes according to title
-      tempRecipes.sort((a, b) => {
-        const titleA = a.title.toLowerCase();
-        const titleB = b.title.toLowerCase();
-        if (titleA < titleB) return -1;
-        if (titleA > titleB) return 1;
-        return 0;
       });
 
       setData(tempRecipes);

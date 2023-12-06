@@ -5,9 +5,18 @@ import {
   Ionicons,
   MaterialCommunityIcons,
   Feather,
+  FontAwesome,
 } from "@expo/vector-icons";
 
-export default function ButtonWithIcon({ icon, color, width, title, onPress }) {
+export default function ButtonWithIcon({
+  icon,
+  color,
+  width,
+  title,
+  iconColor = "#fff",
+  library = "ant",
+  onPress,
+}) {
   return (
     <TouchableOpacity
       style={{
@@ -17,7 +26,12 @@ export default function ButtonWithIcon({ icon, color, width, title, onPress }) {
       }}
       onPress={onPress}
     >
-      <AntDesign name={icon} size={24} color="#fff" />
+      {library == "ant" && (
+        <AntDesign name={icon} size={24} color={iconColor} />
+      )}
+      {library == "materialcom" && (
+        <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
+      )}
       <Text style={styles.text}>{title}</Text>
     </TouchableOpacity>
   );
@@ -25,9 +39,9 @@ export default function ButtonWithIcon({ icon, color, width, title, onPress }) {
 
 export function RoundButtonWithIcon({
   icon,
-  iconColor,
+  iconColor = "#fff",
   color,
-  borderColor,
+  borderColor = "transparent",
   library = "ant",
   onPress,
 }) {
@@ -36,25 +50,24 @@ export function RoundButtonWithIcon({
       style={{
         ...styles.roundButton,
         backgroundColor: color,
-        borderColor: borderColor || "transparent",
+        borderColor: borderColor,
       }}
       onPress={onPress}
     >
       {library == "ant" && (
-        <AntDesign name={icon} size={24} color={iconColor || "#fff"} />
+        <AntDesign name={icon} size={24} color={iconColor} />
       )}
       {library == "iconicons" && (
-        <Ionicons name={icon} size={24} color={iconColor || "#fff"} />
+        <Ionicons name={icon} size={24} color={iconColor} />
       )}
       {library == "materialcom" && (
-        <MaterialCommunityIcons
-          name={icon}
-          size={24}
-          color={iconColor || "#fff"}
-        />
+        <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
       )}
       {library == "feather" && (
-        <Feather name={icon} size={24} color={iconColor || "#fff"} />
+        <Feather name={icon} size={24} color={iconColor} />
+      )}
+      {library == "fontawesome" && (
+        <FontAwesome name={icon} size={24} color={iconColor} />
       )}
     </TouchableOpacity>
   );
