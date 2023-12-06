@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { SimpleLineIcons } from '@expo/vector-icons';
+import { Colors } from "../styles/Colors";
 
 export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToImage, recipeName, cookTime, servingSize, premium}) {
 
@@ -23,10 +24,8 @@ export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToIm
         />
       )}
       <View style={styles.recipeCardText}>
-        <View style={styles.nameAndIcon}>
         <Text style={styles.recipeName}>{recipeName}</Text>
-        {premium === "1" && <SimpleLineIcons name="diamond" size={18} color="#00C0D6" />}
-        </View>
+        <View style={styles.recipeInfoAndDiamond}>
         <View style={styles.recipeInfo}>
           <View style={styles.servingSize}>
         <MaterialCommunityIcons
@@ -53,6 +52,10 @@ export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToIm
           <Text style={styles.infoText}>{cookTime}</Text>
           </View>
         </View>
+        <View style={styles.diamond}> 
+        {premium === "1" && <SimpleLineIcons name="diamond" size={18} color="#00C0D6" />}
+        </View>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -63,12 +66,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexWrap: "wrap",
     borderRadius: 10,
-    borderColor: "#47A73E",
+    borderColor: Colors.secondary,
     borderWidth: 2,
     padding: 6,
     marginLeft: 16,
     marginRight: 16,
-    marginTop: 16,
+    marginTop: 14,
+    marginBottom: 4,
+    backgroundColor: 'white',
+    shadowColor: "#000000",
+    ...Platform.select({
+      android: {
+        elevation: 7,
+        overflow: "hidden",
+      },
+    }),
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   image: {
     width: 80,
@@ -88,10 +103,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 4,
     marginBottom: 12,
+    maxWidth: "80%",
+    alignSelf:'center'
   },
-  nameAndIcon:{
+  diamond:{
+    marginLeft: 10,
+    marginRght: "auto",
+    justifyContent: "center",
+  },
+  recipeInfoAndDiamond:{
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center", // Align items vertically within the container
+    justifyContent: "space-between", // Add space between the recipe info and the diamond
+    maxWidth: "80%",
   },
   recipeInfo: {
     flexDirection: "column",

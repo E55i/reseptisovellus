@@ -49,6 +49,7 @@ export default function GetOwnRecipes({
           rating: doc.data().recipeData.rating,
           healthyRating: doc.data().recipeData.healthyRating,
           comments: doc.data().recipeData.comments,
+          premium: doc.data().recipeData.premium
         };
         tempRecipes.push(recipeObject);
       });
