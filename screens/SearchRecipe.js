@@ -103,11 +103,13 @@ export default function SearchRecipe({ ...props }) {
         filters.some((selectedCourse) => {
           return item.course.includes(selectedCourse);
         });
+
       const mainIngredientMatch =
         filters.length === 0 ||
         filters.some((selectedMainIngredient) => {
           return item.mainIngredient.includes(selectedMainIngredient);
         });
+
       const dietMatch =
         filters.length === 0 ||
         filters.some((selectedDiet) => {
@@ -115,7 +117,6 @@ export default function SearchRecipe({ ...props }) {
         });
       return courseMatch || mainIngredientMatch || dietMatch;
     });
-
     setFilteredData(filtered);
   };
 
