@@ -83,6 +83,12 @@ const Profile = ({ navigation }) => {
       address: 'Osoite',
     };
 
+    if (key === 'birthDate' && value) {
+      const date = new Date(value);
+      const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+      value = formattedDate;
+    }
+
     if (fieldMappings[key] && value) {
       return (
         <View style={styles.dataBox} key={key}>
