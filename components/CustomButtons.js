@@ -7,6 +7,7 @@ import {
   Feather,
   FontAwesome,
 } from "@expo/vector-icons";
+import { Colors } from "../styles/Colors";
 
 export default function ButtonWithIcon({
   icon,
@@ -57,7 +58,7 @@ export function RoundButtonWithIcon({
       {library == "ant" && (
         <AntDesign name={icon} size={24} color={iconColor} />
       )}
-      {library == "iconicons" && (
+      {library == "ionicons" && (
         <Ionicons name={icon} size={24} color={iconColor} />
       )}
       {library == "materialcom" && (
@@ -90,6 +91,43 @@ export function SquareButtonWithIcon({
     >
       <TouchableOpacity onPress={onPress}>
         <AntDesign name={icon} size={80} color={iconColor || "#fff"} />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+export function IconButton({
+  icon,
+  iconColor = Colors.grey,
+  color = "transparent",
+  borderColor = "transparent",
+  library = "ant",
+  onPress,
+}) {
+  return (
+    <View
+      style={{
+        ...styles.iconButton,
+        backgroundColor: color,
+        borderColor: borderColor,
+      }}
+    >
+      <TouchableOpacity onPress={onPress}>
+        {library == "ant" && (
+          <AntDesign name={icon} size={24} color={iconColor} />
+        )}
+        {library == "ionicons" && (
+          <Ionicons name={icon} size={24} color={iconColor} />
+        )}
+        {library == "materialcom" && (
+          <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
+        )}
+        {library == "feather" && (
+          <Feather name={icon} size={24} color={iconColor} />
+        )}
+        {library == "fontawesome" && (
+          <FontAwesome name={icon} size={24} color={iconColor} />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -163,5 +201,13 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
       },
     }),
+  },
+  iconButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 2,
   },
 });

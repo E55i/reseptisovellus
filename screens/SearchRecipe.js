@@ -17,7 +17,7 @@ import GoBackAppBar from "../components/GoBackAppBar";
 import { getUser } from "../components/FirebaseConfig";
 import { Colors } from "../styles/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import GetRecipes from "../components/GetRecipes";
+import GetAllRecipes from "../components/GetRecipes";
 import ButtonWithIcon, {
   RoundButtonWithIcon,
 } from "../components/CustomButtons";
@@ -123,14 +123,14 @@ export default function SearchRecipe({ ...props }) {
   return (
     <>
       <GoBackAppBar {...props} />
-      <GetRecipes
+      <GetAllRecipes
         setData={(data) => {
           setData(data);
           setLoading(false);
         }}
       />
       {loading ? (
-        <ActivityIndicator size="large" animating={true} />
+        <ActivityIndicator size="large" animating={true} color={Colors.secondary}/>
       ) : (
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
