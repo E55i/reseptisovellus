@@ -8,7 +8,11 @@ import {
 } from "react-native";
 import { Colors } from "../styles/Colors";
 
-export default function CustomCheckBox({ options, selectedItems, onSelect }) {
+export default function CustomCheckBox({
+  options,
+  selectedItems = [],
+  onSelect,
+}) {
   const handleToggle = (item) => {
     const isSelected = selectedItems.includes(item);
     if (isSelected) {
@@ -27,7 +31,7 @@ export default function CustomCheckBox({ options, selectedItems, onSelect }) {
           onPress={() => handleToggle(item)}
         >
           <View style={styles.checkbox}>
-            {selectedItems.includes(item) && (
+            {selectedItems?.includes(item) && (
               <View style={styles.checkedCircle} />
             )}
           </View>

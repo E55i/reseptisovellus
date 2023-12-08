@@ -225,7 +225,7 @@ export default function AddRecipe({ route, ...props }) {
       >
         <ScrollView>
           <View style={styles.container}>
-            <View style={styles.sectionTitle}>
+            <View style={styles.title}>
               <Text style={{ fontSize: 28 }}>Lisää resepti</Text>
             </View>
 
@@ -629,11 +629,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
-  sectionTitle: {
+  title: {
     flex: 1,
     height: 72,
     marginTop: 20,
-    fontSize: 28,
     justifyContent: "center",
     alignItems: "center",
   },

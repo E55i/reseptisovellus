@@ -5,24 +5,64 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   FlatList,
+  Text,
+  Modal,
+  TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import RecipeCard from "../components/RecipeCard";
 import GoBackAppBar from "../components/GoBackAppBar";
 import { getUser } from "../components/FirebaseConfig";
 import { Colors } from "../styles/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import GetRecipes from "../components/GetRecipes";
-import { RoundButtonWithIcon } from "../components/CustomButtons";
+import GetAllRecipes from "../components/GetRecipes";
+import ButtonWithIcon, {
+  RoundButtonWithIcon,
+} from "../components/CustomButtons";
+import CustomCheckBox from "../components/CustomCheckBox";
 
 export default function SearchRecipe({ ...props }) {
   const [isPremium, setIsPremium] = useState("0");
   const [query, setQuery] = useState("");
   const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState();
+  const [filteredData, setFilteredData] = useState(data);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState([]);
+  const [showFilterList, setShowFilterList] = useState(false);
+
+  const courseOptions = [
+    "Aamiainen",
+    "Alkupala",
+    "Pääruoka",
+    "Jälkiruoka",
+    "Salaatti",
+    "Keitto",
+    "Lisuke",
+    "Juoma",
+  ];
+
+  const mainIngredientOptions = [
+    "Nauta",
+    "Sika",
+    "Makkara",
+    "Broileri",
+    "Kala",
+    "Äyriäiset",
+    "Kananmuna",
+    "Kasviproteiini",
+  ];
+
+  const dietOptions = [
+    "Kasvis",
+    "Vegaaninen",
+    "Gluteeniton",
+    "Laktoositon",
+    "Maidoton",
+    "Kananmunaton",
+    "Vähähiilihydraattinen",
+  ];
 
   // fetch the premium status of the user
   useEffect(() => {
@@ -44,45 +84,53 @@ export default function SearchRecipe({ ...props }) {
   const handleSearch = (text) => {
     setQuery(text);
     if (text.length > 2) {
-      const filtered = data.filter((item) =>
-        item.title.toLowerCase().includes(text.toLowerCase())
+      const filtered = data.filter(
+        (item) =>
+          item.title.toLowerCase().includes(text.toLowerCase()) ||
+          (item.incredients &&
+            item.incredients.some((incredient) => {
+              return incredient.toLowerCase().includes(text.toLowerCase());
+            }))
       );
       setFilteredData(filtered);
-      console.log(filteredData);
     }
   };
 
-  const filterSearchResults = (filter) => {
-    if (filter === "course") {
-      // filter by food course
-    } else if (filter === "servingSize") {
-      // filter by serving size
-    } else if (filter === "time") {
-      // filter by cooking time
-    } else if (filter === "diet") {
-      // filter by diet
-    } else if (filter === "liked") {
-      // filter by most liked recipes
-    } else if (filter === "rating") {
-      // filter by rating
-    }
-  };
+  const filterSearchResults = () => {
+    const filtered = filteredData.filter((item) => {
+      const courseMatch =
+        filters.length === 0 ||
+        filters.some((selectedCourse) => {
+          return item.course.includes(selectedCourse);
+        });
 
-  const showAllRecipes = () => {
-    setFilteredData(data);
+      const mainIngredientMatch =
+        filters.length === 0 ||
+        filters.some((selectedMainIngredient) => {
+          return item.mainIngredient.includes(selectedMainIngredient);
+        });
+
+      const dietMatch =
+        filters.length === 0 ||
+        filters.some((selectedDiet) => {
+          return item.diet.includes(selectedDiet);
+        });
+      return courseMatch || mainIngredientMatch || dietMatch;
+    });
+    setFilteredData(filtered);
   };
 
   return (
     <>
       <GoBackAppBar {...props} />
-      <GetRecipes
+      <GetAllRecipes
         setData={(data) => {
           setData(data);
           setLoading(false);
         }}
       />
       {loading ? (
-        <ActivityIndicator size="large" animating={true} />
+        <ActivityIndicator size="large" animating={true} color={Colors.secondary}/>
       ) : (
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -106,65 +154,123 @@ export default function SearchRecipe({ ...props }) {
                   value={query}
                   onChangeText={(text) => handleSearch(text)}
                 />
-                <TouchableOpacity
-                  style={styles.searchButton}
-                  onPress={() => console.log("search")}
-                >
-                  <Ionicons name="search-outline" size={28} color="#fff" />
-                </TouchableOpacity>
+                <View style={styles.searchIcon}>
+                  <Ionicons
+                    name="search-outline"
+                    size={28}
+                    color={Colors.grey}
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <View style={styles.filtersAndButtons}>
+                {filters.length > 0 && (
+                  <View style={styles.filtersList}>
+                    {filters.map((item, index) => (
+                      <Text style={styles.filterText} key={index}>
+                        {item}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+
+                <View style={styles.buttonRow}>
+                  <RoundButtonWithIcon
+                    icon="filter-outline"
+                    iconColor="#fff"
+                    color={Colors.secondary}
+                    library="materialcom"
+                    onPress={() => {
+                      setShowFilterList(true);
+                    }}
+                  />
+                  <RoundButtonWithIcon
+                    icon="filter-remove-outline"
+                    iconColor="#fff"
+                    color={Colors.grey}
+                    library="materialcom"
+                    onPress={() => {
+                      setFilteredData(data);
+                      setFilters([]);
+                    }}
+                  />
+                </View>
               </View>
 
-              <View style={styles.buttonRow}>
-                <RoundButtonWithIcon
-                  icon="food-apple-outline"
-                  iconColor="#fff"
-                  color={Colors.primary}
-                  library="materialcom"
-                  onPress={filterSearchResults("course")}
-                />
-                <RoundButtonWithIcon
-                  icon="account-group"
-                  iconColor="#fff"
-                  color={Colors.primary}
-                  library="materialcom"
-                  onPress={filterSearchResults("servingSize")}
-                />
-                <RoundButtonWithIcon
-                  icon="clock"
-                  iconColor="#fff"
-                  color={Colors.primary}
-                  library="feather"
-                  onPress={filterSearchResults("time")}
-                />
-                <RoundButtonWithIcon
-                  icon="food-fork-drink"
-                  iconColor="#fff"
-                  color={Colors.primary}
-                  library="materialcom"
-                  onPress={filterSearchResults("diet")}
-                />
-                <RoundButtonWithIcon
-                  icon="hearto"
-                  iconColor="#fff"
-                  color={Colors.primary}
-                  library="ant"
-                  onPress={filterSearchResults("liked")}
-                />
-                <RoundButtonWithIcon
-                  icon="staro"
-                  iconColor="#fff"
-                  color={Colors.primary}
-                  library="ant"
-                  onPress={filterSearchResults("rating")}
-                />
-                <RoundButtonWithIcon
-                  icon="filter-remove-outline"
-                  iconColor="#fff"
-                  color={Colors.grey}
-                  library="materialcom"
-                  onPress={showAllRecipes}
-                />
-              </View>
+              <Modal
+                transparent={true}
+                animationType="slide"
+                visible={showFilterList}
+                onRequestClose={() => setShowFilterList(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <View style={styles.modalContent}>
+                    <View style={styles.closeButton}>
+                      <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={() => {
+                          setShowFilterList(false);
+                          setFilters([]);
+                        }}
+                      >
+                        <Ionicons name="close" size={20} color={Colors.grey} />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.heading}>Suodata hakutuloksia</Text>
+                    <ScrollView>
+                      <View style={styles.checkBoxSection}>
+                        <Text style={styles.headingSmall}>Ruokalaji</Text>
+                        <CustomCheckBox
+                          options={courseOptions}
+                          selectedItems={filters}
+                          onSelect={(selected) => setFilters(selected)}
+                        />
+                      </View>
+                      <View style={styles.checkBoxSection}>
+                        <Text style={styles.headingSmall}>Pääraaka-aine</Text>
+                        <CustomCheckBox
+                          options={mainIngredientOptions}
+                          selectedItems={filters}
+                          onSelect={(selected) => setFilters(selected)}
+                        />
+                      </View>
+                      <View style={styles.checkBoxSection}>
+                        <Text style={styles.headingSmall}>Ruokavalio</Text>
+                        <CustomCheckBox
+                          options={dietOptions}
+                          selectedItems={filters}
+                          onSelect={(selected) => setFilters(selected)}
+                        />
+                      </View>
+                      <View style={styles.modalButtons}>
+                        <ButtonWithIcon
+                          icon={"filter-remove-outline"}
+                          color={Colors.grey}
+                          width={140}
+                          title="Tyhjennä"
+                          library="materialcom"
+                          onPress={() => {
+                            setFilters([]);
+                          }}
+                        />
+                        <ButtonWithIcon
+                          icon={"filter-outline"}
+                          color={Colors.secondary}
+                          width={140}
+                          title="Suodata"
+                          library="materialcom"
+                          onPress={() => {
+                            setShowFilterList(false);
+                            filterSearchResults();
+                          }}
+                        />
+                      </View>
+                    </ScrollView>
+                  </View>
+                </View>
+              </Modal>
 
               <FlatList
                 data={filteredData}
@@ -196,19 +302,44 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   section: {
-    flex: 1,
     marginBottom: 20,
     marginLeft: 12,
     marginRight: 12,
   },
-  buttonRow: {
+  searchBar: {
     flexDirection: "row",
-    justifyContent: "center",
+    alignItems: "center",
+  },
+  filtersAndButtons: {
+    flexDirection: "row",
+    marginLeft: 12,
+  },
+  filtersList: {
+    flex: 2,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+  },
+  filterText: {
+    backgroundColor: "#bcbcbc",
+    paddingTop: 4,
+    paddingBottom: 4,
+    paddingLeft: 8,
+    paddingRight: 8,
+    borderRadius: 10,
+    overflow: "hidden",
+    color: "#fff",
+  },
+  buttonRow: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
     marginBottom: 12,
     marginLeft: 12,
     marginRight: 12,
-    gap: 8,
   },
+
   add: {
     width: 350,
     height: 100,
@@ -216,42 +347,15 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 16,
   },
-  searchBar: {
-    flexDirection: "row",
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  searchButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.secondary,
-    marginRight: 12,
-    paddingLeft: 10,
-    paddingRight: 10,
-    borderWidth: 1,
-    borderColor: Colors.secondary,
-    borderBottomRightRadius: 10,
-    borderTopRightRadius: 10,
-    shadowColor: "#000000",
-    ...Platform.select({
-      android: {
-        elevation: 7,
-        overflow: "hidden",
-      },
-    }),
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
   input: {
+    flex: 1,
     height: 44,
-    width: "80%",
     marginLeft: 12,
+    marginRight: 12,
     borderWidth: 1,
-    paddingLeft: 10,
+    paddingLeft: 40,
     paddingRight: 10,
-    borderBottomLeftRadius: 10,
-    borderTopLeftRadius: 10,
+    borderRadius: 10,
     borderColor: Colors.secondary,
     backgroundColor: "white",
     shadowColor: "#000000",
@@ -264,5 +368,46 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+  },
+  searchIcon: {
+    position: "absolute",
+    left: "5%",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "#00000080",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    width: "100%",
+    height: "80%",
+    padding: 20,
+    borderRadius: 10,
+  },
+  closeButton: {
+    alignItems: "flex-start",
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  headingSmall: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  checkBoxSection: {
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    alignSelf: "center",
+    marginTop: 16,
+    marginBottom: 24,
+    gap: 8,
   },
 });
