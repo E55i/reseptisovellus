@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Entypo } from "@expo/vector-icons";
 import ButtonWithIcon from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
 import { useNavigation } from "@react-navigation/native";
@@ -72,6 +72,7 @@ export default function AddRecipe({ route, ...props }) {
   const [newStep, setNewStep] = useState("");
   const [tempSteps, setTempSteps] = useState([]);
   const [showStepInput, setShowStepInput] = useState(false);
+  const [stepsNumber, setStepsNumber] = useState(0);
 
   const timeOptions = [
     { key: "1", value: "alle 15 min" },
@@ -141,11 +142,26 @@ export default function AddRecipe({ route, ...props }) {
 
   // add instructions to recipe
   const addInstructionStep = () => {
-    const newSteps = [...tempSteps, newStep];
+    const newSteps = [...tempSteps];
+    newSteps.splice(stepsNumber - 1, 0, newStep);
     setTempSteps(newSteps);
     setShowStepInput(false);
     setRecipeData({ ...recipeData, instructions: newSteps });
     setNewStep("");
+  };
+
+  // increase instruction steps number by one
+  const handleStepUp = () => {
+    if (stepsNumber < tempSteps.length + 1) {
+      setStepsNumber(stepsNumber + 1);
+    }
+  };
+  
+    // decrease instruction steps number by one
+  const handleStepDown = () => {
+    if (stepsNumber > 1) {
+      setStepsNumber(stepsNumber - 1);
+    }
   };
 
   // delete specific ingredient
@@ -159,6 +175,7 @@ export default function AddRecipe({ route, ...props }) {
   const deleteStep = (index) => {
     const updatedSteps = tempSteps.filter((item, i) => i !== index);
     setTempSteps(updatedSteps);
+    setStepsNumber(tempSteps.length);
     setRecipeData({ ...recipeData, instructions: updatedSteps });
   };
 
@@ -250,7 +267,7 @@ export default function AddRecipe({ route, ...props }) {
               </View>
               {!showInput ? (
                 <TouchableOpacity
-                  style={styles.addIngredientButton}
+                  style={styles.addButton}
                   onPress={() => setShowInput(true)}
                 >
                   <Ionicons
@@ -261,12 +278,6 @@ export default function AddRecipe({ route, ...props }) {
                 </TouchableOpacity>
               ) : (
                 <>
-                  <Ionicons
-                    style={styles.addIngredientButton}
-                    name="add-circle"
-                    size={36}
-                    color={Colors.grey}
-                  />
                   <TextInput
                     placeholder="Lisää ainesosa ja määrä, esim. 400 g perunoita..."
                     style={styles.input}
@@ -298,8 +309,11 @@ export default function AddRecipe({ route, ...props }) {
               </View>
               {!showStepInput ? (
                 <TouchableOpacity
-                  style={styles.addIngredientButton}
-                  onPress={() => setShowStepInput(true)}
+                  style={styles.addButton}
+                  onPress={() => {
+                    setShowStepInput(true);
+                    setStepsNumber(tempSteps.length + 1);
+                  }}
                 >
                   <Ionicons
                     name="add-circle"
@@ -309,12 +323,24 @@ export default function AddRecipe({ route, ...props }) {
                 </TouchableOpacity>
               ) : (
                 <>
-                  <Ionicons
-                    style={styles.addIngredientButton}
-                    name="add-circle"
-                    size={36}
-                    color={Colors.grey}
-                  />
+                  <View style={styles.stepInfo}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleStepUp();
+                      }}
+                    >
+                      <Entypo name="chevron-up" size={24} color="black" />
+                    </TouchableOpacity>
+
+                    <Text style={styles.stepNumber}>{stepsNumber}</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleStepDown();
+                      }}
+                    >
+                      <Entypo name="chevron-down" size={24} color="black" />
+                    </TouchableOpacity>
+                  </View>
                   <TextInput
                     placeholder="Lisää työvaihe, esim. Keitä perunat..."
                     style={styles.input}
@@ -327,13 +353,10 @@ export default function AddRecipe({ route, ...props }) {
               )}
               {tempSteps.map((item, index) => (
                 <View style={styles.ingredient} key={index}>
+                  <Text style={styles.stepNumber}>{index + 1}</Text>
                   <Text style={styles.ingredientAndStepsText}>{item}</Text>
                   <TouchableOpacity onPress={() => deleteStep(index)}>
-                    <Ionicons
-                      name="trash-sharp"
-                      size={24}
-                      color={Colors.grey}
-                    />
+                    <Ionicons name="trash-sharp" size={24} color={Colors.grey} />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -682,12 +705,31 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
-  addIngredientButton: {
-    marginLeft: 12,
+  addButton: {
+    marginLeft: 8,
     marginBottom: 12,
   },
   ingredientAndStepsText: {
-    width: "90%",
+    width: "80%",
+  },
+  stepInfo: {
+    marginLeft: 12,
+    marginBottom: 12,
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  stepNumber: {
+    marginTop: 6,
+    marginBottom: 4,
+    marginRight: 4,
+    borderWidth: 1.5,
+    borderColor: "black",
+    borderRadius: 100,
+    width: 24, // Adjust the width based on your preference
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
   },
   ingredient: {
     flexDirection: "row",
