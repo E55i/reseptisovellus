@@ -27,7 +27,7 @@ export default function SearchRecipe({ ...props }) {
   const [isPremium, setIsPremium] = useState("0");
   const [query, setQuery] = useState("");
   const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState([]);
   const [showFilterList, setShowFilterList] = useState(false);
@@ -96,27 +96,26 @@ export default function SearchRecipe({ ...props }) {
     }
   };
 
-  const filterSearchResults = () => {
-    const filtered = filteredData.filter((item) => {
-      const courseMatch =
-        filters.length === 0 ||
-        filters.some((selectedCourse) => {
-          return item.course.includes(selectedCourse);
-        });
+  const filterRecipes = () => {
+    const filtered =
+      filters.length === 0
+        ? data
+        : data.filter((item) => {
+            const courseMatch = filters.some((selectedCourse) => {
+              return item.course.includes(selectedCourse);
+            });
 
-      const mainIngredientMatch =
-        filters.length === 0 ||
-        filters.some((selectedMainIngredient) => {
-          return item.mainIngredient.includes(selectedMainIngredient);
-        });
+            const mainIngredientMatch = filters.some(
+              (selectedMainIngredient) => {
+                return item.mainIngredient.includes(selectedMainIngredient);
+              }
+            );
 
-      const dietMatch =
-        filters.length === 0 ||
-        filters.some((selectedDiet) => {
-          return item.diet.includes(selectedDiet);
-        });
-      return courseMatch || mainIngredientMatch || dietMatch;
-    });
+            const dietMatch = filters.some((selectedDiet) => {
+              return item.diet.includes(selectedDiet);
+            });
+            return courseMatch || mainIngredientMatch || dietMatch;
+          });
     setFilteredData(filtered);
   };
 
@@ -130,7 +129,11 @@ export default function SearchRecipe({ ...props }) {
         }}
       />
       {loading ? (
-        <ActivityIndicator size="large" animating={true} color={Colors.secondary}/>
+        <ActivityIndicator
+          size="large"
+          animating={true}
+          color={Colors.secondary}
+        />
       ) : (
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -263,7 +266,7 @@ export default function SearchRecipe({ ...props }) {
                           library="materialcom"
                           onPress={() => {
                             setShowFilterList(false);
-                            filterSearchResults();
+                            filterRecipes();
                           }}
                         />
                       </View>
@@ -273,7 +276,7 @@ export default function SearchRecipe({ ...props }) {
               </Modal>
 
               <FlatList
-                data={filteredData}
+                data={filteredData.length > 0 ? filteredData : data}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                   <RecipeCard
