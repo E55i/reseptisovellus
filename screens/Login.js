@@ -31,7 +31,7 @@ const StartScreen = ({ navigation }) => {
 
       {!showGreeting && (
         <View style={styles.optionsContainer}>
-          <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate('CreateUser')}>
+          <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate('AppInfo')}>
             <Text style={styles.buttonText}>Luo tili</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate('StartScreen')}>

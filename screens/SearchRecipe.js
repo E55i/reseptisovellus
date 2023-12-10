@@ -274,7 +274,6 @@ export default function SearchRecipe({ ...props }) {
                   </View>
                 </View>
               </Modal>
-
               <FlatList
                 data={filteredData.length > 0 ? filteredData : data}
                 keyExtractor={(item) => item.id}
@@ -310,6 +309,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   searchBar: {
+    marginTop: 16,
     flexDirection: "row",
     alignItems: "center",
   },
