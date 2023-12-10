@@ -74,30 +74,48 @@ const Profile = ({ navigation }) => {
       });
   };
 
-  const renderUserData = (key, value) => {
-    const fieldMappings = {
-      username: 'Käyttäjänimi',
-      firstName: 'Etunimi',
-      lastName: 'Sukunimi',
-      birthDate: 'Syntymäaika',
-      address: 'Osoite',
-    };
+  const renderUserData = () => {
+    const fieldOrder = ['bio', 'username', 'firstName', 'lastName', 'address', 'birthDate'];
 
-    if (key === 'birthDate' && value) {
-      const date = new Date(value);
-      const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
-      value = formattedDate;
-    }
+    return fieldOrder.map((key) => {
+      const originalValue = userData[key];
+      let value = originalValue;
 
-    if (fieldMappings[key] && value) {
-      return (
-        <View style={styles.dataBox} key={key}>
-          <Text style={styles.dataTitle}>{fieldMappings[key]}: </Text>
-          <Text style={styles.dataValue}>{value}</Text>
-        </View>
-      );
-    }
-    return null;
+      if (key === 'birthDate' && value) {
+        const date = new Date(value);
+        const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+        value = formattedDate;
+      }
+
+      const fieldMappings = {
+        bio: 'Bio',
+        username: 'Käyttäjänimi',
+        firstName: 'Etunimi',
+        lastName: 'Sukunimi',
+        birthDate: 'Syntymäaika',
+        address: 'Osoite',
+        profilePicture: 'Profiilikuva',
+      };
+
+      const boxStyle = {
+        ...styles.dataBox,
+        ...(fieldMappings[key] === 'Bio' && { borderWidth: 2, borderColor: 'green', height: 130, marginTop: -10 }),
+      };
+
+      if (fieldMappings[key] && originalValue) {
+        return (
+          <View style={boxStyle} key={key}>
+            <Text style={styles.dataTitle}>{fieldMappings[key]}: </Text>
+            {key === 'bio' ? (
+              <Text style={styles.dataValue} numberOfLines={4}>{value}</Text>
+            ) : (
+              <Text style={styles.dataValue}>{value}</Text>
+            )}
+          </View>
+        );
+      }
+      return null;
+    });
   };
 
   if (loading) {
@@ -108,17 +126,24 @@ const Profile = ({ navigation }) => {
     <View style={styles.container}>
       <GoBackAppBar backgroundColor="orange" navigation={navigation} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.profileImageContainer}>
-          {userData?.profilePicture ? (
+        {userData?.profilePicture ? (
+          <View style={styles.profileImageContainer}>
             <Image source={{ uri: userData.profilePicture }} style={styles.profileImage} />
-          ) : null}
-        </View>
-        {userData ? (
-          <View style={styles.userData}>
-            {Object.entries(userData).map(([key, value]) => renderUserData(key, value))}
           </View>
         ) : (
-          <Text>Käyttäjätietoja ei ole saatavilla</Text>
+          <View style={styles.profileImageContainer}>
+            {/* Display a placeholder image or any other content */}
+            <Image source={require('../assets/placeholder-image.png')} style={styles.profileImage} />
+          </View>
+        )}
+        {userData ? (
+          <View style={styles.userData}>
+            {renderUserData()}
+          </View>
+        ) : (
+          <View style={styles.noDataContainer}>
+            <Text>Käyttäjätietoja ei ole saatavilla</Text>
+          </View>
         )}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.customButton} onPress={navigateToUpdateProfile}>
@@ -144,16 +169,22 @@ const styles = StyleSheet.create({
   profileImageContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 20,
   },
   profileImage: {
-    width: 275,
-    height: 275,
-    borderRadius: 137.5,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    borderColor: 'green',
+    borderWidth: 2,
   },
   userData: {
     padding: 10,
+  },
+  noDataContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   dataBox: {
     backgroundColor: '#F0F0F0',
@@ -161,7 +192,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
     borderColor: 'green',
-    borderWidth: 1,
+    borderWidth: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.22,
