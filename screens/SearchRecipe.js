@@ -130,7 +130,11 @@ export default function SearchRecipe({ ...props }) {
         }}
       />
       {loading ? (
-        <ActivityIndicator size="large" animating={true} color={Colors.secondary}/>
+        <ActivityIndicator
+          size="large"
+          animating={true}
+          color={Colors.secondary}
+        />
       ) : (
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -271,24 +275,23 @@ export default function SearchRecipe({ ...props }) {
                   </View>
                 </View>
               </Modal>
-
-              <FlatList
-                data={filteredData}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <RecipeCard
-                    key={item.id}
-                    recipeId={item.id}
-                    prepTime={item.prepTime}
-                    urlToImage={item.photo}
-                    recipeName={item.title}
-                    cookTime={item.cookTime}
-                    servingSize={item.servingSize}
-                    backgroundColor={props.backgroundColor}
-                  />
-                )}
-              />
             </View>
+            <FlatList
+              data={filteredData}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <RecipeCard
+                  key={item.id}
+                  recipeId={item.id}
+                  prepTime={item.prepTime}
+                  urlToImage={item.photo}
+                  recipeName={item.title}
+                  cookTime={item.cookTime}
+                  servingSize={item.servingSize}
+                  backgroundColor={props.backgroundColor}
+                />
+              )}
+            />
           </View>
         </KeyboardAvoidingView>
       )}
@@ -307,6 +310,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   searchBar: {
+    marginTop: 16,
     flexDirection: "row",
     alignItems: "center",
   },
