@@ -130,7 +130,12 @@ const Profile = ({ navigation }) => {
           <View style={styles.profileImageContainer}>
             <Image source={{ uri: userData.profilePicture }} style={styles.profileImage} />
           </View>
-        ) : null}
+        ) : (
+          <View style={styles.profileImageContainer}>
+            {/* Display a placeholder image or any other content */}
+            <Image source={require('../assets/placeholder-image.png')} style={styles.profileImage} />
+          </View>
+        )}
         {userData ? (
           <View style={styles.userData}>
             {renderUserData()}

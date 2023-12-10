@@ -36,6 +36,8 @@ const UpdateProfile = () => {
   const [profilePictureUri, setProfilePictureUri] = useState('');
   const [bio, setBio] = useState('');
   const [premium, setPremium] = useState("");
+  const [isBirthDateSelected, setIsBirthDateSelected] = useState(false);
+
 
   const auth = getAuth();
   const database = getDatabase();
@@ -199,7 +201,7 @@ const UpdateProfile = () => {
   };
 
   const handleUpdateProfile = () => {
-    if (!username || !firstName || !lastName || !birthDate || !address || !bio) {
+    if (!username || !firstName || !lastName || !birthDate) {
       Alert.alert('Virhe', 'Täytä kaikki pakolliset kentät.');
       return;
     }
@@ -267,7 +269,6 @@ const UpdateProfile = () => {
             <Text style={styles.photoButtonText}>Valitse profiilikuva</Text>
           </TouchableOpacity>
         </View>
-        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
         <Text style={styles.bioLabel}>Bio:</Text>
         <TextInput
           placeholder="Kerro jotain itsetäsi"
@@ -318,7 +319,6 @@ const UpdateProfile = () => {
           style={styles.input}
           onFocus={() => setLastName("")}
         />
-        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
         <Text style={styles.label}>Osoite:</Text>
         <TextInput
           placeholder="Kirjoita osoite muodossa: Katunimi ja numero, postinumero ja -toimipaikka. "
@@ -328,7 +328,12 @@ const UpdateProfile = () => {
           onFocus={() => setAddress("")}
         />
 
-
+          <FontAwesome5
+          name="asterisk"
+          size={10}
+          color="orange"
+          style={styles.asterisk}
+        />
         <TouchableOpacity style={styles.customButton} onPress={() => setShowDatePicker(true)}>
           <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
         </TouchableOpacity>
