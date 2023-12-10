@@ -13,6 +13,7 @@ import OwnRecipes from "./screens/OwnRecipes";
 import PhotoScreen from "./screens/PhotoScreen";
 import PrivacyPolicy from "./screens/PrivacyPolice";
 import RecipeEdit from "./screens/RecipeEdit";
+import AppInfo from "./screens/AppInfo";
 //import GoogleLogin from "./screens/Googlelogin";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -59,6 +60,7 @@ export default function App() {
             {(props) => <RecipeEdit backgroundColor="#FF9C00" {...props} />}
           </Stack.Screen>
           <Stack.Screen name="PhotoScreen" component={PhotoScreen} />
+          <Stack.Screen name="AppInfo" component={AppInfo} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>

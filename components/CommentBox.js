@@ -95,7 +95,7 @@ export default function CommentBox({ comment, created, likes, commentUserId, com
         ) : (
           <Image
             style={styles.profilePicture}
-            source={require("../assets/default_profile_picture.png")}
+            source={require('../assets/placeholder-image.png')}
           />
         )}
         {/*If the comment was written by a user whose user account has been deleted, the name will be displayed as "Tuntematon" */}
