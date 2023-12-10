@@ -12,12 +12,16 @@ const CreateUser = ({ navigation }) => {
       .then((userCredential) => {
         // Rekisteröinti onnistui
         Alert.alert('Rekisteröinti onnistui', 'Tili luotu onnistuneesti!');
-        navigation.navigate('UpdateProfile'); // Olettaen, että haluat ohjata käyttäjän takaisin kirjautumissivulle
+        navigation.navigate('UpdateProfile'); // Olettaen, että haluat ohjata käyttäjän takaisin profiilin päivityssivulle
       })
       .catch((error) => {
         // Virhe rekisteröinnissä
         Alert.alert('Rekisteröintivirhe', error.message);
       });
+  };
+
+  const handleBackToLogin = () => {
+    navigation.navigate('Login');
   };
 
   return (
@@ -38,6 +42,7 @@ const CreateUser = ({ navigation }) => {
         autoCapitalize="none"
       />
       <Button title="Luo tili" onPress={handleSignUp} />
+      <Button title="Takaisin" onPress={handleBackToLogin} />
     </View>
   );
 };

@@ -32,6 +32,8 @@ const UpdateProfile = () => {
   const [loading, setLoading] = useState(false);
   const [profilePictureUri, setProfilePictureUri] = useState('');
   const [bio, setBio] = useState('');
+  const [isBirthDateSelected, setIsBirthDateSelected] = useState(false);
+
 
   const auth = getAuth();
   const database = getDatabase();
@@ -169,26 +171,31 @@ const UpdateProfile = () => {
     const currentDate = selectedDate || birthDate;
     setShowDatePicker(Platform.OS === 'ios');
   
-    // Check if the date is in the future
+    // Tarkistetaan, että syntymäaika on valittu
     if (currentDate > new Date()) {
       Alert.alert('Virhe', 'Syntymäaika ei voi olla tulevaisuudessa.');
+      setIsBirthDateSelected(false);
       return;
     }
   
-    // Check if the date indicates an age over 120 years
     const maxAgeDate = new Date();
     maxAgeDate.setFullYear(maxAgeDate.getFullYear() - 120);
     if (currentDate < maxAgeDate) {
-      Alert.alert('Virhe', 'Syötetty ikä ylittää sovelluksen asettamat rajoitukset. Tarkistathan ikäsi uudelleen.');
+      Alert.alert(
+        'Virhe',
+        'Syötetty ikä ylittää sovelluksen asettamat rajoitukset. Tarkistathan ikäsi uudelleen.'
+      );
+      setIsBirthDateSelected(false);
       return;
     }
   
     setBirthDate(currentDate);
+    setIsBirthDateSelected(true);
   };
   
 
   const handleUpdateProfile = () => {
-    if (!username || !firstName || !lastName || !birthDate || !address || !bio) {
+    if (!username || !firstName || !lastName){
       Alert.alert('Virhe', 'Täytä kaikki pakolliset kentät.');
       return;
     }
@@ -247,7 +254,6 @@ const UpdateProfile = () => {
             <Text style={styles.photoButtonText}>Valitse profiilikuva</Text>
           </TouchableOpacity>
         </View>
-        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
         <Text style={styles.bioLabel}>Bio:</Text>
         <TextInput
           placeholder="Kerro jotain itsetäsi"
@@ -283,7 +289,6 @@ const UpdateProfile = () => {
           style={styles.input}
           onFocus={() => setLastName('')}
         />
-        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
         <Text style={styles.label}>Osoite:</Text>
         <TextInput
           placeholder="Kirjoita osoite muodossa: Katunimi ja numero, postinumero ja -toimipaikka. "
@@ -292,8 +297,6 @@ const UpdateProfile = () => {
           style={styles.input}
           onFocus={() => setAddress('')}
         />
-
-
         <TouchableOpacity style={styles.customButton} onPress={() => setShowDatePicker(true)}>
           <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
         </TouchableOpacity>
@@ -367,7 +370,7 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: 10,
     padding: 10,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: 'green',
     borderRadius: 10,
   },
@@ -407,14 +410,14 @@ const styles = StyleSheet.create({
   bioInput: {
     marginBottom: 10,
     padding: 10,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: 'green',
     borderRadius: 10,
   },
   label: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'black', // Dark text color
+    color: 'black',
     marginBottom: 5,
   },
 });
