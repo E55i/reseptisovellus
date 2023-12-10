@@ -408,8 +408,8 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: 10,
     padding: 10,
-    borderWidth: 1,
-    borderColor: 'green',
+    borderWidth: 2,
+    borderColor: Colors.secondary,
     borderRadius: 10,
   },
   customButton: {
@@ -448,14 +448,14 @@ const styles = StyleSheet.create({
   bioInput: {
     marginBottom: 10,
     padding: 10,
-    borderWidth: 1,
-    borderColor: 'green',
+    borderWidth: 2,
+    borderColor: Colors.secondary,
     borderRadius: 10,
   },
   label: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'black', // Dark text color
+    color: 'black',
     marginBottom: 5,
   },
 });

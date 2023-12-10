@@ -13,6 +13,7 @@ import GoBackAppBar from '../components/GoBackAppBar';
 import { getAuth, signOut } from 'firebase/auth';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { useRoute } from '@react-navigation/native';
+import { Colors } from "../styles/Colors";
 
 const Profile = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
@@ -99,7 +100,7 @@ const Profile = ({ navigation }) => {
 
       const boxStyle = {
         ...styles.dataBox,
-        ...(fieldMappings[key] === 'Bio' && { borderWidth: 2, borderColor: 'green', height: 130, marginTop: -10 }),
+        ...(fieldMappings[key] === 'Bio' && { borderWidth: 2, borderColor: Colors.secondary, height: 130, marginTop: -10 }),
       };
 
       if (fieldMappings[key] && originalValue) {
@@ -124,7 +125,7 @@ const Profile = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <GoBackAppBar backgroundColor="orange" navigation={navigation} />
+      <GoBackAppBar backgroundColor={Colors.primary} navigation={navigation} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {userData?.profilePicture ? (
           <View style={styles.profileImageContainer}>
@@ -146,10 +147,10 @@ const Profile = ({ navigation }) => {
           </View>
         )}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.customButton} onPress={navigateToUpdateProfile}>
+          <TouchableOpacity style={[styles.customButton, { backgroundColor: Colors.primary }]} onPress={navigateToUpdateProfile}>
             <Text style={styles.buttonText}>Muokkaa tietoja</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.customButton} onPress={confirmLogout}>
+          <TouchableOpacity style={[styles.customButton, { backgroundColor: Colors.primary }]} onPress={confirmLogout}>
             <Text style={styles.buttonText}>Kirjaudu ulos</Text>
           </TouchableOpacity>
         </View>
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    borderColor: 'green',
+    borderColor: Colors.secondary,
     borderWidth: 2,
   },
   userData: {
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginVertical: 5,
-    borderColor: 'green',
+    borderColor: Colors.secondary,
     borderWidth: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -212,11 +213,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   customButton: {
-    borderWidth: 1,
-    borderColor: 'orange',
     borderRadius: 10,
     padding: 10,
-    backgroundColor: 'orange',
     flex: 1,
     marginHorizontal: 5,
   },
