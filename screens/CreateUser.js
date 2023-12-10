@@ -13,8 +13,9 @@ const CreateUser = ({ navigation }) => {
         setEmail("");
         setPassword("");
         // Rekisteröinti onnistui
-        Alert.alert("Rekisteröinti onnistui", "Tili luotu onnistuneesti!");
-        navigation.navigate("UpdateProfile"); // Olettaen, että haluat ohjata käyttäjän takaisin profiilin päivityssivulle
+        Alert.alert('Rekisteröinti onnistui', 'Tili luotu onnistuneesti!');
+        navigation.navigate('UpdateProfile'); // Olettaen, että haluat ohjata käyttäjän takaisin profiilin päivityssivulle
+
       })
       .catch((error) => {
         // Virhe rekisteröinnissä
@@ -23,7 +24,7 @@ const CreateUser = ({ navigation }) => {
   };
 
   const handleBackToLogin = () => {
-    navigation.navigate("Login");
+    navigation.navigate('Login');
   };
 
   return (
