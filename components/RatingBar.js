@@ -24,8 +24,8 @@ export default function RatingBar({ recipeId }) {
         const recipeSnapshot = await getDoc(specificRecipeDoc);
         // fetch the documet data
         const recipeData = recipeSnapshot.data();
-        console.log("Recipe data:", recipeData);
-        console.log("userRated data:", recipeData.recipeData.userRated);
+        //console.log("Recipe data:", recipeData);
+        //console.log("userRated data:", recipeData.recipeData.userRated);
 
         //check if curren user has already rated this recipe
         if (

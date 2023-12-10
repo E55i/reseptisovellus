@@ -1,32 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Button, Alert } from 'react-native';
-import { auth, signInWithEmailAndPassword, signInWithGoogle } from '../components/FirebaseConfig'; // Oletan, että olet lisännyt signInWithGoogle-funktion konfiguraatioosi
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth, signInWithEmailAndPassword } from '../components/FirebaseConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        navigation.replace('Welcome'); // Kirjautuminen onnistui
-      })
-      .catch(error => {
-        Alert.alert('Kirjautumisvirhe', error.message);
+  useEffect(() => {
+    checkIfLoggedIn();
+  }, []);
+
+  const checkIfLoggedIn = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    if (token) {
+      // Tarkista Firebase Authenticationin kautta, onko token yhä voimassa
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          navigation.replace('Welcome'); // Käyttäjä on kirjautunut sisään
+        }
       });
+    }
   };
-  /*const handleGoogleLogin = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        // Google-kirjautuminen onnistui
-        navigation.navigate('Welcome');
-      }).catch((error) => {
-        // Google-kirjautumisvirhe
-        Alert.alert('Kirjautumisvirhe', error.message);
-      });
-  };*/
+
+  const handleLogin = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const token = await userCredential.user.getIdToken();
+      await AsyncStorage.setItem('userToken', token); // Tallenna token
+      navigation.replace('Welcome'); // Kirjautuminen onnistui
+    } catch (error) {
+      Alert.alert('Kirjautumisvirhe', error.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -70,7 +76,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginBottom: 10, // Lisää marginaali jokaisen View:n alapuolelle
   },
-  // Lisää tähän muita tyylejä tarvittaessa
+
 });
 
 export default LoginScreen;

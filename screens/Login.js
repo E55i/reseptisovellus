@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Modal, Image } from 'react-native'; // Tuo Image
-import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import { StyleSheet, View, Text, TouchableOpacity, Modal, Image } from 'react-native';
 
 const StartScreen = ({ navigation }) => {
   const [showGreeting, setShowGreeting] = useState(true);
@@ -10,17 +9,13 @@ const StartScreen = ({ navigation }) => {
       if (showGreeting) {
         setShowGreeting(false);
       }
-    }, 3000); // Siirry kirjautumisvalikkoon 5 sekunnin kuluttua
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [showGreeting]);
 
-  const onSwipeAway = () => {
-    setShowGreeting(false);
-  };
-
   return (
-    <GestureHandlerRootView style={styles.rootView}>
+    <View style={styles.rootView}>
       <Modal
         animationType="slide"
         transparent={true}
@@ -28,12 +23,9 @@ const StartScreen = ({ navigation }) => {
         onRequestClose={() => setShowGreeting(false)}
       >
         <View style={styles.modalContainer}>
-          <Swipeable onSwipeableRightOpen={onSwipeAway}>
-            <View style={styles.modalView}>
-              {/* Kuvan näyttäminen */}
-              <Image source={require('../assets/Logo001.png')} style={styles.logo} />
-            </View>
-          </Swipeable>
+          <View style={styles.modalView}>
+            <Image source={require('../assets/Logo001.png')} style={styles.logo} />
+          </View>
         </View>
       </Modal>
 
@@ -45,9 +37,13 @@ const StartScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.optionButton} onPress={() => navigation.navigate('StartScreen')}>
             <Text style={styles.buttonText}>Kirjaudu sisään</Text>
           </TouchableOpacity>
+          {/* Linkki tietosuojaselosteeseen */}
+          <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')}>
+            <Text style={styles.privacyPolicyLink}>Tietosuojaseloste</Text>
+          </TouchableOpacity>
         </View>
       )}
-    </GestureHandlerRootView>
+    </View>
   );
 };
 
@@ -89,6 +85,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  privacyPolicyLink: {
+    color: '#007bff',
+    marginTop: 20,
+    textDecorationLine: 'underline',
   },
   optionButton: {
     padding: 15,

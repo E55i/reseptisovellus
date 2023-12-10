@@ -1,8 +1,23 @@
 import { Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import React from "react";
-import { AntDesign } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Ionicons,
+  MaterialCommunityIcons,
+  Feather,
+  FontAwesome,
+} from "@expo/vector-icons";
+import { Colors } from "../styles/Colors";
 
-export default function ButtonWithIcon({ icon, color, width, title, onPress }) {
+export default function ButtonWithIcon({
+  icon,
+  color,
+  width,
+  title,
+  iconColor = "#fff",
+  library = "ant",
+  onPress,
+}) {
   return (
     <TouchableOpacity
       style={{
@@ -12,7 +27,12 @@ export default function ButtonWithIcon({ icon, color, width, title, onPress }) {
       }}
       onPress={onPress}
     >
-      <AntDesign name={icon} size={24} color="#fff" />
+      {library == "ant" && (
+        <AntDesign name={icon} size={24} color={iconColor} />
+      )}
+      {library == "materialcom" && (
+        <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
+      )}
       <Text style={styles.text}>{title}</Text>
     </TouchableOpacity>
   );
@@ -20,9 +40,10 @@ export default function ButtonWithIcon({ icon, color, width, title, onPress }) {
 
 export function RoundButtonWithIcon({
   icon,
-  iconColor,
+  iconColor = "#fff",
   color,
-  borderColor,
+  borderColor = "transparent",
+  library = "ant",
   onPress,
 }) {
   return (
@@ -30,11 +51,25 @@ export function RoundButtonWithIcon({
       style={{
         ...styles.roundButton,
         backgroundColor: color,
-        borderColor: borderColor || "transparent",
+        borderColor: borderColor,
       }}
       onPress={onPress}
     >
-      <AntDesign name={icon} size={32} color={iconColor || "#fff"} />
+      {library == "ant" && (
+        <AntDesign name={icon} size={24} color={iconColor} />
+      )}
+      {library == "ionicons" && (
+        <Ionicons name={icon} size={24} color={iconColor} />
+      )}
+      {library == "materialcom" && (
+        <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
+      )}
+      {library == "feather" && (
+        <Feather name={icon} size={24} color={iconColor} />
+      )}
+      {library == "fontawesome" && (
+        <FontAwesome name={icon} size={24} color={iconColor} />
+      )}
     </TouchableOpacity>
   );
 }
@@ -56,6 +91,43 @@ export function SquareButtonWithIcon({
     >
       <TouchableOpacity onPress={onPress}>
         <AntDesign name={icon} size={80} color={iconColor || "#fff"} />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+export function IconButton({
+  icon,
+  iconColor = Colors.grey,
+  color = "transparent",
+  borderColor = "transparent",
+  library = "ant",
+  onPress,
+}) {
+  return (
+    <View
+      style={{
+        ...styles.iconButton,
+        backgroundColor: color,
+        borderColor: borderColor,
+      }}
+    >
+      <TouchableOpacity onPress={onPress}>
+        {library == "ant" && (
+          <AntDesign name={icon} size={24} color={iconColor} />
+        )}
+        {library == "ionicons" && (
+          <Ionicons name={icon} size={24} color={iconColor} />
+        )}
+        {library == "materialcom" && (
+          <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
+        )}
+        {library == "feather" && (
+          <Feather name={icon} size={24} color={iconColor} />
+        )}
+        {library == "fontawesome" && (
+          <FontAwesome name={icon} size={24} color={iconColor} />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -93,9 +165,9 @@ const styles = StyleSheet.create({
   roundButton: {
     justifyContent: "center",
     alignItems: "center",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     borderWidth: 2,
     ...Platform.select({
       android: {
@@ -129,5 +201,13 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
       },
     }),
+  },
+  iconButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 2,
   },
 });

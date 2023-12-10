@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -10,30 +10,32 @@ import {
   Alert,
   ActivityIndicator,
   Image,
-} from 'react-native';
-import { getAuth } from 'firebase/auth';
-import { getDatabase, ref, onValue, set } from 'firebase/database';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import * as ImagePicker from 'expo-image-picker';
-import { uploadToStorage, deleteFromStorage } from '../components/FirebaseConfig';
-import ShowAlert from '../components/ShowAlert';
-import { Colors } from '../styles/Colors';
-import { useNavigation } from '@react-navigation/native';
-import GoBackAppBar from '../components/GoBackAppBar';
-import { FontAwesome5 } from '@expo/vector-icons';
+} from "react-native";
+import { getAuth } from "firebase/auth";
+import { getDatabase, ref, onValue, set } from "firebase/database";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
+import {
+  uploadToStorage,
+  deleteFromStorage,
+} from "../components/FirebaseConfig";
+import ShowAlert from "../components/ShowAlert";
+import { Colors } from "../styles/Colors";
+import { useNavigation } from "@react-navigation/native";
+import GoBackAppBar from "../components/GoBackAppBar";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 const UpdateProfile = () => {
-  const [username, setUsername] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState(new Date());
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profilePictureUri, setProfilePictureUri] = useState('');
   const [bio, setBio] = useState('');
-  const [isBirthDateSelected, setIsBirthDateSelected] = useState(false);
-
+  const [premium, setPremium] = useState("");
 
   const auth = getAuth();
   const database = getDatabase();
@@ -44,10 +46,10 @@ const UpdateProfile = () => {
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
-    if (status !== 'granted') {
+    if (status !== "granted") {
       ShowAlert(
-        'Ei lupaa käyttää kameraa',
-        'Anna sovellukselle lupa käyttää puhelimen kameraa, mikäli haluat ottaa kuvan.'
+        "Ei lupaa käyttää kameraa",
+        "Anna sovellukselle lupa käyttää puhelimen kameraa, mikäli haluat ottaa kuvan."
       );
       return;
     }
@@ -63,8 +65,11 @@ const UpdateProfile = () => {
       setLoading(true);
       const { assets } = cameraResp;
       const uri = assets[0].uri;
-      const fileName = uri.split('/').pop();
-      const uploadResp = await uploadToStorage(uri, 'profile_images/' + fileName);
+      const fileName = uri.split("/").pop();
+      const uploadResp = await uploadToStorage(
+        uri,
+        "profile_images/" + fileName
+      );
 
       setProfilePictureUri(uploadResp.downloadUrl);
       setLoading(false);
@@ -74,10 +79,10 @@ const UpdateProfile = () => {
   const selectPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (status !== 'granted') {
+    if (status !== "granted") {
       ShowAlert(
-        'Ei lupaa käyttää puhelimen kuvia',
-        'Anna sovellukselle lupa käyttää puhelimen kuvia, mikäli haluat lisätä kuvan puhelimestasi.'
+        "Ei lupaa käyttää puhelimen kuvia",
+        "Anna sovellukselle lupa käyttää puhelimen kuvia, mikäli haluat lisätä kuvan puhelimestasi."
       );
       return;
     }
@@ -93,9 +98,12 @@ const UpdateProfile = () => {
       setLoading(true);
       const { assets } = libraryResp;
       const uri = assets[0].uri;
-      const fileName = uri.split('/').pop();
+      const fileName = uri.split("/").pop();
 
-      const uploadResp = await uploadToStorage(uri, 'profile_images/' + fileName);
+      const uploadResp = await uploadToStorage(
+        uri,
+        "profile_images/" + fileName
+      );
       setProfilePictureUri(uploadResp.downloadUrl);
       setLoading(false);
     }
@@ -103,18 +111,19 @@ const UpdateProfile = () => {
 
   useEffect(() => {
     if (user) {
-      const userProfileRef = ref(database, 'users/' + user.uid);
+      const userProfileRef = ref(database, "users/" + user.uid);
       onValue(userProfileRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          setUsername(data.username || '');
-          setFirstName(data.firstName || '');
-          setLastName(data.lastName || '');
+          setUsername(data.username || "");
+          setFirstName(data.firstName || "");
+          setLastName(data.lastName || "");
           setBirthDate(data.birthDate ? new Date(data.birthDate) : new Date());
-          setAddress(data.address || '');
-          setProfilePictureUri(data.profilePicture || '');
-          setUsername(data.username || '');
-          setBio(data.bio || '');
+          setAddress(data.address || "");
+          setProfilePictureUri(data.profilePicture || "");
+          setUsername(data.username || "");
+          setBio(data.bio || "");
+          setPremium(data.premium);
         }
       });
     }
@@ -122,12 +131,12 @@ const UpdateProfile = () => {
 
   const validateName = (name, fieldName) => {
     if (name.length > 20) {
-      Alert.alert('Virhe', `${fieldName} ei voi olla yli 20 merkkiä pitkä.`);
+      Alert.alert("Virhe", `${fieldName} ei voi olla yli 20 merkkiä pitkä.`);
       return false;
     }
 
     if (!/^[a-zA-ZäöüÄÖÜß ]+$/.test(name)) {
-      Alert.alert('Virhe', `${fieldName} voi sisältää vain kirjaimia.`);
+      Alert.alert("Virhe", `${fieldName} voi sisältää vain kirjaimia.`);
       return false;
     }
 
@@ -140,17 +149,17 @@ const UpdateProfile = () => {
     }
 
     Alert.alert(
-      'Poista profiilikuva',
-      'Haluatko varmasti poistaa profiilikuvan?',
+      "Poista profiilikuva",
+      "Haluatko varmasti poistaa profiilikuvan?",
       [
         {
-          text: 'Peruuta',
-          style: 'cancel',
+          text: "Peruuta",
+          style: "cancel",
         },
         {
-          text: 'Poista',
+          text: "Poista",
           onPress: () => confirmDeleteProfilePicture(),
-          style: 'destructive',
+          style: "destructive",
         },
       ],
       { cancelable: false }
@@ -160,10 +169,10 @@ const UpdateProfile = () => {
   const confirmDeleteProfilePicture = async () => {
     try {
       await deleteFromStorage(profilePictureUri);
-      setProfilePictureUri('');
+      setProfilePictureUri("");
     } catch (error) {
-      console.error('Error deleting profile picture:', error);
-      ShowAlert('Virhe', 'Profiilikuvan poistaminen epäonnistui.');
+      console.error("Error deleting profile picture:", error);
+      ShowAlert("Virhe", "Profiilikuvan poistaminen epäonnistui.");
     }
   };
 
@@ -171,55 +180,54 @@ const UpdateProfile = () => {
     const currentDate = selectedDate || birthDate;
     setShowDatePicker(Platform.OS === 'ios');
   
-    // Tarkistetaan, että syntymäaika on valittu
+    // Check if the date is in the future
     if (currentDate > new Date()) {
       Alert.alert('Virhe', 'Syntymäaika ei voi olla tulevaisuudessa.');
-      setIsBirthDateSelected(false);
       return;
     }
   
+    // Check if the date indicates an age over 120 years
     const maxAgeDate = new Date();
     maxAgeDate.setFullYear(maxAgeDate.getFullYear() - 120);
     if (currentDate < maxAgeDate) {
-      Alert.alert(
-        'Virhe',
-        'Syötetty ikä ylittää sovelluksen asettamat rajoitukset. Tarkistathan ikäsi uudelleen.'
-      );
-      setIsBirthDateSelected(false);
+      Alert.alert('Virhe', 'Syötetty ikä ylittää sovelluksen asettamat rajoitukset. Tarkistathan ikäsi uudelleen.');
       return;
     }
-  
+
     setBirthDate(currentDate);
     setIsBirthDateSelected(true);
   };
-  
 
   const handleUpdateProfile = () => {
-    if (!username || !firstName || !lastName){
+    if (!username || !firstName || !lastName || !birthDate || !address || !bio) {
       Alert.alert('Virhe', 'Täytä kaikki pakolliset kentät.');
       return;
     }
 
-    if (!validateName(firstName, 'Etunimi') || !validateName(lastName, 'Sukunimi')) {
+    if (
+      !validateName(firstName, "Etunimi") ||
+      !validateName(lastName, "Sukunimi")
+    ) {
       return;
     }
 
     if (user) {
-      const userProfileRef = ref(database, 'users/' + user.uid);
+      const userProfileRef = ref(database, "users/" + user.uid);
       set(userProfileRef, {
         username,
         firstName,
         lastName,
-        birthDate: birthDate.toISOString().split('T')[0],
+        birthDate: birthDate.toISOString().split("T")[0],
         address,
         profilePicture: profilePictureUri,
         bio,
+        premium: premium ? premium : "0",
       })
         .then(() => {
-          navigation.navigate('Profile', { profilePictureUri });
+          navigation.navigate("Welcome");
         })
         .catch((error) => {
-          console.error('Profiilin päivitys epäonnistui:', error);
+          console.error("Profiilin päivitys epäonnistui:", error);
         });
     }
   };
@@ -227,12 +235,17 @@ const UpdateProfile = () => {
   return (
     <View style={styles.fullScreenContainer}>
       <GoBackAppBar backgroundColor="orange" navigation={navigation} />
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+      >
         <View style={styles.profileImageContainer}>
           {profilePictureUri ? (
             <>
-              <Image source={{ uri: profilePictureUri }} style={styles.profileImage} />
+              <Image
+                source={{ uri: profilePictureUri }}
+                style={styles.profileImage}
+              />
               <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => handleDeleteProfilePicture()}
@@ -254,49 +267,68 @@ const UpdateProfile = () => {
             <Text style={styles.photoButtonText}>Valitse profiilikuva</Text>
           </TouchableOpacity>
         </View>
+        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
         <Text style={styles.bioLabel}>Bio:</Text>
         <TextInput
           placeholder="Kerro jotain itsetäsi"
           onChangeText={setBio}
           value={bio}
           style={styles.bioInput}
-          onFocus={() => setBio('')}
+          onFocus={() => setBio("")}
         />
-        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
+        <FontAwesome5
+          name="asterisk"
+          size={10}
+          color="orange"
+          style={styles.asterisk}
+        />
         <Text style={styles.label}>Käyttäjänimi:</Text>
         <TextInput
           placeholder="Kirjoita uusi Käyttäjänimesi"
           onChangeText={setUsername}
           value={username}
           style={styles.input}
-          onFocus={() => setUsername('')}
+          onFocus={() => setUsername("")}
         />
-        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
+        <FontAwesome5
+          name="asterisk"
+          size={10}
+          color="orange"
+          style={styles.asterisk}
+        />
         <Text style={styles.label}>Etunimi:</Text>
         <TextInput
           placeholder="Kirjoita etunimesi"
           onChangeText={setFirstName}
           value={firstName}
           style={styles.input}
-          onFocus={() => setFirstName('')}
+          onFocus={() => setFirstName("")}
         />
-        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
+        <FontAwesome5
+          name="asterisk"
+          size={10}
+          color="orange"
+          style={styles.asterisk}
+        />
         <Text style={styles.label}>Sukunimi:</Text>
         <TextInput
           placeholder="Kirjoita sukunimesi"
           onChangeText={setLastName}
           value={lastName}
           style={styles.input}
-          onFocus={() => setLastName('')}
+          onFocus={() => setLastName("")}
         />
+        <FontAwesome5 name="asterisk" size={10} color="orange" style={styles.asterisk} />
         <Text style={styles.label}>Osoite:</Text>
         <TextInput
           placeholder="Kirjoita osoite muodossa: Katunimi ja numero, postinumero ja -toimipaikka. "
           onChangeText={setAddress}
           value={address}
           style={styles.input}
-          onFocus={() => setAddress('')}
+          onFocus={() => setAddress("")}
         />
+
+
         <TouchableOpacity style={styles.customButton} onPress={() => setShowDatePicker(true)}>
           <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
         </TouchableOpacity>
@@ -306,16 +338,17 @@ const UpdateProfile = () => {
             testID="dateTimePicker"
             value={birthDate}
             mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            display={Platform.OS === "ios" ? "spinner" : "default"}
             onChange={onChangeBirthDate}
           />
         )}
 
-        {loading && (
-          <ActivityIndicator size="large" color={Colors.primary} />
-        )}
+        {loading && <ActivityIndicator size="large" color={Colors.primary} />}
 
-        <TouchableOpacity style={styles.customButton} onPress={handleUpdateProfile}>
+        <TouchableOpacity
+          style={styles.customButton}
+          onPress={handleUpdateProfile}
+        >
           <Text style={styles.customButtonText}>Päivitä profiili</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -326,19 +359,19 @@ const UpdateProfile = () => {
 const styles = StyleSheet.create({
   fullScreenContainer: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   container: {
     flex: 1,
     padding: 14,
   },
   contentContainer: {
-    justifyContent: 'center',
+    justifyContent: "center",
     flexGrow: 1,
   },
   profileImageContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 20,
     marginBottom: 20,
   },
@@ -351,73 +384,73 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    flexDirection: "row",
+    justifyContent: "space-evenly",
     marginBottom: 10,
   },
   photoButton: {
     backgroundColor: Colors.primary,
     padding: 10,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
     marginHorizontal: 5,
   },
   photoButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
   input: {
     marginBottom: 10,
     padding: 10,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: 'green',
     borderRadius: 10,
   },
   customButton: {
-    backgroundColor: 'orange',
-    borderColor: 'orange',
+    backgroundColor: "orange",
+    borderColor: "orange",
     borderRadius: 10,
     padding: 10,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 10,
   },
   customButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
   deleteButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 5,
     right: 5,
     zIndex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 5,
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: 'grey', 
+    borderColor: "grey",
   },
   bioLabel: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: 'black',
+    fontWeight: "bold",
+    color: "black",
     marginBottom: 5,
   },
   bioInput: {
     marginBottom: 10,
     padding: 10,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: 'green',
     borderRadius: 10,
   },
   label: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'black', // Dark text color
     marginBottom: 5,
   },
 });
