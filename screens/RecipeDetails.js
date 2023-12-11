@@ -49,7 +49,7 @@ export default function RecipeDetails({ route }) {
   const [instructions, setInstructions] = useState([]);
   const [recipeRating, setRecipeRating] = useState(0);
 
-  const { recipeId, backgroundColor } = route.params;
+  const { recipeId } = route.params;
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -162,7 +162,7 @@ export default function RecipeDetails({ route }) {
   };
   return (
     <View style={styles.firstContainer}>
-      <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />
+      <GoBackAppBar navigation={navigation} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
