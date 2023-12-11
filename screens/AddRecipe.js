@@ -156,8 +156,8 @@ export default function AddRecipe({ route, ...props }) {
       setStepsNumber(stepsNumber + 1);
     }
   };
-  
-    // decrease instruction steps number by one
+
+  // decrease instruction steps number by one
   const handleStepDown = () => {
     if (stepsNumber > 1) {
       setStepsNumber(stepsNumber - 1);
@@ -212,7 +212,7 @@ export default function AddRecipe({ route, ...props }) {
 
   const deletePhoto = () => {
     const photoName = recipeData.photoName;
-    let imageRef = ref(fbStorage, photoName);
+    let imageRef = ref(fbStorage, `images/${photoName}`);
 
     // Delete the file
     deleteObject(imageRef)
@@ -356,7 +356,11 @@ export default function AddRecipe({ route, ...props }) {
                   <Text style={styles.stepNumber}>{index + 1}</Text>
                   <Text style={styles.ingredientAndStepsText}>{item}</Text>
                   <TouchableOpacity onPress={() => deleteStep(index)}>
-                    <Ionicons name="trash-sharp" size={24} color={Colors.grey} />
+                    <Ionicons
+                      name="trash-sharp"
+                      size={24}
+                      color={Colors.grey}
+                    />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -367,7 +371,7 @@ export default function AddRecipe({ route, ...props }) {
                 {!route.params?.photoUrl && (
                   <ButtonWithIcon
                     onPress={() => {
-                      navigation.navigate("PhotoScreen");
+                      navigation.navigate("PhotoScreen", {calledFrom: "AddRecipe"});
                     }}
                     icon={"plus"}
                     width={140}
@@ -611,15 +615,7 @@ export default function AddRecipe({ route, ...props }) {
               </View>
             </View>
 
-            <View
-              style={{
-                ...styles.sectionButtons,
-                marginLeft: 12,
-                marginRight: 12,
-                marginTop: 40,
-                marginBottom: 40,
-              }}
-            >
+            <View style={styles.sectionButtons}>
               <ButtonWithIcon
                 icon={"back"}
                 color={Colors.grey}
@@ -670,7 +666,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
     gap: 8,
-    marginBottom: 20,
+    marginTop: 20,
+    marginBottom: 40,
     marginLeft: 12,
     marginRight: 12,
   },

@@ -45,6 +45,10 @@ export default function GetAllRecipes({ setData }) {
           protein: doc.data().recipeData.protein,
           salt: doc.data().recipeData.salt,
           photo: doc.data().recipeData.photo,
+          photoName: doc.data().recipeData.photoName,
+          rating: doc.data().recipeData.rating,
+          userRated: doc.data().recipeData.userRated,
+          premium: doc.data().recipeData.premium,
         };
         tempRecipes.push(recipeObject);
       });
@@ -69,6 +73,7 @@ export function GetOwnRecipes({ setData, order, orderDirection = "asc" }) {
       querySnapshot.forEach((doc) => {
         const recipeObject = {
           id: doc.id,
+          userId: doc.data().recipeData.userId,
           title: doc.data().recipeData.title,
           created: convertTimeStampToJS(doc.data().created),
           incredients: doc.data().recipeData.incredients,
@@ -89,9 +94,9 @@ export function GetOwnRecipes({ setData, order, orderDirection = "asc" }) {
           protein: doc.data().recipeData.protein,
           salt: doc.data().recipeData.salt,
           photo: doc.data().recipeData.photo,
+          photoName: doc.data().recipeData.photoName,
           rating: doc.data().recipeData.rating,
-          healthyRating: doc.data().recipeData.healthyRating,
-          comments: doc.data().recipeData.comments,
+          userRated: doc.data().recipeData.userRated,
           premium: doc.data().recipeData.premium,
         };
         tempRecipes.push(recipeObject);
@@ -113,9 +118,9 @@ export function GetSingleRecipe({ recipeId, setData }) {
         if (docRef.exists()) {
           const data = docRef.data();
           const tempData = {
-            id: doc.id,
+            id: recipeId,
+            userId: data.recipeData.userId,
             title: data.recipeData.title,
-            created: convertTimeStampToJS(data.created),
             incredients: data.recipeData.incredients,
             instructions: data.recipeData.instructions,
             course: data.recipeData.course,
@@ -134,10 +139,10 @@ export function GetSingleRecipe({ recipeId, setData }) {
             protein: data.recipeData.protein,
             salt: data.recipeData.salt,
             photo: data.recipeData.photo,
+            photoName: data.recipeData.photoName,
             rating: data.recipeData.rating,
-            healthyRating: data.recipeData.healthyRating,
-            comments: data.recipeData.comments,
-            premium: data.recipeData.premium,           
+            userRated: data.recipeData.userRated,
+            premium: data.recipeData.premium,
           };
           setData(tempData);
         } else {

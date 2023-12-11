@@ -63,7 +63,7 @@ export default function SearchRecipe({ ...props }) {
     "Kananmunaton",
     "Vähähiilihydraattinen",
   ];
-
+  
   // fetch the premium status of the user
   useEffect(() => {
     const fetchUserData = async () => {
@@ -287,6 +287,7 @@ export default function SearchRecipe({ ...props }) {
                     cookTime={item.cookTime}
                     servingSize={item.servingSize}
                     backgroundColor={props.backgroundColor}
+                    premium={item.premium}
                   />
                 )}
               />
