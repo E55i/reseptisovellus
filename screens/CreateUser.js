@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View, TextInput, Button, Alert } from "react-native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { Colors } from "../styles/Colors";
 
 const CreateUser = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -44,8 +45,12 @@ const CreateUser = ({ navigation }) => {
         secureTextEntry
         autoCapitalize="none"
       />
-      <Button title="Luo tili" onPress={handleSignUp} />
-      <Button title="Takaisin" onPress={handleBackToLogin} />
+      <View style={styles.buttonContainer}>
+        <Button title="Luo tili" onPress={handleSignUp} color="#FF9C00" />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="Takaisin" onPress={handleBackToLogin} color="#FF9C00" />
+      </View>
     </View>
   );
 };
@@ -58,10 +63,17 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    borderColor: "gray",
+    borderColor: Colors.primary,
     borderWidth: 1,
     marginBottom: 20,
+    padding: 10,
   },
+  buttonContainer: {
+    backgroundColor: "#FF9C00",
+    borderRadius: 50, // Set the desired border radius here
+    overflow: "hidden", // Ensure that the button container clips its contents
+    marginBottom: 10,
+    },
   // Lisää tähän muita tyylejä tarvittaessa
 });
 
