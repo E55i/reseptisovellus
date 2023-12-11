@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Modal, Image } from 'react-native';
+import { Colors } from "../styles/Colors";
 
 const StartScreen = ({ navigation }) => {
   const [showGreeting, setShowGreeting] = useState(true);
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: Colors.secondary,
     textAlign: 'center', // Varmistetaan, että teksti on keskitetty
   },
   optionsContainer: {
@@ -87,17 +88,18 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   privacyPolicyLink: {
-    color: '#007bff',
+    color: Colors.secondary,
     marginTop: 20,
     textDecorationLine: 'underline',
   },
   optionButton: {
-    padding: 15,
-    margin: 10,
-    borderRadius: 10,
-    backgroundColor: '#007bff',
+    padding: 10,
     width: '80%',
     alignItems: 'center',
+    backgroundColor: "#FF9C00",
+    borderRadius: 50, // Set the desired border radius here
+    overflow: "hidden", // Ensure that the button container clips its contents
+    marginBottom: 10,
   },
   buttonText: {
     color: '#fff',

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Button, Alert } from 'react-native';
 import { auth, signInWithEmailAndPassword } from '../components/FirebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Colors } from "../styles/Colors";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -52,10 +53,10 @@ const LoginScreen = ({ navigation }) => {
         autoCapitalize="none"
       />
       <View style={styles.buttonContainer}>
-        <Button title="Kirjaudu sisään" onPress={handleLogin} />
+        <Button title="Kirjaudu sisään" onPress={handleLogin} color="#FF9C00" />
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="Ei tiliä? Luo tili" onPress={() => navigation.navigate('CreateUser')} />
+        <Button title="Ei tiliä? Luo tili" onPress={() => navigation.navigate('AppInfo')} color="#FF9C00" />
       </View>
     </View>
   );
@@ -69,12 +70,16 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: Colors.primary,
     borderWidth: 1,
     marginBottom: 20,
+    padding: 10,
   },
   buttonContainer: {
-    marginBottom: 10, // Lisää marginaali jokaisen View:n alapuolelle
+  backgroundColor: "#FF9C00",
+  borderRadius: 50, // Set the desired border radius here
+  overflow: "hidden", // Ensure that the button container clips its contents
+  marginBottom: 10,
   },
 
 });
