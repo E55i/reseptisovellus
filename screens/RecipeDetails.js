@@ -8,6 +8,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import {
   auth,
@@ -32,15 +33,18 @@ import { Ionicons } from "@expo/vector-icons";
 import ShowAlert from "../components/ShowAlert";
 import { convertTimeStampToJS } from "../helpers/Functions";
 import UpdateToPremium from "../components/UpdateToPremium";
+import { GetSingleRecipe } from "../components/GetRecipes";
+import { Colors } from "../styles/Colors";
 
 export default function RecipeDetails({ route }) {
   const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [recipeLoading, setRecipeLoading] = useState(true);
   const [comments, setComments] = useState([]);
-  const [title, setTitle] = useState("");
   const [premiumRecipe, setPremiumRecipe] = useState("");
   const [isUserPremium, setIsUserPremium] = useState("0");
   const [recipeRating, setRecipeRating] = useState(0);
+  const [data, setData] = useState({});
 
   const { recipeId, backgroundColor } = route.params;
   const navigation = useNavigation();
@@ -59,41 +63,6 @@ export default function RecipeDetails({ route }) {
       .catch((error) => {
         ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
       });
-
-    // Fetch recipes details from Firestore recipes collection
-    const fetchRecipeData = async () => {
-      try {
-        const recipeDocSnapshot = await getDoc(
-          doc(firestore, "recipes", recipeId)
-        );
-
-        if (recipeDocSnapshot.exists()) {
-          const recipeData = recipeDocSnapshot.data();
-          console.log("Recipe Data:", recipeData);
-          setTitle(recipeData.recipeData.title);
-          setPremiumRecipe(recipeData.recipeData.premium);
-          setRecipeRating(
-            recipeData.recipeData.rating[0] / recipeData.recipeData.rating[1]
-          );
-          setIsLoading(false);
-        } else {
-          console.log("Reseptin tietoja ei löydy");
-          navigation.navigate("Welcome");
-          ShowAlert(
-            "Hups!",
-            "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
-          );
-          setIsLoading(false);
-        }
-      } catch (error) {
-        navigation.navigate("Welcome");
-        ShowAlert(
-          "Hups!",
-          "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
-        );
-        setIsLoading(false);
-      }
-    };
 
     // Fetch comments from Firestore feedbacks collection
     const fetchComments = async () => {
@@ -124,7 +93,6 @@ export default function RecipeDetails({ route }) {
         setIsLoading(false);
       }
     };
-    fetchRecipeData();
     fetchComments();
   }, []);
 
@@ -152,31 +120,56 @@ export default function RecipeDetails({ route }) {
   return (
     <View style={styles.firstContainer}>
       <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />
+      <GetSingleRecipe
+        recipeId={recipeId}
+        setData={(data) => {
+          setData(data);
+          setRecipeLoading(false);
+        }}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
         <ScrollView>
-          {/* Add an image component for the recipe here */}
-          {isLoading && (
+          {(isLoading && recipeLoading) ? (
             <ActivityIndicator
               style={styles.activityIndicator}
               size="large"
               color="#47A73E"
             />
+          ) : (
+            <>
+              <Image style={styles.image} source={{ uri: data.photo }} />
+              <Text style={styles.title}>{data.title}</Text>
+              <Rating rating={data.rating[0] / data.rating[1]} />
+              <View style={styles.section}>
+                {data.incredients.map((item, index) => (
+                  <Text key={`${index}-incr`} style={styles.incredient}>
+                    {item}
+                  </Text>
+                ))}
+              </View>
+              <View style={styles.section}>
+                {data.instructions.map((item, index) => (
+                  <View
+                    key={`${index}-instr`}
+                    style={styles.numberedInstruction}
+                  >
+                    <Text style={styles.stepNumber}>{index + 1}</Text>
+                    <Text style={styles.instruction}>{item}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
           )}
-          {!isLoading && <Text>{title}</Text>}
-          <Rating rating={recipeRating} />
+
           {/*If it's not the case that the user is not premium but the recipe is premium, show the recipe details. 
           Otherwise tell the user that subscription must be upgraded to premium before recipe can be shown.*/}
           {(premiumRecipe !== "1" && isUserPremium !== "1") ||
           (premiumRecipe !== "1" && isUserPremium === "1") ||
           (premiumRecipe === "1" && isUserPremium === "1") ? (
             <>
-              <Text>Ingredients:</Text>
-              <Text>Ingredient 1, Ingredient 2, ...</Text>
-              <Text>Instructions:</Text>
-              <Text>Step-by-step instructions go here...</Text>
               <RatingBar recipeId={recipeId} />
               {isLoading && (
                 <ActivityIndicator
@@ -221,7 +214,7 @@ export default function RecipeDetails({ route }) {
               </View>
             </>
           ) : (
-            <UpdateToPremium/>
+            <UpdateToPremium />
           )}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -237,7 +230,53 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#FFFFFF",
     flex: 1,
-    paddingBottom: 48,
+  },
+  title: {
+    flex: 1,
+    height: 72,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+    fontSize: 28,
+    textAlign: "center",
+  },
+  image: {
+    width: "100%",
+    height: 250,
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  section: {
+    flex: 1,
+    margin: 20,
+  },
+  incredient: {
+    fontSize: 18,
+    marginBottom: 4,
+    marginLeft: 30,
+  },
+  numberedInstruction: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+  },
+  stepNumber: {
+    borderWidth: 1.5,
+    borderColor: Colors.secondary,
+    color: Colors.secondary,
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  instruction: {
+    fontSize: 18,
+    marginBottom: 8,
+    marginRight: 30,
+    flexWrap: "wrap",
   },
   newComment: {
     flexDirection: "row",
@@ -246,6 +285,7 @@ const styles = StyleSheet.create({
     marginRight: 20,
     marginTop: 16,
   },
+
   input: {
     flex: 6,
     height: "auto",
