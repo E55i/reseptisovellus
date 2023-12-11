@@ -33,18 +33,21 @@ import { Ionicons } from "@expo/vector-icons";
 import ShowAlert from "../components/ShowAlert";
 import { convertTimeStampToJS } from "../helpers/Functions";
 import UpdateToPremium from "../components/UpdateToPremium";
-import { GetSingleRecipe } from "../components/GetRecipes";
 import { Colors } from "../styles/Colors";
 
 export default function RecipeDetails({ route }) {
   const [newComment, setNewComment] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [recipeLoading, setRecipeLoading] = useState(true);
   const [comments, setComments] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(true);
+
   const [premiumRecipe, setPremiumRecipe] = useState("");
   const [isUserPremium, setIsUserPremium] = useState("0");
+  const [title, setTitle] = useState("");
+  const [photo, setPhoto] = useState("");
+  const [incredients, setIncredients] = useState([]);
+  const [instructions, setInstructions] = useState([]);
   const [recipeRating, setRecipeRating] = useState(0);
-  const [data, setData] = useState({});
 
   const { recipeId, backgroundColor } = route.params;
   const navigation = useNavigation();
@@ -63,6 +66,45 @@ export default function RecipeDetails({ route }) {
       .catch((error) => {
         ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
       });
+
+    // Fetch recipes details from Firestore recipes collection
+    const fetchRecipeData = async () => {
+      try {
+        const recipeDocSnapshot = await getDoc(
+          doc(firestore, "recipes", recipeId)
+        );
+
+        if (recipeDocSnapshot.exists()) {
+          const recipeData = recipeDocSnapshot.data();
+          console.log("Recipe Data:", recipeData);
+          setTitle(recipeData.recipeData.title);
+          setPremiumRecipe(recipeData.recipeData.premium);
+          setIncredients(recipeData.recipeData.incredients);
+          setInstructions(recipeData.recipeData.instructions);
+          setPhoto(recipeData.recipeData.photo);
+          setRecipeRating(
+            recipeData.recipeData.rating[0] / recipeData.recipeData.rating[1]
+          );
+
+          setIsLoading(false);
+        } else {
+          console.log("Reseptin tietoja ei löydy");
+          navigation.navigate("Welcome");
+          ShowAlert(
+            "Hups!",
+            "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
+          );
+          setIsLoading(false);
+        }
+      } catch (error) {
+        navigation.navigate("Welcome");
+        ShowAlert(
+          "Hups!",
+          "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
+        );
+        setIsLoading(false);
+      }
+    };
 
     // Fetch comments from Firestore feedbacks collection
     const fetchComments = async () => {
@@ -93,6 +135,7 @@ export default function RecipeDetails({ route }) {
         setIsLoading(false);
       }
     };
+    fetchRecipeData();
     fetchComments();
   }, []);
 
@@ -120,47 +163,26 @@ export default function RecipeDetails({ route }) {
   return (
     <View style={styles.firstContainer}>
       <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />
-      <GetSingleRecipe
-        recipeId={recipeId}
-        setData={(data) => {
-          setData(data);
-          setRecipeLoading(false);
-        }}
-      />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
         <ScrollView>
-          {(isLoading && recipeLoading) ? (
+          {/* Add an image component for the recipe here */}
+          {isLoading && (
             <ActivityIndicator
               style={styles.activityIndicator}
               size="large"
               color="#47A73E"
             />
-          ) : (
+          )}
+          {!isLoading && (
             <>
-              <Image style={styles.image} source={{ uri: data.photo }} />
-              <Text style={styles.title}>{data.title}</Text>
-              <Rating rating={data.rating[0] / data.rating[1]} />
-              <View style={styles.section}>
-                {data.incredients.map((item, index) => (
-                  <Text key={`${index}-incr`} style={styles.incredient}>
-                    {item}
-                  </Text>
-                ))}
-              </View>
-              <View style={styles.section}>
-                {data.instructions.map((item, index) => (
-                  <View
-                    key={`${index}-instr`}
-                    style={styles.numberedInstruction}
-                  >
-                    <Text style={styles.stepNumber}>{index + 1}</Text>
-                    <Text style={styles.instruction}>{item}</Text>
-                  </View>
-                ))}
-              </View>
+              {photo && (
+                <Image style={styles.image} source={{ uri: photo }} />
+              ) }
+              <Text style={styles.title}>{title}</Text>
+              <Rating rating={recipeRating} />
             </>
           )}
 
@@ -170,6 +192,21 @@ export default function RecipeDetails({ route }) {
           (premiumRecipe !== "1" && isUserPremium === "1") ||
           (premiumRecipe === "1" && isUserPremium === "1") ? (
             <>
+              <View style={styles.section}>
+                {incredients.map((item, index) => (
+                  <Text key={index} style={styles.incredient}>
+                    {item}
+                  </Text>
+                ))}
+                <View style={styles.section}>
+                  {instructions.map((item, index) => (
+                    <View key={index} style={styles.numberedInstruction}>
+                      <Text style={styles.stepNumber}>{index + 1}</Text>
+                      <Text style={styles.instruction}>{item}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
               <RatingBar recipeId={recipeId} />
               {isLoading && (
                 <ActivityIndicator

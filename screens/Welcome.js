@@ -61,10 +61,9 @@ useEffect(() => {
           photo: doc.data().recipeData.photo,
           premium: doc.data().recipeData.premium,
           //recipeRating is the average of the given ratings
-          recipeRating: doc.data().recipeData.rating[1]
-            ? doc.data().recipeData.rating[0] /
-              doc.data().recipeData.rating[1]
-            : 0,
+          recipeRating: doc.data().recipeData.rating[1] !== 0
+          ? doc.data().recipeData.rating[0] / doc.data().recipeData.rating[1]
+          : 0,
         };
         tempRecipes.push(recipeObject);
       });
@@ -195,7 +194,6 @@ useEffect(() => {
                 recipeName={item.title}
                 cookTime={item.cookTime}
                 servingSize={item.servingSize}
-                backgroundColor={backgroundColor}
                 premium={item.premium}
               />
             ))}

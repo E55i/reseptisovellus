@@ -5,14 +5,14 @@ import { useNavigation } from "@react-navigation/native";
 import { SimpleLineIcons } from '@expo/vector-icons';
 import { Colors } from "../styles/Colors";
 
-export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToImage, recipeName, cookTime, servingSize, premium}) {
+export default function RecipeCard({recipeId, prepTime, urlToImage, recipeName, cookTime, servingSize, premium}) {
 
   const navigation = useNavigation();
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        navigation.navigate("RecipeDetails", {recipeId, backgroundColor});
+        navigation.navigate("RecipeDetails", {recipeId});
       }}
     >
       {urlToImage ? (
