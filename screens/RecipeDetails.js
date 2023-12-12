@@ -14,9 +14,7 @@ import {
   auth,
   firestore,
   collection,
-  doc,
   addDoc,
-  getDoc,
   serverTimestamp,
   query,
   onSnapshot,
@@ -34,82 +32,42 @@ import ShowAlert from "../components/ShowAlert";
 import { convertTimeStampToJS } from "../helpers/Functions";
 import UpdateToPremium from "../components/UpdateToPremium";
 import { Colors } from "../styles/Colors";
+import { GetSingleRecipe } from "../components/GetRecipes";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default function RecipeDetails({ route }) {
+export default function RecipeDetails({ route, ...props }) {
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([]);
-
+  const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [premiumRecipe, setPremiumRecipe] = useState("");
   const [isUserPremium, setIsUserPremium] = useState("0");
-  const [title, setTitle] = useState("");
-  const [photo, setPhoto] = useState("");
-  const [incredients, setIncredients] = useState([]);
-  const [instructions, setInstructions] = useState([]);
-  const [recipeRating, setRecipeRating] = useState(0);
 
-  const { recipeId } = route.params;
+  let { recipeId } = route.params;
   const navigation = useNavigation();
 
   useEffect(() => {
-    const database = getDatabase();
-    // Fetch user data
-    const userRef = ref(database, "users/" + auth.currentUser.uid);
-    get(userRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
+    let isMounted = true; // Flag to track whether the component is mounted
+    const fetchData = async () => {
+      try {
+        // Fetch user data
+        const database = getDatabase();
+        const userRef = ref(database, "users/" + auth.currentUser.uid);
+        const userSnapshot = await get(userRef);
+        if (isMounted && userSnapshot.exists()) {
+          const userData = userSnapshot.val();
           setIsUserPremium(userData.premium);
         }
-      })
-      .catch((error) => {
-        ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
-      });
 
-    // Fetch recipes details from Firestore recipes collection
-    const fetchRecipeData = async () => {
-      try {
-        const recipeDocSnapshot = await getDoc(
-          doc(firestore, "recipes", recipeId)
-        );
-
-        if (recipeDocSnapshot.exists()) {
-          const recipeData = recipeDocSnapshot.data();
-          console.log("Recipe Data:", recipeData);
-          setTitle(recipeData.recipeData.title);
-          setPremiumRecipe(recipeData.recipeData.premium);
-          setIncredients(recipeData.recipeData.incredients);
-          setInstructions(recipeData.recipeData.instructions);
-          setPhoto(recipeData.recipeData.photo);
-          setRecipeRating(
-            recipeData.recipeData.rating[0] / recipeData.recipeData.rating[1]
-          );
-
-          setIsLoading(false);
-        } else {
-          console.log("Reseptin tietoja ei löydy");
-          navigation.navigate("Welcome");
-          ShowAlert(
-            "Hups!",
-            "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
-          );
-          setIsLoading(false);
+        // Fetch the recipe data
+        const recipe = await GetSingleRecipe({ recipeId });
+        if (isMounted) {
+          setData(recipe);
         }
-      } catch (error) {
-        navigation.navigate("Welcome");
-        ShowAlert(
-          "Hups!",
-          "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
-        );
-        setIsLoading(false);
-      }
-    };
 
-    // Fetch comments from Firestore feedbacks collection
-    const fetchComments = async () => {
-      try {
-        onSnapshot(
+        // Fetch comments from Firestore feedbacks collection
+        const unsubscribe = onSnapshot(
           query(
             collection(firestore, "feedbacks"),
             where("recipeId", "==", recipeId),
@@ -127,16 +85,28 @@ export default function RecipeDetails({ route }) {
               };
               tempComments.push(commentObject);
             });
-            setComments(tempComments);
-            setIsLoading(false);
+            if (isMounted) {
+              setComments(tempComments);
+              setIsLoading(false);
+            }
           }
         );
+
+        // Cleanup: Unsubscribe from real-time updates when the component is unmounted
+        return () => {
+          isMounted = false;
+          unsubscribe();
+        };
       } catch (error) {
-        setIsLoading(false);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchRecipeData();
-    fetchComments();
+    fetchData();
+    // Cleanup: Ensure that any asynchronous tasks or subscriptions are cleared
+    // when the component is unmounted
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Save new comment to Firestore
@@ -160,53 +130,86 @@ export default function RecipeDetails({ route }) {
       setNewComment("");
     }
   };
+
   return (
-    <View style={styles.firstContainer}>
-      <GoBackAppBar navigation={navigation} />
+    <>
+      <GoBackAppBar {...props} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <ScrollView>
-          {/* Add an image component for the recipe here */}
-          {isLoading && (
+        <ScrollView style={styles.scrollContainer}>
+          {isLoading ? (
             <ActivityIndicator
               style={styles.activityIndicator}
               size="large"
-              color="#47A73E"
+              color={Colors.secondary}
             />
-          )}
-          {!isLoading && (
+          ) : (
             <>
-              {photo && (
-                <Image style={styles.image} source={{ uri: photo }} />
-              ) }
-              <Text style={styles.title}>{title}</Text>
-              <Rating rating={recipeRating} />
+              <Image style={styles.image} source={{ uri: data.photo }} />
+              <Text style={styles.title}>{data.title}</Text>
+              <View style={{ ...styles.section, alignItems: "center" }}>
+                <View style={styles.iconTextRow}>
+                  <MaterialCommunityIcons
+                    name="account-group"
+                    size={20}
+                    color={Colors.grey}
+                  />
+                  <Text style={styles.infoText}>
+                    Annoskoko: {data.servingSize} hlö
+                  </Text>
+                </View>
+                <View style={styles.iconTextRow}>
+                  <Feather name="clock" size={20} color={Colors.grey} />
+                  <Text style={styles.infoText}>
+                    Valmisteluaika: {data.prepTime}
+                  </Text>
+                </View>
+
+                <View style={styles.iconTextRow}>
+                  <MaterialCommunityIcons
+                    style={styles.icon}
+                    name="toaster-oven"
+                    size={20}
+                    color={Colors.grey}
+                  />
+                  <Text style={styles.infoText}>
+                    Kokkausaika: {data.cookTime}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.section}>
+                <Rating rating={data.rating[0] / data.rating[1]} />
+              </View>
+
+              <View style={styles.section}>
+                {data.incredients.map((item, index) => (
+                  <Text key={`${index}-incr`} style={styles.incredient}>
+                    {item}
+                  </Text>
+                ))}
+              </View>
+              <View style={styles.section}>
+                {data.instructions.map((item, index) => (
+                  <View
+                    key={`${index}-instr`}
+                    style={styles.numberedInstruction}
+                  >
+                    <Text style={styles.stepNumber}>{index + 1}</Text>
+                    <Text style={styles.instruction}>{item}</Text>
+                  </View>
+                ))}
+              </View>
             </>
           )}
 
-          {/*If it's not the case that the user is not premium but the recipe is premium, show the recipe details. 
-          Otherwise tell the user that subscription must be upgraded to premium before recipe can be shown.*/}
+          {/*If recipe is premium, show recipe details, for premium user only. 
+          Tell the non-premium user to upgrade the subscription to see recipe details.*/}
           {(premiumRecipe !== "1" && isUserPremium !== "1") ||
           (premiumRecipe !== "1" && isUserPremium === "1") ||
           (premiumRecipe === "1" && isUserPremium === "1") ? (
             <>
-              <View style={styles.section}>
-                {incredients.map((item, index) => (
-                  <Text key={index} style={styles.incredient}>
-                    {item}
-                  </Text>
-                ))}
-                <View style={styles.section}>
-                  {instructions.map((item, index) => (
-                    <View key={index} style={styles.numberedInstruction}>
-                      <Text style={styles.stepNumber}>{index + 1}</Text>
-                      <Text style={styles.instruction}>{item}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
               <RatingBar recipeId={recipeId} />
               {isLoading && (
                 <ActivityIndicator
@@ -255,27 +258,22 @@ export default function RecipeDetails({ route }) {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  firstContainer: {
-    backgroundColor: "#FFFFFF",
-    flex: 1,
-  },
   container: {
     backgroundColor: "#FFFFFF",
     flex: 1,
   },
   title: {
     flex: 1,
-    height: 72,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
     fontSize: 28,
     textAlign: "center",
+    marginBottom: 12,
   },
   image: {
     width: "100%",
@@ -285,7 +283,16 @@ const styles = StyleSheet.create({
   },
   section: {
     flex: 1,
-    margin: 20,
+    marginBottom: 12,
+    marginLeft: 16,
+    marginRight: 16,
+  },
+  iconTextRow: {
+    flexDirection: "row",
+  },
+  infoText: {
+    fontSize: 16,
+    paddingLeft: 8,
   },
   incredient: {
     fontSize: 18,
@@ -321,11 +328,12 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginRight: 20,
     marginTop: 16,
+    marginBottom: 40,
   },
 
   input: {
     flex: 6,
-    height: "auto",
+    minHeight: 50,
     marginRight: 8,
     borderWidth: 1,
     paddingLeft: 10,

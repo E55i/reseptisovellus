@@ -1,164 +1,168 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   auth,
   firestore,
   collection,
   query,
-  onSnapshot,
   orderBy,
   where,
   doc,
+  getDocs,
   getDoc,
 } from "../components/FirebaseConfig";
 import { convertTimeStampToJS } from "../helpers/Functions";
 import ShowAlert from "../components/ShowAlert";
 
-export default function GetAllRecipes({ setData }) {
-  useEffect(() => {
-    const q = query(
-      collection(firestore, "recipes"),
-      orderBy("recipeData.title", "asc")
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const tempRecipes = [];
-      querySnapshot.forEach((doc) => {
-        const recipeObject = {
-          id: doc.id,
-          userId: doc.data().recipeData.userId,
-          title: doc.data().recipeData.title,
-          created: convertTimeStampToJS(doc.data().created),
-          incredients: doc.data().recipeData.incredients,
-          instructions: doc.data().recipeData.instructions,
-          course: doc.data().recipeData.course,
-          mainIngredient: doc.data().recipeData.mainIngredient,
-          diet: doc.data().recipeData.diet,
-          source: doc.data().recipeData.source,
-          servingSize: doc.data().recipeData.servingSize,
-          prepTime: doc.data().recipeData.prepTime,
-          cookTime: doc.data().recipeData.cookTime,
-          caloriesKj: doc.data().recipeData.caloriesKj,
-          caloriesKcal: doc.data().recipeData.caloriesKcal,
-          totalFat: doc.data().recipeData.totalFat,
-          saturatedFat: doc.data().recipeData.saturatedFat,
-          totalCarb: doc.data().recipeData.totalCarb,
-          sugar: doc.data().recipeData.sugar,
-          protein: doc.data().recipeData.protein,
-          salt: doc.data().recipeData.salt,
-          photo: doc.data().recipeData.photo,
-          photoName: doc.data().recipeData.photoName,
-          rating: doc.data().recipeData.rating,
-          userRated: doc.data().recipeData.userRated,
-          premium: doc.data().recipeData.premium,
-        };
-        tempRecipes.push(recipeObject);
-      });
-
-      setData(tempRecipes);
+export default async function GetAllRecipes() {
+  const q = query(
+    collection(firestore, "recipes"),
+    orderBy("recipeData.title", "asc")
+  );
+  try {
+    const querySnapshot = await getDocs(q);
+    const tempRecipes = [];
+    querySnapshot.forEach((doc) => {
+      const recipeObject = {
+        id: doc.id,
+        userId: doc.data().recipeData.userId,
+        title: doc.data().recipeData.title,
+        created: convertTimeStampToJS(doc.data().created),
+        incredients: doc.data().recipeData.incredients,
+        instructions: doc.data().recipeData.instructions,
+        course: doc.data().recipeData.course,
+        mainIngredient: doc.data().recipeData.mainIngredient,
+        diet: doc.data().recipeData.diet,
+        source: doc.data().recipeData.source,
+        servingSize: doc.data().recipeData.servingSize,
+        prepTime: doc.data().recipeData.prepTime,
+        cookTime: doc.data().recipeData.cookTime,
+        caloriesKj: doc.data().recipeData.caloriesKj,
+        caloriesKcal: doc.data().recipeData.caloriesKcal,
+        totalFat: doc.data().recipeData.totalFat,
+        saturatedFat: doc.data().recipeData.saturatedFat,
+        totalCarb: doc.data().recipeData.totalCarb,
+        sugar: doc.data().recipeData.sugar,
+        protein: doc.data().recipeData.protein,
+        salt: doc.data().recipeData.salt,
+        photo: doc.data().recipeData.photo,
+        photoName: doc.data().recipeData.photoName,
+        rating: doc.data().recipeData.rating,
+        userRated: doc.data().recipeData.userRated,
+        premium: doc.data().recipeData.premium,
+      };
+      tempRecipes.push(recipeObject);
     });
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+    return tempRecipes;
+  } catch (error) {
+    console.error("Error fetching recipes:", error);
+    throw error;
+  }
 }
 
-export function GetOwnRecipes({ setData, order, orderDirection = "asc" }) {
-  useEffect(() => {
-    const q = query(
-      collection(firestore, "recipes"),
-      where("recipeData.userId", "==", auth.currentUser.uid),
-      orderBy(order, orderDirection)
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const tempRecipes = [];
-      querySnapshot.forEach((doc) => {
-        const recipeObject = {
-          id: doc.id,
-          userId: doc.data().recipeData.userId,
-          title: doc.data().recipeData.title,
-          created: convertTimeStampToJS(doc.data().created),
-          incredients: doc.data().recipeData.incredients,
-          instructions: doc.data().recipeData.instructions,
-          course: doc.data().recipeData.course,
-          mainIngredient: doc.data().recipeData.mainIngredient,
-          diet: doc.data().recipeData.diet,
-          source: doc.data().recipeData.source,
-          servingSize: doc.data().recipeData.servingSize,
-          prepTime: doc.data().recipeData.prepTime,
-          cookTime: doc.data().recipeData.cookTime,
-          caloriesKj: doc.data().recipeData.caloriesKj,
-          caloriesKcal: doc.data().recipeData.caloriesKcal,
-          totalFat: doc.data().recipeData.totalFat,
-          saturatedFat: doc.data().recipeData.saturatedFat,
-          totalCarb: doc.data().recipeData.totalCarb,
-          sugar: doc.data().recipeData.sugar,
-          protein: doc.data().recipeData.protein,
-          salt: doc.data().recipeData.salt,
-          photo: doc.data().recipeData.photo,
-          photoName: doc.data().recipeData.photoName,
-          rating: doc.data().recipeData.rating,
-          userRated: doc.data().recipeData.userRated,
-          premium: doc.data().recipeData.premium,
-        };
-        tempRecipes.push(recipeObject);
-      });
-      setData(tempRecipes);
+export async function GetOwnRecipes() {
+  const q = query(
+    collection(firestore, "recipes"),
+    where("recipeData.userId", "==", auth.currentUser.uid),
+    orderBy("created", "desc")
+  );
+  try {
+    const querySnapshot = await getDocs(q);
+    const tempRecipes = [];
+    querySnapshot.forEach((doc) => {
+      const recipeObject = {
+        id: doc.id,
+        userId: doc.data().recipeData.userId,
+        title: doc.data().recipeData.title,
+        created: convertTimeStampToJS(doc.data().created),
+        incredients: doc.data().recipeData.incredients,
+        instructions: doc.data().recipeData.instructions,
+        course: doc.data().recipeData.course,
+        mainIngredient: doc.data().recipeData.mainIngredient,
+        diet: doc.data().recipeData.diet,
+        source: doc.data().recipeData.source,
+        servingSize: doc.data().recipeData.servingSize,
+        prepTime: doc.data().recipeData.prepTime,
+        cookTime: doc.data().recipeData.cookTime,
+        caloriesKj: doc.data().recipeData.caloriesKj,
+        caloriesKcal: doc.data().recipeData.caloriesKcal,
+        totalFat: doc.data().recipeData.totalFat,
+        saturatedFat: doc.data().recipeData.saturatedFat,
+        totalCarb: doc.data().recipeData.totalCarb,
+        sugar: doc.data().recipeData.sugar,
+        protein: doc.data().recipeData.protein,
+        salt: doc.data().recipeData.salt,
+        photo: doc.data().recipeData.photo,
+        photoName: doc.data().recipeData.photoName,
+        rating: doc.data().recipeData.rating,
+        userRated: doc.data().recipeData.userRated,
+        premium: doc.data().recipeData.premium,
+      };
+      tempRecipes.push(recipeObject);
     });
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+    return tempRecipes;
+  } catch (error) {
+    console.error("Error fetching recipes:", error);
+    throw error;
+  }
 }
 
-export function GetSingleRecipe({ recipeId, setData }) {
-  useEffect(() => {
-    const fetchRecipeData = async () => {
-      try {
-        const docRef = await getDoc(doc(firestore, "recipes", recipeId));
-
-        if (docRef.exists()) {
-          const data = docRef.data();
-          const tempData = {
-            id: recipeId,
-            userId: data.recipeData.userId,
-            title: data.recipeData.title,
-            incredients: data.recipeData.incredients,
-            instructions: data.recipeData.instructions,
-            course: data.recipeData.course,
-            mainIngredient: data.recipeData.mainIngredient,
-            diet: data.recipeData.diet,
-            source: data.recipeData.source,
-            servingSize: data.recipeData.servingSize,
-            prepTime: data.recipeData.prepTime,
-            cookTime: data.recipeData.cookTime,
-            caloriesKj: data.recipeData.caloriesKj,
-            caloriesKcal: data.recipeData.caloriesKcal,
-            totalFat: data.recipeData.totalFat,
-            saturatedFat: data.recipeData.saturatedFat,
-            totalCarb: data.recipeData.totalCarb,
-            sugar: data.recipeData.sugar,
-            protein: data.recipeData.protein,
-            salt: data.recipeData.salt,
-            photo: data.recipeData.photo,
-            photoName: data.recipeData.photoName,
-            rating: data.recipeData.rating,
-            userRated: data.recipeData.userRated,
-            premium: data.recipeData.premium,
-          };
-          setData(tempData);
-        } else {
-          console.log("Reseptin tietoja ei löydy");
-          ShowAlert(
-            "Hups!",
-            "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
-          );
-        }
-      } catch (error) {
-        ShowAlert(
-          "Hups!",
-          "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
-        );
+export async function GetSingleRecipe({ recipeId }) {
+  try {
+    const docRef = await getDoc(doc(firestore, "recipes", recipeId));
+    if (docRef.exists()) {
+      const data = docRef.data();
+      const tempData = {
+        id: recipeId,
+        userId: data.recipeData.userId,
+        title: data.recipeData.title,
+        incredients: data.recipeData.incredients,
+        instructions: data.recipeData.instructions,
+        course: data.recipeData.course,
+        mainIngredient: data.recipeData.mainIngredient,
+        diet: data.recipeData.diet,
+        source: data.recipeData.source,
+        servingSize: data.recipeData.servingSize,
+        prepTime: data.recipeData.prepTime,
+        cookTime: data.recipeData.cookTime,
+        caloriesKj: data.recipeData.caloriesKj,
+        caloriesKcal: data.recipeData.caloriesKcal,
+        totalFat: data.recipeData.totalFat,
+        saturatedFat: data.recipeData.saturatedFat,
+        totalCarb: data.recipeData.totalCarb,
+        sugar: data.recipeData.sugar,
+        protein: data.recipeData.protein,
+        salt: data.recipeData.salt,
+        photo: data.recipeData.photo,
+        photoName: data.recipeData.photoName,
+        rating: data.recipeData.rating,
+        userRated: data.recipeData.userRated,
+        premium: data.recipeData.premium,
+      };
+      function removeUndefinedValues(obj) {
+        Object.entries(obj).forEach(([key, value]) => {
+          if (value === undefined) {
+            delete obj[key];
+          } else if (typeof value === "object" && value !== null) {
+            // Recursively check nested objects and arrays
+            removeUndefinedValues(value);
+          }
+        });
       }
-    };
-    fetchRecipeData();
-  }, []);
+      removeUndefinedValues(tempData);
+      console.log("tempdata:", tempData);
+      return tempData;
+    } else {
+      console.log("Recipe data not found");
+      ShowAlert(
+        "Hups!",
+        "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching recipes:", error);
+    ShowAlert(
+      "Hups!",
+      "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
+    );
+  }
 }

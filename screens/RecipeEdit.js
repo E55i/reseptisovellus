@@ -28,6 +28,7 @@ import {
   ref,
   deleteObject,
 } from "../components/FirebaseConfig";
+import ShowAlert from "../components/ShowAlert";
 
 export default function RecipeEdit({ route, ...props }) {
   const recipeId = route.params.recipeId;
@@ -51,20 +52,6 @@ export default function RecipeEdit({ route, ...props }) {
     } else if (type === "instruction") {
       const newInstructions = [...recipeData.instructions, newInstruction];
       setRecipeData({ ...recipeData, instructions: newInstructions });
-    }
-  };
-
-  // increase instruction steps number by one
-  const handleStepUp = () => {
-    if (stepsNumber < tempSteps.length + 1) {
-      setStepsNumber(stepsNumber + 1);
-    }
-  };
-
-  // decrease instruction steps number by one
-  const handleStepDown = () => {
-    if (stepsNumber > 1) {
-      setStepsNumber(stepsNumber - 1);
     }
   };
 
@@ -92,7 +79,7 @@ export default function RecipeEdit({ route, ...props }) {
     let imageRef = ref(fbStorage, photoName);
     console.log("imgRef: ", imageRef);
 
-    // Delete the file
+    // Delete photo from Firebase Storage
     deleteObject(imageRef)
       .then(() => {
         setRecipeData({ ...recipeData, photo: "", photoName: "" });
@@ -103,7 +90,7 @@ export default function RecipeEdit({ route, ...props }) {
       });
   };
 
-  // update the recipeData to firestore
+  // Update the recipeData to firestore
   const updateRecipeData = async () => {
     if (
       !recipeData.title ||
@@ -113,40 +100,41 @@ export default function RecipeEdit({ route, ...props }) {
       !recipeData.prepTime ||
       !recipeData.cookTime
     ) {
-      Alert.alert("Täytä kaikki pakolliset kentät.");
+      ShowAlert(
+        "Täytä ainakin pakolliset kentät!",
+        "Otsikko, ainekset, ohjeet, annoskoko, valmistelu- tai kokkausaika eivät voi olla tyhjänä."
+      );
       return;
-
     } else {
       function removeUndefinedValues(obj) {
         Object.entries(obj).forEach(([key, value]) => {
           if (value === undefined) {
             delete obj[key];
-          } else if (typeof value === 'object' && value !== null) {
+          } else if (typeof value === "object" && value !== null) {
             // Recursively check nested objects and arrays
             removeUndefinedValues(value);
           }
         });
       }
-
       removeUndefinedValues(recipeData);
 
       const docRef = await updateDoc(doc(firestore, "recipes", recipeId), {
         recipeData,
         lastEdit: serverTimestamp(),
-      }).catch((error) => {
-        console.log(error);
-        ShowAlert("Error", error);
-      });
-
-      setRecipeData({});
-      Alert.alert("Resepti tallennettu!");
-      console.log("Data saved");
-      navigation.goBack();
+      })
+        .then(() => {
+          Alert.alert("Resepti tallennettu!");
+          console.log("Data saved");
+          navigation.goBack();
+        })
+        .catch((error) => {
+          console.log(error);
+          ShowAlert("Error", error);
+        });
     }
   };
 
   // monitor changes in the form (remove from final app)
-
   useEffect(() => {
     console.log(recipeData);
   }, [recipeData]);

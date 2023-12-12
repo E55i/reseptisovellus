@@ -4,7 +4,7 @@ import { AppBar, HStack, IconButton } from "@react-native-material/core";
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../styles/Colors";
 
-export default function GoBackAppBar({ navigation }) {
+export default function DefaultAppBar({ navigation }) {
   return (
     <AppBar
       backgroundColor={Colors.primary}

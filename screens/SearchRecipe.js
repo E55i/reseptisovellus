@@ -63,22 +63,38 @@ export default function SearchRecipe({ ...props }) {
     "Kananmunaton",
     "Vähähiilihydraattinen",
   ];
-  
-  // fetch the premium status of the user
+
   useEffect(() => {
-    const fetchUserData = async () => {
+    let isMounted = true; // Flag to track whether the component is mounted
+    const fetchData = async () => {
       try {
         const userData = await getUser();
-        if (userData) {
+        if (isMounted && userData.length > 0) {
           setIsPremium(userData.premium);
-        } else {
-          console.log("User data not found.");
         }
+
+        // Fetch the recipe data
+        const recipes = await GetAllRecipes();
+        if (isMounted) {
+          setData(recipes);
+          setLoading(false);
+        }
+
+        // Cleanup: Unsubscribe from real-time updates when the component is unmounted
+        return () => {
+          isMounted = false;
+          unsubscribe();
+        };
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchUserData();
+    fetchData();
+    // Cleanup: Ensure that any asynchronous tasks or subscriptions are cleared
+    // when the component is unmounted
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSearch = (text) => {
@@ -122,12 +138,6 @@ export default function SearchRecipe({ ...props }) {
   return (
     <>
       <GoBackAppBar {...props} />
-      <GetAllRecipes
-        setData={(data) => {
-          setData(data);
-          setLoading(false);
-        }}
-      />
       {loading ? (
         <ActivityIndicator
           size="large"
@@ -286,7 +296,6 @@ export default function SearchRecipe({ ...props }) {
                     recipeName={item.title}
                     cookTime={item.cookTime}
                     servingSize={item.servingSize}
-                    backgroundColor={props.backgroundColor}
                     premium={item.premium}
                   />
                 )}
