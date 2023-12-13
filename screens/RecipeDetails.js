@@ -237,7 +237,7 @@ export default function RecipeDetails({ route, ...props }) {
                         saveComment();
                       }}
                     >
-                      <Ionicons name="send-sharp" size={24} color="#FFFFFF" />
+                      <Ionicons name="send-sharp" size={24} color={Colors.white} />
                     </TouchableOpacity>
                   </View>
                 </>
@@ -252,7 +252,7 @@ export default function RecipeDetails({ route, ...props }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.white,
     flex: 1,
   },
   title: {
@@ -327,8 +327,8 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     borderRadius: 10,
-    borderColor: "#47A73E",
-    backgroundColor: "white",
+    borderColor: Colors.secondary,
+    backgroundColor: Colors.white,
     shadowColor: "#000000",
     ...Platform.select({
       android: {
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   sendButton: {
     flex: 1,
     aspectRatio: 1,
-    backgroundColor: "#FF9C00",
+    backgroundColor: Colors.primary,
     borderRadius: 50,
     padding: 2,
     justifyContent: "center",

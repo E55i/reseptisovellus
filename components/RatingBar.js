@@ -9,6 +9,7 @@ import {
   updateDoc,
 } from "./FirebaseConfig";
 import ShowAlert from "./ShowAlert";
+import { Colors } from "../styles/Colors";
 
 export default function RatingBar({ recipeId }) {
   const [rating, setRating] = useState(0);
@@ -114,7 +115,7 @@ export default function RatingBar({ recipeId }) {
           <TouchableOpacity
             style={[
               styles.button,
-              { backgroundColor: rating === 0 ? "#8B8B8B" : "#47A73E" },
+              { backgroundColor: rating === 0 ? Colors.grey : Colors.secondary },
             ]}
             disabled={rating === 0}
             onPress={() => {
@@ -150,6 +151,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   buttonText: {
-    color: "#FFFFFF",
+    color: Colors.white,
   },
 });
