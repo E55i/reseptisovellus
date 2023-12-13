@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,28 +15,46 @@ import { IconButton } from "../components/CustomButtons";
 import { useNavigation } from "@react-navigation/native";
 
 export default function OwnRecipes({ ...props }) {
-  const [recipes, setRecipes] = useState([]);
+  const [recipeData, setRecipeData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
+  useEffect(() => {
+    let isMounted = true; // Flag to track whether the component is mounted
+    const fetchData = async () => {
+      try {
+        // Fetch the recipe data
+        const recipes = await GetOwnRecipes();
+        if (isMounted) {
+          setRecipeData(recipes);
+          setLoading(false);
+        }
+        // Cleanup: Unsubscribe from real-time updates when the component is unmounted
+        return () => {
+          isMounted = false;
+          unsubscribe();
+        };
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+    // Cleanup: Ensure that any asynchronous tasks or subscriptions are cleared
+    // when the component is unmounted
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <>
       <GoBackAppBar {...props} />
       <View style={styles.container}>
         <ScrollView>
-          <GetOwnRecipes
-            setData={(recipes) => {
-              setRecipes(recipes);
-              setLoading(false);
-            }}
-            order={"created"}
-            orderDirection={"desc"}
-          />
           <View style={styles.title}>
             <Text style={{ fontSize: 28 }}>Omat reseptit</Text>
           </View>
-          {recipes.length > 0 ? (
+          {recipeData.length > 0 ? (
             loading ? (
               <ActivityIndicator
                 style={styles.activityIndicator}
@@ -45,7 +63,7 @@ export default function OwnRecipes({ ...props }) {
               />
             ) : (
               <>
-                {recipes.map((item) => (
+                {recipeData.map((item) => (
                   <View key={item.id}>
                     <RecipeCard
                       key={`${item.id}-edit`}
