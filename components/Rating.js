@@ -5,7 +5,6 @@ export default function Rating({ rating }) {
   const ratingScale = [1, 2, 3, 4, 5];
   const fullStars = Math.floor(rating);
   const modulus = rating % 1;
-  console.log(modulus);
 
   return (
     <View style={styles.stars}>

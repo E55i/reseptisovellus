@@ -9,6 +9,7 @@ import {
   updateDoc,
 } from "./FirebaseConfig";
 import ShowAlert from "./ShowAlert";
+import { Colors } from "../styles/Colors";
 
 export default function RatingBar({ recipeId }) {
   const [rating, setRating] = useState(0);
@@ -24,8 +25,6 @@ export default function RatingBar({ recipeId }) {
         const recipeSnapshot = await getDoc(specificRecipeDoc);
         // fetch the documet data
         const recipeData = recipeSnapshot.data();
-        //console.log("Recipe data:", recipeData);
-        //console.log("userRated data:", recipeData.recipeData.userRated);
 
         //check if curren user has already rated this recipe
         if (
@@ -33,14 +32,12 @@ export default function RatingBar({ recipeId }) {
           recipeData.recipeData.userRated.includes(auth.currentUser.uid)
         ) {
           setIsRated(true);
-          console.log(isRated);
         }
       } catch (error) {
         ShowAlert(
           "Virhe",
           "Reseptin tietojen haussa ilmeni virhe. Kokeile myöhemmin uudelleen."
         );
-        console.error("Error fetching recipe:", error);
       }
     };
     getRecipesRatingInfo();
@@ -81,14 +78,12 @@ export default function RatingBar({ recipeId }) {
 
       // Tell user that rating is saved
       ShowAlert("", "Kiitos että arvioit reseptin!");
-      console.log("Rating saved successfully");
     } catch (error) {
       //Tell user if there is an error saving the rating
       ShowAlert(
         "Virhe",
         "Antamaasi arviota ei voitu tallentaa. Yritä myöhemmin uudelleen."
       );
-      console.error("Error saving rating:", error);
     }
   };
 
@@ -120,7 +115,7 @@ export default function RatingBar({ recipeId }) {
           <TouchableOpacity
             style={[
               styles.button,
-              { backgroundColor: rating === 0 ? "#8B8B8B" : "#47A73E" },
+              { backgroundColor: rating === 0 ? Colors.grey : Colors.secondary },
             ]}
             disabled={rating === 0}
             onPress={() => {
@@ -156,6 +151,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   buttonText: {
-    color: "#FFFFFF",
+    color: Colors.white,
   },
 });

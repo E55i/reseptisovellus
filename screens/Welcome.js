@@ -22,6 +22,7 @@ import RecipeCard from "../components/RecipeCard";
 import ShowAlert from "../components/ShowAlert";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { SimpleLineIcons } from "@expo/vector-icons";
+import { Colors } from "../styles/Colors";
 
 
 export default function Welcome({ backgroundColor, navigation }) {
@@ -153,7 +154,7 @@ useEffect(() => {
           {userName ? `Tervetuloa ${userName}` : "Tervetuloa"}
         </Text>
         {isUserPremium === "1" && (
-          <SimpleLineIcons name="diamond" size={18} color="#00C0D6" />
+          <SimpleLineIcons name="diamond" size={18} color={Colors.diamond} />
         )}
         </View>
         <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
@@ -177,7 +178,7 @@ useEffect(() => {
           <ActivityIndicator
             style={styles.activityIndicator}
             size="large"
-            color="#47A73E"
+            color={Colors.secondary}
           />
         )}
         {/* Show top 10 recipes when category is not choosed*/}
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   container: {
-    backgroundColor: "white",
+    backgroundColor: Colors.white,
     paddingBottom: 60,
   },
   nameAndIcon:{
@@ -250,14 +251,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 26,
     fontSize: 20,
-    color: "#8B8B8B",
+    color: Colors.grey,
     textAlign: "center",
   },
   textFavourites: {
     marginTop: 8,
     marginBottom: 8,
     fontSize: 20,
-    color: "#8B8B8B",
+    color: Colors.grey,
     textAlign: "center",
   },
 });

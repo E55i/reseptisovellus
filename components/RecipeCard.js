@@ -32,7 +32,7 @@ export default function RecipeCard({recipeId, prepTime, urlToImage, recipeName, 
             style={styles.icon}
             name="account-group"
             size={18}
-            color="#8B8B8B"
+            color={Colors.grey}
           />
           <Text style={styles.infoText}>{servingSize} hlö</Text>
           </View>
@@ -40,20 +40,20 @@ export default function RecipeCard({recipeId, prepTime, urlToImage, recipeName, 
           <Feather style={styles.icon} 
           name="clock" 
           size={16} 
-          color="#8B8B8B" 
+          color={Colors.grey} 
           />
           <Text style={styles.infoText}>{prepTime}</Text>
           <MaterialCommunityIcons
             style={styles.icon}
             name="toaster-oven"
             size={18}
-            color="#8B8B8B"
+            color={Colors.grey}
           />
           <Text style={styles.infoText}>{cookTime}</Text>
           </View>
         </View>
         <View style={styles.diamond}> 
-        {premium === "1" && <SimpleLineIcons name="diamond" size={18} color="#00C0D6" />}
+        {premium === "1" && <SimpleLineIcons name="diamond" size={18} color={Colors.diamond} />}
         </View>
         </View>
       </View>
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
     marginTop: 14,
     marginBottom: 4,
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     shadowColor: "#000000",
     ...Platform.select({
       android: {

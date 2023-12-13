@@ -10,6 +10,7 @@ import {
   getDoc,
   updateDoc,
 } from "./FirebaseConfig";
+import { Colors } from "../styles/Colors";
 
 export default function CommentBox({ comment, created, likes, commentUserId, commentId }) {
   const [isLiked, setIsLiked] = useState(false)
@@ -108,11 +109,11 @@ export default function CommentBox({ comment, created, likes, commentUserId, com
         <Text style={styles.likerText}>{numberOfLikes ? numberOfLikes : "0"} tykkää tästä</Text>
           {isLiked ? (
             <TouchableOpacity onPress={deleteLike}>
-            <AntDesign name="heart" size={30} color="#FF573A" />
+            <AntDesign name="heart" size={30} color={Colors.heart} />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={saveLike}>
-            <AntDesign name="hearto" size={30} color="#8B8B8B" />
+            <AntDesign name="hearto" size={30} color={Colors.grey} />
             </TouchableOpacity>
           )}
       </View>
@@ -123,7 +124,7 @@ export default function CommentBox({ comment, created, likes, commentUserId, com
 const styles = StyleSheet.create({
   box: {
     borderRadius: 20,
-    borderColor: "#47A73E",
+    borderColor: Colors.secondary,
     borderWidth: 2,
     padding: 8,
     marginLeft: 20,
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
   },
   userNameText: {
     fontSize: 18,
-    color: "#8B8B8B",
+    color: Colors.grey,
     textAlign: "center",
   },
   profilePicture: {
