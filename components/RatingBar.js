@@ -24,8 +24,6 @@ export default function RatingBar({ recipeId }) {
         const recipeSnapshot = await getDoc(specificRecipeDoc);
         // fetch the documet data
         const recipeData = recipeSnapshot.data();
-        //console.log("Recipe data:", recipeData);
-        //console.log("userRated data:", recipeData.recipeData.userRated);
 
         //check if curren user has already rated this recipe
         if (
@@ -33,14 +31,12 @@ export default function RatingBar({ recipeId }) {
           recipeData.recipeData.userRated.includes(auth.currentUser.uid)
         ) {
           setIsRated(true);
-          console.log(isRated);
         }
       } catch (error) {
         ShowAlert(
           "Virhe",
           "Reseptin tietojen haussa ilmeni virhe. Kokeile myöhemmin uudelleen."
         );
-        console.error("Error fetching recipe:", error);
       }
     };
     getRecipesRatingInfo();
@@ -81,14 +77,12 @@ export default function RatingBar({ recipeId }) {
 
       // Tell user that rating is saved
       ShowAlert("", "Kiitos että arvioit reseptin!");
-      console.log("Rating saved successfully");
     } catch (error) {
       //Tell user if there is an error saving the rating
       ShowAlert(
         "Virhe",
         "Antamaasi arviota ei voitu tallentaa. Yritä myöhemmin uudelleen."
       );
-      console.error("Error saving rating:", error);
     }
   };
 

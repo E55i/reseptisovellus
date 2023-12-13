@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -24,7 +24,6 @@ import {
 import { getDatabase, ref, get } from "firebase/database";
 import GoBackAppBar from "../components/GoBackAppBar";
 import RatingBar from "../components/RatingBar";
-import { useNavigation } from "@react-navigation/native";
 import Rating from "../components/Rating";
 import CommentBox from "../components/CommentBox";
 import { Ionicons } from "@expo/vector-icons";
@@ -40,14 +39,16 @@ export default function RecipeDetails({ route, ...props }) {
   const [comments, setComments] = useState([]);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const [premiumRecipe, setPremiumRecipe] = useState("");
   const [isUserPremium, setIsUserPremium] = useState("0");
 
+  const scrollViewRef = useRef();
   let { recipeId } = route.params;
-  const navigation = useNavigation();
 
   useEffect(() => {
+    // if page is scrolled down before, it is automatically scrolled to the top of the page when searching new recipe
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+    }
     let isMounted = true; // Flag to track whether the component is mounted
     const fetchData = async () => {
       try {
@@ -65,7 +66,6 @@ export default function RecipeDetails({ route, ...props }) {
         if (isMounted) {
           setData(recipe);
         }
-
         // Fetch comments from Firestore feedbacks collection
         const unsubscribe = onSnapshot(
           query(
@@ -107,7 +107,7 @@ export default function RecipeDetails({ route, ...props }) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [recipeId]);
 
   // Save new comment to Firestore
   const saveComment = async () => {
@@ -138,7 +138,7 @@ export default function RecipeDetails({ route, ...props }) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <ScrollView style={styles.scrollContainer}>
+        <ScrollView style={styles.scrollContainer} ref={scrollViewRef}>
           {isLoading ? (
             <ActivityIndicator
               style={styles.activityIndicator}
@@ -182,79 +182,67 @@ export default function RecipeDetails({ route, ...props }) {
               <View style={styles.section}>
                 <Rating rating={data.rating[0] / data.rating[1]} />
               </View>
-
-              <View style={styles.section}>
-                {data.incredients.map((item, index) => (
-                  <Text key={`${index}-incr`} style={styles.incredient}>
-                    {item}
-                  </Text>
-                ))}
-              </View>
-              <View style={styles.section}>
-                {data.instructions.map((item, index) => (
-                  <View
-                    key={`${index}-instr`}
-                    style={styles.numberedInstruction}
-                  >
-                    <Text style={styles.stepNumber}>{index + 1}</Text>
-                    <Text style={styles.instruction}>{item}</Text>
+              {/*Check if recipe is premium but user is not premium. 
+              If true, don't show incredients, instructions or commnets but show window where user can update subscription to premium */}
+              {data.premium === "1" && isUserPremium !== "1" ? (
+                <UpdateToPremium />
+              ) : (
+                <>
+                  <View style={styles.section}>
+                    {data.incredients.map((item, index) => (
+                      <Text key={`${index}-incr`} style={styles.incredient}>
+                        {item}
+                      </Text>
+                    ))}
                   </View>
-                ))}
-              </View>
-            </>
-          )}
-
-          {/*If recipe is premium, show recipe details, for premium user only. 
-          Tell the non-premium user to upgrade the subscription to see recipe details.*/}
-          {(premiumRecipe !== "1" && isUserPremium !== "1") ||
-          (premiumRecipe !== "1" && isUserPremium === "1") ||
-          (premiumRecipe === "1" && isUserPremium === "1") ? (
-            <>
-              <RatingBar recipeId={recipeId} />
-              {isLoading && (
-                <ActivityIndicator
-                  style={styles.activityIndicator}
-                  size="large"
-                  color="#47A73E"
-                />
+                  <View style={styles.section}>
+                    {data.instructions.map((item, index) => (
+                      <View
+                        key={`${index}-instr`}
+                        style={styles.numberedInstruction}
+                      >
+                        <Text style={styles.stepNumber}>{index + 1}</Text>
+                        <Text style={styles.instruction}>{item}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <RatingBar recipeId={recipeId} />
+                  {comments.map((item) => (
+                    <CommentBox
+                      key={item.id}
+                      commentId={item.id}
+                      comment={item.comment}
+                      created={item.created}
+                      likes={item.likes}
+                      commentUserId={item.commentUserId}
+                    />
+                  ))}
+                  <View style={styles.newComment}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Kirjoita kommentti..."
+                      multiline={true}
+                      value={newComment}
+                      returnKeyType="send"
+                      onSubmitEditing={() => {
+                        if (newComment !== "") {
+                          saveComment(newComment);
+                        }
+                      }}
+                      onChangeText={(text) => setNewComment(text)}
+                    />
+                    <TouchableOpacity
+                      style={styles.sendButton}
+                      onPress={() => {
+                        saveComment();
+                      }}
+                    >
+                      <Ionicons name="send-sharp" size={24} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  </View>
+                </>
               )}
-              {!isLoading &&
-                comments.map((item) => (
-                  <CommentBox
-                    key={item.id}
-                    commentId={item.id}
-                    comment={item.comment}
-                    created={item.created}
-                    likes={item.likes}
-                    commentUserId={item.commentUserId}
-                  />
-                ))}
-              <View style={styles.newComment}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Kirjoita kommentti..."
-                  multiline={true}
-                  value={newComment}
-                  returnKeyType="send"
-                  onSubmitEditing={() => {
-                    if (newComment !== "") {
-                      saveComment(newComment);
-                    }
-                  }}
-                  onChangeText={(text) => setNewComment(text)}
-                />
-                <TouchableOpacity
-                  style={styles.sendButton}
-                  onPress={() => {
-                    saveComment();
-                  }}
-                >
-                  <Ionicons name="send-sharp" size={24} color="#FFFFFF" />
-                </TouchableOpacity>
-              </View>
             </>
-          ) : (
-            <UpdateToPremium />
           )}
         </ScrollView>
       </KeyboardAvoidingView>
