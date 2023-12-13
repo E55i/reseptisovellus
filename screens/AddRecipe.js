@@ -57,7 +57,6 @@ export default function AddRecipe({ route, ...props }) {
     photoName: "",
     rating: [],
     userRated: [],
-    healthyRating: 0,
     premium: "0",
   });
 
@@ -257,7 +256,7 @@ export default function AddRecipe({ route, ...props }) {
                 onChangeText={(text) =>
                   setRecipeData({ ...recipeData, title: text })
                 }
-              ></TextInput>
+              />
             </View>
 
             <View style={styles.section}>
@@ -371,7 +370,9 @@ export default function AddRecipe({ route, ...props }) {
                 {!route.params?.photoUrl && (
                   <ButtonWithIcon
                     onPress={() => {
-                      navigation.navigate("PhotoScreen", {calledFrom: "AddRecipe"});
+                      navigation.navigate("PhotoScreen", {
+                        calledFrom: "AddRecipe",
+                      });
                     }}
                     icon={"plus"}
                     width={140}
@@ -424,7 +425,7 @@ export default function AddRecipe({ route, ...props }) {
                 onChangeText={(text) =>
                   setRecipeData({ ...recipeData, servingSize: text })
                 }
-              ></TextInput>
+              />
             </View>
 
             <View style={styles.section}>
@@ -469,7 +470,7 @@ export default function AddRecipe({ route, ...props }) {
                 onChangeText={(text) =>
                   setRecipeData({ ...recipeData, source: text })
                 }
-              ></TextInput>
+              />
             </View>
 
             <View style={styles.section}>
@@ -530,7 +531,7 @@ export default function AddRecipe({ route, ...props }) {
                     onChangeText={(text) =>
                       setRecipeData({ ...recipeData, caloriesKj: text })
                     }
-                  ></TextInput>
+                  />
                   <TextInput
                     style={[styles.input, styles.caloriesInput]}
                     placeholder="kcal"
@@ -538,7 +539,7 @@ export default function AddRecipe({ route, ...props }) {
                     onChangeText={(text) =>
                       setRecipeData({ ...recipeData, caloriesKcal: text })
                     }
-                  ></TextInput>
+                  />
                 </View>
               </View>
 
@@ -551,7 +552,7 @@ export default function AddRecipe({ route, ...props }) {
                   onChangeText={(text) =>
                     setRecipeData({ ...recipeData, totalFat: text })
                   }
-                ></TextInput>
+                />
               </View>
 
               <View style={styles.row}>
@@ -563,7 +564,7 @@ export default function AddRecipe({ route, ...props }) {
                   onChangeText={(text) =>
                     setRecipeData({ ...recipeData, saturatedFat: text })
                   }
-                ></TextInput>
+                />
               </View>
 
               <View style={styles.row}>
@@ -575,7 +576,7 @@ export default function AddRecipe({ route, ...props }) {
                   onChangeText={(text) =>
                     setRecipeData({ ...recipeData, totalCarb: text })
                   }
-                ></TextInput>
+                />
               </View>
 
               <View style={styles.row}>
@@ -587,7 +588,7 @@ export default function AddRecipe({ route, ...props }) {
                   onChangeText={(text) =>
                     setRecipeData({ ...recipeData, sugar: text })
                   }
-                ></TextInput>
+                />
               </View>
 
               <View style={styles.row}>
@@ -599,7 +600,7 @@ export default function AddRecipe({ route, ...props }) {
                   onChangeText={(text) =>
                     setRecipeData({ ...recipeData, protein: text })
                   }
-                ></TextInput>
+                />
               </View>
 
               <View style={styles.row}>
@@ -611,7 +612,7 @@ export default function AddRecipe({ route, ...props }) {
                   onChangeText={(text) =>
                     setRecipeData({ ...recipeData, salt: text })
                   }
-                ></TextInput>
+                />
               </View>
             </View>
 

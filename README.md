@@ -25,14 +25,12 @@ Sovellus noudattaa parhaita käytäntöjä ja tarjoaa käyttäjille helppokäytt
 # Kuinka Aloitat:
 
 - Kloonaa tämä repository: git clone `git clone https://github.com/E55i/reseptisovellus.git`
-- Asenna Expo `npm expo install`
 - Siirry kloonattuun kansioon ja suorita päätteessä `npm install`
 - Lisää .env-tiedosto Teamsista projektin juureen
 - Käynnistä expo-laitteesi `npm start`
 
-# Installation in english
+# Installation in English
 - Clone the repo by `git clone https://github.com/E55i/reseptisovellus.git`
-- Install Expo by `npm expo install`
 - Go to the cloned folder and in the terminal, run `npm install`
 - Add .env file from Teams to the root of the project
 - Start your expo device by `npm start`

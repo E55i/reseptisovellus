@@ -149,7 +149,6 @@ export async function GetSingleRecipe({ recipeId }) {
         });
       }
       removeUndefinedValues(tempData);
-      console.log("tempdata:", tempData);
       return tempData;
     } else {
       console.log("Recipe data not found");

@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Alert,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import GoBackAppBar from "../components/GoBackAppBar";
 import { GetSingleRecipe } from "../components/GetRecipes";
@@ -29,6 +29,11 @@ import {
   deleteObject,
 } from "../components/FirebaseConfig";
 import ShowAlert from "../components/ShowAlert";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  SelectList,
+  MultipleSelectList,
+} from "react-native-dropdown-select-list";
 
 export default function RecipeEdit({ route, ...props }) {
   const recipeId = route.params.recipeId;
@@ -39,10 +44,53 @@ export default function RecipeEdit({ route, ...props }) {
   const [editInstructions, setEditInstructions] = useState(false);
   const [showIncredientInput, setShowIncredientInput] = useState(false);
   const [showInstructionInput, setShowInstructionInput] = useState(false);
+  const [showCheckboxDropdowns, setShowCheckboxDropdowns] = useState(false);
   const [newIngredient, setNewIngredient] = useState("");
   const [newInstruction, setNewInstruction] = useState("");
 
+  const scrollViewRef = useRef();
   const navigation = useNavigation();
+
+  const timeOptions = [
+    { key: "1", value: "alle 15 min" },
+    { key: "2", value: "alle 30 min" },
+    { key: "3", value: "30-60 min" },
+    { key: "4", value: "yli 60 min" },
+  ];
+
+  useEffect(() => {
+    // if page is scrolled down before, it is automatically scrolled to the
+    // top of the page when searching new recipe
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+    }
+    let isMounted = true; // Flag to track whether the component is mounted
+    const fetchData = async () => {
+      try {
+        // Fetch the recipe data
+        const recipe = await GetSingleRecipe({ recipeId });
+        if (isMounted) {
+          setRecipeData(recipe);
+          setLoading(false);
+        }
+
+        // Cleanup: Unsubscribe from real-time updates when the
+        // component is unmounted
+        return () => {
+          isMounted = false;
+          unsubscribe();
+        };
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+    // Cleanup: Ensure that any asynchronous tasks or subscriptions are cleared
+    // when the component is unmounted
+    return () => {
+      isMounted = false;
+    };
+  }, [recipeId]);
 
   // add new ingredient to recipe
   const addItem = (type) => {
@@ -146,13 +194,6 @@ export default function RecipeEdit({ route, ...props }) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <GetSingleRecipe
-          recipeId={recipeId}
-          setData={(data) => {
-            setRecipeData(data);
-            setLoading(false);
-          }}
-        />
         {loading ? (
           <ActivityIndicator
             size="large"
@@ -206,7 +247,7 @@ export default function RecipeEdit({ route, ...props }) {
               <View
                 style={{
                   ...styles.section,
-                  backgroundColor: "#e4e4e4",
+                  backgroundColor: Colors.lightgrey,
                   borderRadius: 10,
                 }}
               >
@@ -244,11 +285,99 @@ export default function RecipeEdit({ route, ...props }) {
               </View>
             )}
 
+            {showCheckboxDropdowns ? (
+              <View
+                style={{
+                  ...styles.section,
+                  backgroundColor: Colors.lightgrey,
+                  borderRadius: 10,
+                }}
+              >
+                <TextInput
+                  style={styles.input}
+                  placeholder="Muuta annoskokoa (hlö)"
+                  keyboardType="numeric"
+                  onChangeText={(text) =>
+                    setRecipeData({ ...recipeData, servingSize: text })
+                  }
+                />
+                <SelectList
+                  boxStyles={styles.input}
+                  placeholder="Valitse valmisteluaika"
+                  setSelected={(val) =>
+                    setRecipeData({ ...recipeData, prepTime: val })
+                  }
+                  data={timeOptions}
+                  search={false}
+                  save="value"
+                />
+                <SelectList
+                  boxStyles={styles.input}
+                  placeholder="Valitse kokkausaika"
+                  setSelected={(val) =>
+                    setRecipeData({ ...recipeData, cookTime: val })
+                  }
+                  data={timeOptions}
+                  search={false}
+                  save="value"
+                />
+                <View style={styles.editingButton}>
+                  <IconButton
+                    icon="checkcircle"
+                    iconColor={Colors.secondary}
+                    onPress={() => {
+                      setShowCheckboxDropdowns(!showCheckboxDropdowns);
+                    }}
+                  />
+                </View>
+              </View>
+            ) : (
+              <View style={{ ...styles.section, alignItems: "center" }}>
+                <View style={styles.iconTextRow}>
+                  <MaterialCommunityIcons
+                    name="account-group"
+                    size={20}
+                    color={Colors.grey}
+                  />
+                  <Text style={styles.infoText}>
+                    Annoskoko: {recipeData.servingSize} hlö
+                  </Text>
+                </View>
+                <View style={styles.iconTextRow}>
+                  <Feather name="clock" size={20} color={Colors.grey} />
+                  <Text style={styles.infoText}>
+                    Valmisteluaika: {recipeData.prepTime}
+                  </Text>
+                </View>
+
+                <View style={styles.iconTextRow}>
+                  <MaterialCommunityIcons
+                    name="toaster-oven"
+                    size={20}
+                    color={Colors.grey}
+                  />
+                  <Text style={styles.infoText}>
+                    Kokkausaika: {recipeData.cookTime}
+                  </Text>
+                </View>
+
+                <View style={styles.editingButton}>
+                  <IconButton
+                    icon="setting"
+                    iconColor={Colors.grey}
+                    onPress={() => {
+                      setShowCheckboxDropdowns(!showCheckboxDropdowns);
+                    }}
+                  />
+                </View>
+              </View>
+            )}
+
             {editIncredients ? (
               <View
                 style={{
                   ...styles.section,
-                  backgroundColor: "#e4e4e4",
+                  backgroundColor: Colors.lightgrey,
                   borderRadius: 10,
                   paddingTop: 36,
                 }}
@@ -332,7 +461,7 @@ export default function RecipeEdit({ route, ...props }) {
               <View
                 style={{
                   ...styles.section,
-                  backgroundColor: "#e4e4e4",
+                  backgroundColor: Colors.lightgrey,
                   borderRadius: 10,
                   paddingTop: 36,
                 }}
@@ -487,6 +616,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
     textAlign: "center",
   },
+  iconTextRow: {
+    flexDirection: "row",
+  },
+  infoText: {
+    fontSize: 16,
+    paddingLeft: 8,
+  },
   incredient: {
     fontSize: 18,
     marginBottom: 4,
@@ -505,8 +641,8 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 44,
-    marginLeft: 12,
-    marginRight: 12,
+    marginLeft: 8,
+    marginRight: 20,
     marginBottom: 12,
     borderWidth: 1,
     paddingLeft: 10,
