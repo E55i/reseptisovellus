@@ -69,7 +69,7 @@ export default function SearchRecipe({ ...props }) {
     const fetchData = async () => {
       try {
         const userData = await getUser();
-        if (isMounted && userData.length > 0) {
+        if (isMounted && userData) {
           setIsPremium(userData.premium);
         }
 

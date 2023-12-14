@@ -19,6 +19,7 @@ export default function OwnRecipes({ ...props }) {
   const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
+  
   useEffect(() => {
     let isMounted = true; // Flag to track whether the component is mounted
     const fetchData = async () => {

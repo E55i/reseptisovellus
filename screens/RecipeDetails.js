@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Image,
+  Modal,
 } from "react-native";
 import {
   auth,
@@ -33,6 +34,7 @@ import UpdateToPremium from "../components/UpdateToPremium";
 import { Colors } from "../styles/Colors";
 import { GetSingleRecipe } from "../components/GetRecipes";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import ButtonWithIcon from "../components/CustomButtons";
 
 export default function RecipeDetails({ route, ...props }) {
   const [newComment, setNewComment] = useState("");
@@ -40,6 +42,7 @@ export default function RecipeDetails({ route, ...props }) {
   const [recipeData, setRecipeData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUserPremium, setIsUserPremium] = useState("0");
+  const [showModal, setShowModal] = useState(false);
 
   const scrollViewRef = useRef();
   const { recipeId } = route.params;
@@ -58,7 +61,6 @@ export default function RecipeDetails({ route, ...props }) {
         if (isMounted && userData) {
           setIsUserPremium(userData.premium);
         }
-
         // Fetch the recipe data
         const recipe = await GetSingleRecipe({ recipeId });
         if (isMounted) {
@@ -99,6 +101,7 @@ export default function RecipeDetails({ route, ...props }) {
       }
     };
     fetchData();
+
     // Cleanup: Ensure that any asynchronous tasks or subscriptions are cleared
     // when the component is unmounted
     return () => {
@@ -109,7 +112,7 @@ export default function RecipeDetails({ route, ...props }) {
   // Save new comment to Firestore
   const saveComment = async () => {
     if (!newComment) {
-      ShowAlert("", "Kirjoita kommenttiin teksitä ennen kuin lähetät sen");
+      ShowAlert("", "Kirjoita kommenttiin tekstiä ennen kuin lähetät sen");
       return;
     } else {
       const docRef = await addDoc(collection(firestore, "feedbacks"), {
@@ -144,8 +147,20 @@ export default function RecipeDetails({ route, ...props }) {
             />
           ) : (
             <>
-              <Image style={styles.image} source={{ uri: recipeData.photo }} />
+              {recipeData.photo ? (
+                <Image
+                  style={styles.image}
+                  source={{ uri: recipeData.photo }}
+                />
+              ) : (
+                <Image
+                  style={styles.image}
+                  source={require("../assets/image_placeholder.png")}
+                />
+              )}
+
               <Text style={styles.title}>{recipeData.title}</Text>
+
               <View style={{ ...styles.section, alignItems: "center" }}>
                 <View style={styles.iconTextRow}>
                   <MaterialCommunityIcons
@@ -180,7 +195,8 @@ export default function RecipeDetails({ route, ...props }) {
                 <Rating rating={recipeData.rating[0] / recipeData.rating[1]} />
               </View>
               {/*Check if recipe is premium but user is not premium. 
-              If true, don't show incredients, instructions or commnets but show window where user can update subscription to premium */}
+              If true, don't show incredients, instructions or commnets but 
+              show window where user can update subscription to premium */}
               {recipeData.premium === "1" && isUserPremium !== "1" ? (
                 <UpdateToPremium />
               ) : (
@@ -203,6 +219,158 @@ export default function RecipeDetails({ route, ...props }) {
                       </View>
                     ))}
                   </View>
+                  <Text style={[styles.section, { fontSize: 16 }]}>
+                    Kategoriat:
+                  </Text>
+                  <View style={[styles.section, styles.filtersList]}>
+                    {recipeData.course &&
+                      recipeData.course?.map((item, index) => (
+                        <Text key={index} style={styles.filterText}>
+                          {item}
+                        </Text>
+                      ))}
+                    {recipeData.mainIncredient &&
+                      recipeData.mainIncredient?.map((item, index) => (
+                        <Text key={index} style={styles.filterText}>
+                          {item}
+                        </Text>
+                      ))}
+                    {recipeData.diet &&
+                      recipeData.diet?.map((item, index) => (
+                        <Text key={index} style={styles.filterText}>
+                          {item}
+                        </Text>
+                      ))}
+                  </View>
+                  <View style={{ alignItems: "center" }}>
+                    <ButtonWithIcon
+                      icon={"infocirlceo"}
+                      color={Colors.primary}
+                      width={200}
+                      title="Ravintosisältö"
+                      onPress={() => {
+                        setShowModal(!showModal);
+                      }}
+                    />
+                  </View>
+                  {showModal &&
+                  recipeData.caloriesKj === "" &&
+                  recipeData.caloriesKcal === "" &&
+                  recipeData.totalFat === "" &&
+                  recipeData.saturatedFat === "" &&
+                  recipeData.totalCarb === "" &&
+                  recipeData.sugar === "" &&
+                  recipeData.protein === "" &&
+                  recipeData.salt === "" ? (
+                    ShowAlert(
+                      "",
+                      "Valitettavasti tälle reseptille ei ole vielä lisätty ravintosisältöä."
+                    )
+                  ) : (
+                    <Modal
+                      transparent={true}
+                      animationType="slide"
+                      visible={showModal}
+                      onRequestClose={() => setShowModal(false)}
+                    >
+                      <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                          <View style={styles.closeButton}>
+                            <TouchableOpacity
+                              style={styles.closeButton}
+                              onPress={() => {
+                                setShowModal(false);
+                              }}
+                            >
+                              <Ionicons
+                                name="close"
+                                size={20}
+                                color={Colors.grey}
+                              />
+                            </TouchableOpacity>
+                          </View>
+                          <Text style={styles.heading}>Ravintosisältö</Text>
+
+                          <View style={styles.row}>
+                            <Text style={{ fontSize: 16 }}></Text>
+                            <Text
+                              style={{
+                                fontSize: 16,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              100 g
+                            </Text>
+                          </View>
+                          <View
+                            style={{
+                              borderBottomColor: Colors.secondary,
+                              borderBottomWidth: 1,
+                              marginBottom: 8,
+                            }}
+                          ></View>
+
+                          <View style={styles.row}>
+                            <Text style={{ fontSize: 16 }}>Energia</Text>
+                            <View style={{ flexDirection: "row", gap: 4 }}>
+                              <Text style={{ fontSize: 16 }}>
+                                {recipeData.caloriesKj} kJ /
+                              </Text>
+                              <Text style={{ fontSize: 16 }}>
+                                {recipeData.caloriesKcal} kCal
+                              </Text>
+                            </View>
+                          </View>
+
+                          <View style={styles.row}>
+                            <Text style={{ fontSize: 16 }}>Rasva</Text>
+                            <Text style={{ fontSize: 16 }}>
+                              {recipeData.totalFat} g
+                            </Text>
+                          </View>
+
+                          <View style={styles.row}>
+                            <Text style={{ fontSize: 16 }}>
+                              josta tyydyttynyttä
+                            </Text>
+                            <Text style={{ fontSize: 16 }}>
+                              {recipeData.saturatedFat} g
+                            </Text>
+                          </View>
+
+                          <View style={styles.row}>
+                            <Text style={{ fontSize: 16 }}>Hiilihydraatit</Text>
+                            <Text style={{ fontSize: 16 }}>
+                              {recipeData.totalCarb} g
+                            </Text>
+                          </View>
+
+                          <View style={styles.row}>
+                            <Text style={{ fontSize: 16 }}>
+                              josta sokereita
+                            </Text>
+                            <Text style={{ fontSize: 16 }}>
+                              {recipeData.sugar} g
+                            </Text>
+                          </View>
+
+                          <View style={styles.row}>
+                            <Text style={{ fontSize: 16 }}>Proteiini</Text>
+                            <Text style={{ fontSize: 16 }}>
+                              {recipeData.protein} g
+                            </Text>
+                          </View>
+
+                          <View style={styles.row}>
+                            <Text style={{ fontSize: 16 }}>Suola</Text>
+                            <Text style={{ fontSize: 16 }}>
+                              {recipeData.salt} g
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </Modal>
+                  )}
                   <RatingBar recipeId={recipeId} />
                   {comments.map((item) => (
                     <CommentBox
@@ -285,6 +453,7 @@ const styles = StyleSheet.create({
   },
   incredient: {
     fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 4,
     marginLeft: 30,
   },
@@ -310,6 +479,50 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginRight: 30,
     flexWrap: "wrap",
+  },
+  filtersList: {
+    flex: 2,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+  },
+  filterText: {
+    backgroundColor: Colors.lightgrey,
+    paddingTop: 4,
+    paddingBottom: 4,
+    paddingLeft: 8,
+    paddingRight: 8,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "#00000080",
+  },
+  modalContent: {
+    backgroundColor: Colors.white,
+    width: "100%",
+    height: "50%",
+    padding: 20,
+    borderRadius: 10,
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  closeButton: {
+    alignItems: "flex-start",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+    marginLeft: 30,
+    marginRight: 39,
   },
   newComment: {
     flexDirection: "row",
