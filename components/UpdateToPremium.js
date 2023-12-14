@@ -7,12 +7,13 @@ import { getDatabase, ref, update } from "firebase/database";
 import { auth } from "../components/FirebaseConfig";
 import { Colors } from "../styles/Colors";
 
-// Update users subscription to premium
+
 export default function UpdateToPremium() {
   const [isVisible, setIsVisible] = useState(true);
   const navigation = useNavigation();
   const database = getDatabase();
 
+  // Update premium subscription to current users information
   const handleUpdate = () => {
     setIsVisible(false);
     const userProfileRef = ref(database, "users/" + auth.currentUser.uid);

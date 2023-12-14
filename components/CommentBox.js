@@ -25,7 +25,7 @@ export default function CommentBox({ comment, created, likes, commentUserId, com
     if(likedUserIds.includes(auth.currentUser.uid)){
       setIsLiked(true);
     }
-    // Get the username and profile picture of the user who wrote the comment
+    // Get username and profile picture of the user who wrote the comment
     const database = getDatabase();
     const userRef = ref(database, "users/" + commentUserId);
     get(userRef)
@@ -103,7 +103,6 @@ export default function CommentBox({ comment, created, likes, commentUserId, com
         <Text style={styles.userNameText}>{userName ? userName : "Tuntematon"} kommentoi</Text>
       </View>
       <Text style={styles.createdText}>{created}</Text>
-      {/*Tee tähän päivämäärän näyttäminen */}
       <Text style={styles.commentText}>{comment}</Text>
       <View style={styles.likeInfo}>
         <Text style={styles.likerText}>{numberOfLikes ? numberOfLikes : "0"} tykkää tästä</Text>

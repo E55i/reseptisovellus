@@ -113,8 +113,8 @@ const styles = StyleSheet.create({
   },
   recipeInfoAndDiamond:{
     flexDirection: "row",
-    alignItems: "center", // Align items vertically within the container
-    justifyContent: "space-between", // Add space between the recipe info and the diamond
+    alignItems: "center", 
+    justifyContent: "space-between", 
     maxWidth: "80%",
   },
   recipeInfo: {
