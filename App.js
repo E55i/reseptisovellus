@@ -42,22 +42,22 @@ export default function App() {
             {(props) => <Welcome {...props} />}
           </Stack.Screen>
           <Stack.Screen name="AddRecipe">
-            {(props) => <AddRecipe backgroundColor="#FF9C00" {...props} />}
+            {(props) => <AddRecipe {...props} />}
           </Stack.Screen>
           <Stack.Screen name="SearchRecipe">
-            {(props) => <SearchRecipe backgroundColor="#FF9C00" {...props} />}
+            {(props) => <SearchRecipe {...props} />}
           </Stack.Screen>
           <Stack.Screen name="RecipeDetails">
-            {(props) => <RecipeDetails backgroundColor="#FF9C00" {...props} />}
+            {(props) => <RecipeDetails {...props} />}
           </Stack.Screen>
           <Stack.Screen name="Profile">
-            {(props) => <Profile backgroundColor="#FF9C00" {...props} />}
+            {(props) => <Profile {...props} />}
           </Stack.Screen>
           <Stack.Screen name="OwnRecipes">
-            {(props) => <OwnRecipes backgroundColor="#FF9C00" {...props} />}
+            {(props) => <OwnRecipes {...props} />}
           </Stack.Screen>
           <Stack.Screen name="RecipeEdit">
-            {(props) => <RecipeEdit backgroundColor="#FF9C00" {...props} />}
+            {(props) => <RecipeEdit {...props} />}
           </Stack.Screen>
           <Stack.Screen name="PhotoScreen" component={PhotoScreen} />
           <Stack.Screen name="AppInfo" component={AppInfo} />
