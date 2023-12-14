@@ -24,6 +24,7 @@ import { Colors } from "../styles/Colors";
 import { useNavigation } from "@react-navigation/native";
 import GoBackAppBar from "../components/GoBackAppBar";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { CheckBox } from 'react-native-elements';
 
 const UpdateProfile = () => {
   const [username, setUsername] = useState("");
@@ -126,6 +127,7 @@ const UpdateProfile = () => {
           setUsername(data.username || "");
           setBio(data.bio || "");
           setPremium(data.premium);
+          setPremium(data.premium || "");
           setIsProfileLoaded(true);
         }
       });
@@ -328,7 +330,13 @@ const UpdateProfile = () => {
           style={styles.input}
           onFocus={() => setAddress("")}
         />
-
+        <Text style={styles.label}>Premium:</Text>
+        <CheckBox
+          title="Haluan premium-version"
+          checked={premium === '1'}
+          onPress={() => setPremium(premium === '1' ? '0' : '1')}
+          checkedColor="orange"
+          />
           <FontAwesome5
           name="asterisk"
           size={10}
