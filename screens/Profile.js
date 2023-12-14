@@ -1,3 +1,4 @@
+// Import necessary components and libraries
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -9,25 +10,40 @@ import {
   Alert,
   Image,
 } from 'react-native';
+
+//Import custom component
 import GoBackAppBar from '../components/GoBackAppBar';
+
+// Import Firebase authentication and database functions
 import { getAuth, signOut } from 'firebase/auth';
 import { getDatabase, ref, onValue } from 'firebase/database';
+
+// Import navigation hook
 import { useRoute } from '@react-navigation/native';
+
+// Import color constants and icon component
 import { Colors } from "../styles/Colors";
 import { SimpleLineIcons } from "@expo/vector-icons";
 
+// Profile component
 const Profile = ({ navigation }) => {
+  // State variables
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isPremiumVisible, setIsPremiumVisible] = useState(true);
 
+  // Get current route
   const route = useRoute();
+
+  // Firebase authentication and database instances
   const auth = getAuth();
   const database = getDatabase();
   const user = auth.currentUser;
 
+  // Reference for ScrollView
   const scrollViewRef = useRef(null);
-
+  
+  // Effect to fetch user data on component mount
   useEffect(() => {
     if (user) {
       const userProfileRef = ref(database, 'users/' + user.uid);
@@ -47,10 +63,12 @@ const Profile = ({ navigation }) => {
     }
   }, [user, database]);
 
+  // Navigate to update profile screen
   const navigateToUpdateProfile = () => {
     navigation.navigate('UpdateProfile');
   };
 
+  // Confirm logout with an alert
   const confirmLogout = () => {
     Alert.alert(
       'Kirjaudu ulos',
@@ -69,6 +87,7 @@ const Profile = ({ navigation }) => {
     );
   };
 
+  // Logout user
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
@@ -78,7 +97,8 @@ const Profile = ({ navigation }) => {
         console.error('Logout error:', error);
       });
   };
-
+  
+  // Render user data based on a predefined order
   const renderUserData = () => {
     const fieldOrder = ['bio', 'username', 'firstName', 'lastName', 'address', 'birthDate'];
 
@@ -86,12 +106,14 @@ const Profile = ({ navigation }) => {
       const originalValue = userData[key];
       let value = originalValue;
 
+      // Format birthdate if present
       if (key === 'birthDate' && value) {
         const date = new Date(value);
         const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
         value = formattedDate;
       }
-
+      
+      // Map field names for better readability
       const fieldMappings = {
         bio: 'Bio',
         username: 'Käyttäjänimi',
@@ -102,11 +124,13 @@ const Profile = ({ navigation }) => {
         profilePicture: 'Profiilikuva',
       };
 
+      // Style for data boxes, with specific styling for Bio
       const boxStyle = {
         ...styles.dataBox,
         ...(fieldMappings[key] === 'Bio' && { borderWidth: 2, borderColor: Colors.secondary, height: 130, marginTop: -10 }),
       };
 
+      // Render data boxes if mapping exists and the original value is present
       if (fieldMappings[key] && originalValue) {
         return (
           <View style={boxStyle} key={key}>
@@ -122,7 +146,8 @@ const Profile = ({ navigation }) => {
       return null;
     });
   };
-
+  
+  // Handle scroll events to show/hide premium icon
   const handleScroll = (event) => {
     const scrollPosition = event.nativeEvent.contentOffset.y;
     const threshold = 100; // Adjust this value based on when you want the premium icon to hide
@@ -130,35 +155,43 @@ const Profile = ({ navigation }) => {
     setIsPremiumVisible(scrollPosition < threshold);
   };
 
+  // Loading indicator while data is being fetched
   if (loading) {
     return <ActivityIndicator size="large" />;
   }
 
+  // Main component JSX
   return (
     <View style={styles.container}>
+      {/* App bar with custom styling */}
       <GoBackAppBar backgroundColor={Colors.primary} navigation={navigation} />
+      
+      {/* Scroll view with onScroll handler and reference */}
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         onScroll={handleScroll}
         ref={scrollViewRef}
         scrollEventThrottle={16} // Adjust the throttle value as needed
       >
-        {/* Check if user is premium and render diamond icon */}
+        {/* Check if user is premium and render diamond icon if visible */}
         {isPremiumVisible && userData?.premium === "1" && (
           <View style={styles.premiumIconContainer}>
             <SimpleLineIcons name="diamond" size={40} color={Colors.diamond} />
           </View>
         )}
+        
+        {/* Render user profile picture or a placeholder */}
         {userData?.profilePicture ? (
           <View style={styles.profileImageContainer}>
             <Image source={{ uri: userData.profilePicture }} style={styles.profileImage} />
           </View>
         ) : (
           <View style={styles.profileImageContainer}>
-            {/* Display a placeholder image or any other content */}
             <Image source={require('../assets/placeholder-image.png')} style={styles.profileImage} />
           </View>
         )}
+        
+        {/* Render user data or a message if no data is available */}
         {userData ? (
           <View style={styles.userData}>
             {renderUserData()}
@@ -168,6 +201,8 @@ const Profile = ({ navigation }) => {
             <Text>Käyttäjätietoja ei ole saatavilla</Text>
           </View>
         )}
+        
+        {/* Button container with options to update profile and logout */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={[styles.customButton, { backgroundColor: Colors.primary }]} onPress={navigateToUpdateProfile}>
             <Text style={styles.buttonText}>Muokkaa tietoja</Text>
@@ -181,6 +216,7 @@ const Profile = ({ navigation }) => {
   );
 };
 
+// Styles for various components
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,

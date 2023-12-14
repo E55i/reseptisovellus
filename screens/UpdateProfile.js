@@ -37,7 +37,7 @@ const UpdateProfile = () => {
   const [profilePictureUri, setProfilePictureUri] = useState('');
   const [bio, setBio] = useState('');
   const [premium, setPremium] = useState("");
-  const [isBirthDateSelected, setIsBirthDateSelected] = useState(false);
+  const [setIsBirthDateSelected] = useState(false);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const scrollViewRef = useRef(null);
   const auth = getAuth();
