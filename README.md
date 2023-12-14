@@ -1,21 +1,21 @@
 
-# Tervetuloa Reseptisovellus-sovelluksen GitHub-sivulle! 
+# Tervetuloa ReseptiKirja-sovelluksen GitHub-sivulle! 
 
 
 ![adaptive-icon](https://github.com/E55i/reseptisovellus/assets/114296942/2b486ff1-ba7c-4010-b779-dd0310dae44c)
 
 
-# Reseptisovellus – Terveellisen Ruokavalion Apuväline
+# ReseptiKirja – Terveellisen Ruokavalion Apuväline
 
-Reseptisovellus on mobiilipohjainen reseptikirja, jonka tarkoituksena on tarjota käyttäjille inspiroivia, terveellisiä reseptejä ja luoda yhteisöllinen alusta ruoanlaiton ympärille.
+ReseptiKirja-mobiilisovellus on mobiilipohjainen reseptikirja, jonka tarkoituksena on tarjota käyttäjille inspiroivia, terveellisiä reseptejä ja luoda yhteisöllinen alusta ruoanlaiton ympärille.
 
 # Sovelluksen Tausta ja Toimintaympäristö
 
 Ruokareseptisovellukset ovat arvokkaita työkaluja terveellisen ruokavalion ylläpitämisessä, tarjoten käyttäjille inspiraatiota, tietoa ja helppoutta ruoanlaittoon. Reseptisovellus sijoittuu tälle alalle tarjoten käyttäjille monipuolisia, terveellisiä ja helppokäyttöisiä reseptejä.
 
-# Miksi Reseptisovellus?
+# Miksi ReseptiKirja?
 
-Terveellisen ruokavalion ylläpitäminen on tärkeää, ja Reseptisovellus syntyi tarpeesta tarjota käyttäjille kätevä ja inspiroiva tapa parantaa ruokailutottumuksiaan. Sovellus ei ole pelkästään reseptikirja vaan myös yhteisö, joka mahdollistaa reseptien jakamisen, kokemusten vaihdon ja terveyskeskeisen lähestymistavan ruoanlaittoon.
+Terveellisen ruokavalion ylläpitäminen on tärkeää, ja ReseptiKirja syntyi tarpeesta tarjota käyttäjille kätevä ja inspiroiva tapa parantaa ruokailutottumuksiaan. Sovellus ei ole pelkästään reseptikirja vaan myös yhteisö, joka mahdollistaa reseptien jakamisen, kokemusten vaihdon ja terveyskeskeisen lähestymistavan ruoanlaittoon.
 
 # Tekniset Vaatimukset
 
