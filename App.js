@@ -36,10 +36,10 @@ export default function App() {
           <Stack.Screen name="CreateUser" component={CreateUser} />
           <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
           <Stack.Screen name="UpdateProfile">
-            {(props) => <UpdateProfile backgroundColor="#FF9C00" {...props} />}
+            {(props) => <UpdateProfile {...props} />}
           </Stack.Screen>
           <Stack.Screen name="Welcome">
-            {(props) => <Welcome backgroundColor="#FF9C00" {...props} />}
+            {(props) => <Welcome {...props} />}
           </Stack.Screen>
           <Stack.Screen name="AddRecipe">
             {(props) => <AddRecipe backgroundColor="#FF9C00" {...props} />}

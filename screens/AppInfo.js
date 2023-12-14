@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     flexDirection: "column-reverse",
   },
   textContainer: {
-    backgroundColor: "white",
+    backgroundColor: Colors.white,
     paddingLeft: 30,
     paddingRight: 30,
     paddingTop: 40,

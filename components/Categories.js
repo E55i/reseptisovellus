@@ -4,9 +4,9 @@ import { Colors } from "../styles/Colors";
 
 export default function Categories({...props}) {
 
+  // when category button is clicked set selected value to category variable
   const handleButtonClick = (value) => {
     props.setCategory(value)
-    console.log("hakusana: "+value) 
   }
 
   return (

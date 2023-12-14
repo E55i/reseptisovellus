@@ -24,66 +24,64 @@ import { getDatabase, ref, onValue } from "firebase/database";
 import { SimpleLineIcons } from "@expo/vector-icons";
 import { Colors } from "../styles/Colors";
 
-
-export default function Welcome({ backgroundColor, navigation }) {
+export default function Welcome({ navigation }) {
   const [recipes, setRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUserPremium, setIsUserPremium] = useState("");
   const [category, setCategory] = useState("");
   const [userName, setUserName] = useState("");
 
-  
-useEffect(() => {
-  if (auth.currentUser) {
-
-    const database = getDatabase();
-    // Fetch user data
-    const userRef = ref(database, "users/" + auth.currentUser.uid);
-    // Fetch firstName and premium from database and update information if it change
-    const unsubscribeUser = onValue(userRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const userData = snapshot.val();
-        setUserName(userData.firstName);
-        setIsUserPremium(userData.premium);
-      }
-    });
-  
-  // Fetch top recipes
-  try {
-    onSnapshot(query(collection(firestore, "recipes")), (querySnapshot) => {
-      const tempRecipes = [];
-      querySnapshot.forEach((doc) => {
-        const recipeObject = {
-          id: doc.id,
-          title: doc.data().recipeData.title,
-          servingSize: doc.data().recipeData.servingSize,
-          cookTime: doc.data().recipeData.cookTime,
-          prepTime: doc.data().recipeData.prepTime,
-          photo: doc.data().recipeData.photo,
-          premium: doc.data().recipeData.premium,
-          //recipeRating is the average of the given ratings
-          recipeRating: doc.data().recipeData.rating[1] !== 0
-          ? doc.data().recipeData.rating[0] / doc.data().recipeData.rating[1]
-          : 0,
-        };
-        tempRecipes.push(recipeObject);
+  useEffect(() => {
+    if (auth.currentUser) {
+      const database = getDatabase();
+      // Fetch user data
+      const userRef = ref(database, "users/" + auth.currentUser.uid);
+      // Fetch firstName and premium from database and update information if it change
+      const unsubscribeUser = onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          setUserName(userData.firstName);
+          setIsUserPremium(userData.premium);
+        }
       });
-      tempRecipes.sort((a, b) => b.recipeRating - a.recipeRating);
-      setRecipes(tempRecipes);
-      setIsLoading(false);
-    });
-  } catch (error) {
-    setIsLoading(false);
-    ShowAlert(
-      "Virhe",
-      "Reseptien hakemisessa ilmeni virhe. Yritä myöhemmin uudelleen."
-    );
-  }
-} else {
-  navigation.replace("Login");
-}
 
-}, []);
+      // Fetch top recipes
+      try {
+        onSnapshot(query(collection(firestore, "recipes")), (querySnapshot) => {
+          const tempRecipes = [];
+          querySnapshot.forEach((doc) => {
+            const recipeObject = {
+              id: doc.id,
+              title: doc.data().recipeData.title,
+              servingSize: doc.data().recipeData.servingSize,
+              cookTime: doc.data().recipeData.cookTime,
+              prepTime: doc.data().recipeData.prepTime,
+              photo: doc.data().recipeData.photo,
+              premium: doc.data().recipeData.premium,
+              //recipeRating is the average of the given ratings
+              recipeRating:
+                doc.data().recipeData.rating[1] !== 0
+                  ? doc.data().recipeData.rating[0] /
+                    doc.data().recipeData.rating[1]
+                  : 0,
+            };
+            tempRecipes.push(recipeObject);
+          });
+          tempRecipes.sort((a, b) => b.recipeRating - a.recipeRating);
+          setRecipes(tempRecipes);
+          setIsLoading(false);
+        });
+      } catch (error) {
+        setIsLoading(false);
+        ShowAlert(
+          "Virhe",
+          "Reseptien hakemisessa ilmeni virhe. Yritä myöhemmin uudelleen."
+        );
+      }
+    } else {
+      navigation.replace("Login");
+    }
+  }, []);
 
   // Fetch recipes based on category change
   useEffect(() => {
@@ -137,28 +135,25 @@ useEffect(() => {
         } catch (error) {
           setIsLoading(false);
         }
-      } 
+      }
     })();
   }, [category]);
 
   return (
     <View style={styles.container}>
-      {/* show appbar top of the screen */}
       <DefaultAppBar
-        backgroundColor={backgroundColor}
         navigation={navigation}
       />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.nameAndIcon}>
-        <Text style={styles.welcomeText}>
-          {userName ? `Tervetuloa ${userName}` : "Tervetuloa"}
-        </Text>
-        {isUserPremium === "1" && (
-          <SimpleLineIcons name="diamond" size={18} color={Colors.diamond} />
-        )}
+          <Text style={styles.welcomeText}>
+            {userName ? `Tervetuloa ${userName}` : "Tervetuloa"}
+          </Text>
+          {isUserPremium === "1" && (
+            <SimpleLineIcons name="diamond" size={18} color={Colors.diamond} />
+          )}
         </View>
         <Text style={styles.infoText}>Mitä haluaisit kokata tänään?</Text>
-        {/* Categories component */}
         <Categories setCategory={setCategory} />
         {/* Show add if user is not premium */}
         {isUserPremium !== "1" && (
@@ -167,13 +162,11 @@ useEffect(() => {
             source={require("../assets/mainos_vaaka.png")}
           />
         )}
-        {/* Show text if no category selected */}
         {category === "" && (
           <Text style={styles.textFavourites}>
             Top 10 suosituimmat reseptit
           </Text>
         )}
-        {/* Show loading indicator when data is not fetch */}
         {isLoading && (
           <ActivityIndicator
             style={styles.activityIndicator}
@@ -210,7 +203,6 @@ useEffect(() => {
               recipeName={item.title}
               cookTime={item.cookTime}
               servingSize={item.servingSize}
-              backgroundColor={backgroundColor}
               premium={item.premium}
             />
           ))}
@@ -233,11 +225,12 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.white,
     paddingBottom: 60,
+    flexGrow: 1,
   },
-  nameAndIcon:{
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  nameAndIcon: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   welcomeText: {
     marginLeft: 8,
