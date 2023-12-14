@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,33 +11,50 @@ import { GetOwnRecipes } from "../components/GetRecipes";
 import { Colors } from "../styles/Colors";
 import GoBackAppBar from "../components/GoBackAppBar";
 import RecipeCard from "../components/RecipeCard";
-import ButtonWithIcon, { IconButton } from "../components/CustomButtons";
+import { IconButton } from "../components/CustomButtons";
 import { useNavigation } from "@react-navigation/native";
 
 export default function OwnRecipes({ ...props }) {
-  const [recipes, setRecipes] = useState([]);
+  const [recipeData, setRecipeData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [notEditing, setNotEditing] = useState(true);
 
   const navigation = useNavigation();
+  useEffect(() => {
+    let isMounted = true; // Flag to track whether the component is mounted
+    const fetchData = async () => {
+      try {
+        // Fetch the recipe data
+        const recipes = await GetOwnRecipes();
+        if (isMounted) {
+          setRecipeData(recipes);
+          setLoading(false);
+        }
+        // Cleanup: Unsubscribe from real-time updates when the component is unmounted
+        return () => {
+          isMounted = false;
+          unsubscribe();
+        };
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+    // Cleanup: Ensure that any asynchronous tasks or subscriptions are cleared
+    // when the component is unmounted
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <>
       <GoBackAppBar {...props} />
       <View style={styles.container}>
         <ScrollView>
-          <GetOwnRecipes
-            setData={(recipes) => {
-              setRecipes(recipes);
-              setLoading(false);
-            }}
-            order={"created"} // if you want to order by some other feature, add 'recipeData.' before the featurename, e.g. "recipeData.title"
-            orderDirection={"desc"}
-          />
           <View style={styles.title}>
             <Text style={{ fontSize: 28 }}>Omat reseptit</Text>
           </View>
-          {recipes.length > 0 ? (
+          {recipeData.length > 0 ? (
             loading ? (
               <ActivityIndicator
                 style={styles.activityIndicator}
@@ -46,21 +63,10 @@ export default function OwnRecipes({ ...props }) {
               />
             ) : (
               <>
-                <View style={{ alignItems: "center", marginBottom: 12 }}>
-                  <ButtonWithIcon
-                    icon="setting"
-                    color={notEditing ? Colors.secondary : Colors.grey}
-                    width={140}
-                    title="Muokkaa"
-                    onPress={() => {
-                      setNotEditing(!notEditing);
-                    }}
-                  />
-                </View>
-                {notEditing ? (
-                  recipes.map((item) => (
+                {recipeData.map((item) => (
+                  <View key={item.id}>
                     <RecipeCard
-                      key={item.id}
+                      key={`${item.id}-edit`}
                       recipeId={item.id}
                       prepTime={item.prepTime}
                       urlToImage={item.photo}
@@ -69,42 +75,24 @@ export default function OwnRecipes({ ...props }) {
                       servingSize={item.servingSize}
                       premium={item.premium}
                     />
-                  ))
-                ) : (
-                  <>
-                    {recipes.map((item) => (
-                      <View key={item.id}>
-                        <RecipeCard
-                          key={`${item.id}-edit`}
-                          recipeId={item.id}
-                          prepTime={item.prepTime}
-                          urlToImage={item.photo}
-                          recipeName={item.title}
-                          cookTime={item.cookTime}
-                          servingSize={item.servingSize}
-                          premium={item.premium}
-                        />
-                        <View style={styles.editingButton}>
-                          <IconButton
-                            key={`${item.id}-button`}
-                            icon="setting"
-                            iconColor="#fff"
-                            color={Colors.grey}
-                            onPress={() => {
-                              navigation.navigate({
-                                name: "RecipeEdit",
-                                params: {
-                                  recipeId: item.id,
-                                },
-                                merge: true,
-                              });
-                            }}
-                          />
-                        </View>
-                      </View>
-                    ))}
-                  </>
-                )}
+                    <View style={styles.editingButton}>
+                      <IconButton
+                        key={`${item.id}-button`}
+                        icon="setting"
+                        iconColor={Colors.grey}
+                        onPress={() => {
+                          navigation.navigate({
+                            name: "RecipeEdit",
+                            params: {
+                              recipeId: item.id,
+                            },
+                            merge: true,
+                          });
+                        }}
+                      />
+                    </View>
+                  </View>
+                ))}
               </>
             )
           ) : (

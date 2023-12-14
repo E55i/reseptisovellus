@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,97 +8,64 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import {
   auth,
   firestore,
   collection,
-  doc,
   addDoc,
-  getDoc,
   serverTimestamp,
   query,
   onSnapshot,
   orderBy,
   where,
 } from "../components/FirebaseConfig";
-import { getDatabase, ref, get } from "firebase/database";
+import { getUser } from "../components/FirebaseConfig";
 import GoBackAppBar from "../components/GoBackAppBar";
 import RatingBar from "../components/RatingBar";
-import { useNavigation } from "@react-navigation/native";
 import Rating from "../components/Rating";
 import CommentBox from "../components/CommentBox";
 import { Ionicons } from "@expo/vector-icons";
 import ShowAlert from "../components/ShowAlert";
 import { convertTimeStampToJS } from "../helpers/Functions";
 import UpdateToPremium from "../components/UpdateToPremium";
+import { Colors } from "../styles/Colors";
+import { GetSingleRecipe } from "../components/GetRecipes";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default function RecipeDetails({ route }) {
+export default function RecipeDetails({ route, ...props }) {
   const [newComment, setNewComment] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [comments, setComments] = useState([]);
-  const [title, setTitle] = useState("");
-  const [premiumRecipe, setPremiumRecipe] = useState("");
+  const [recipeData, setRecipeData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUserPremium, setIsUserPremium] = useState("0");
-  const [recipeRating, setRecipeRating] = useState(0);
 
-  const { recipeId, backgroundColor } = route.params;
-  const navigation = useNavigation();
+  const scrollViewRef = useRef();
+  const { recipeId } = route.params;
 
   useEffect(() => {
-    const database = getDatabase();
-    // Fetch user data
-    const userRef = ref(database, "users/" + auth.currentUser.uid);
-    get(userRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
+    // if page is scrolled down before, it is automatically scrolled to the
+    // top of the page when searching new recipe
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+    }
+    let isMounted = true; // Flag to track whether the component is mounted
+    const fetchData = async () => {
+      try {
+        // Fetch user data
+        const userData = await getUser();
+        if (isMounted && userData) {
           setIsUserPremium(userData.premium);
         }
-      })
-      .catch((error) => {
-        ShowAlert("Virhe", "Tapahtui virhe käyttäjätietojen haussa.");
-      });
 
-    // Fetch recipes details from Firestore recipes collection
-    const fetchRecipeData = async () => {
-      try {
-        const recipeDocSnapshot = await getDoc(
-          doc(firestore, "recipes", recipeId)
-        );
-
-        if (recipeDocSnapshot.exists()) {
-          const recipeData = recipeDocSnapshot.data();
-          console.log("Recipe Data:", recipeData);
-          setTitle(recipeData.recipeData.title);
-          setPremiumRecipe(recipeData.recipeData.premium);
-          setRecipeRating(
-            recipeData.recipeData.rating[0] / recipeData.recipeData.rating[1]
-          );
-          setIsLoading(false);
-        } else {
-          console.log("Reseptin tietoja ei löydy");
-          navigation.navigate("Welcome");
-          ShowAlert(
-            "Hups!",
-            "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
-          );
-          setIsLoading(false);
+        // Fetch the recipe data
+        const recipe = await GetSingleRecipe({ recipeId });
+        if (isMounted) {
+          setRecipeData(recipe);
         }
-      } catch (error) {
-        navigation.navigate("Welcome");
-        ShowAlert(
-          "Hups!",
-          "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."
-        );
-        setIsLoading(false);
-      }
-    };
-
-    // Fetch comments from Firestore feedbacks collection
-    const fetchComments = async () => {
-      try {
-        onSnapshot(
+        // Fetch comments from Firestore feedbacks collection
+        const unsubscribe = onSnapshot(
           query(
             collection(firestore, "feedbacks"),
             where("recipeId", "==", recipeId),
@@ -116,17 +83,28 @@ export default function RecipeDetails({ route }) {
               };
               tempComments.push(commentObject);
             });
-            setComments(tempComments);
-            setIsLoading(false);
+            if (isMounted) {
+              setComments(tempComments);
+              setIsLoading(false);
+            }
           }
         );
+        // Cleanup: Unsubscribe from real-time updates when the component is unmounted
+        return () => {
+          isMounted = false;
+          unsubscribe();
+        };
       } catch (error) {
-        setIsLoading(false);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchRecipeData();
-    fetchComments();
-  }, []);
+    fetchData();
+    // Cleanup: Ensure that any asynchronous tasks or subscriptions are cleared
+    // when the component is unmounted
+    return () => {
+      isMounted = false;
+    };
+  }, [recipeId]);
 
   // Save new comment to Firestore
   const saveComment = async () => {
@@ -149,95 +127,189 @@ export default function RecipeDetails({ route }) {
       setNewComment("");
     }
   };
+
   return (
-    <View style={styles.firstContainer}>
-      <GoBackAppBar backgroundColor={backgroundColor} navigation={navigation} />
+    <>
+      <GoBackAppBar {...props} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <ScrollView>
-          {/* Add an image component for the recipe here */}
-          {isLoading && (
+        <ScrollView style={styles.scrollContainer} ref={scrollViewRef}>
+          {isLoading ? (
             <ActivityIndicator
               style={styles.activityIndicator}
               size="large"
-              color="#47A73E"
+              color={Colors.secondary}
             />
-          )}
-          {!isLoading && <Text>{title}</Text>}
-          <Rating rating={recipeRating} />
-          {/*If it's not the case that the user is not premium but the recipe is premium, show the recipe details. 
-          Otherwise tell the user that subscription must be upgraded to premium before recipe can be shown.*/}
-          {(premiumRecipe !== "1" && isUserPremium !== "1") ||
-          (premiumRecipe !== "1" && isUserPremium === "1") ||
-          (premiumRecipe === "1" && isUserPremium === "1") ? (
-            <>
-              <Text>Ingredients:</Text>
-              <Text>Ingredient 1, Ingredient 2, ...</Text>
-              <Text>Instructions:</Text>
-              <Text>Step-by-step instructions go here...</Text>
-              <RatingBar recipeId={recipeId} />
-              {isLoading && (
-                <ActivityIndicator
-                  style={styles.activityIndicator}
-                  size="large"
-                  color="#47A73E"
-                />
-              )}
-              {!isLoading &&
-                comments.map((item) => (
-                  <CommentBox
-                    key={item.id}
-                    commentId={item.id}
-                    comment={item.comment}
-                    created={item.created}
-                    likes={item.likes}
-                    commentUserId={item.commentUserId}
-                  />
-                ))}
-              <View style={styles.newComment}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Kirjoita kommentti..."
-                  multiline={true}
-                  value={newComment}
-                  returnKeyType="send"
-                  onSubmitEditing={() => {
-                    if (newComment !== "") {
-                      saveComment(newComment);
-                    }
-                  }}
-                  onChangeText={(text) => setNewComment(text)}
-                />
-                <TouchableOpacity
-                  style={styles.sendButton}
-                  onPress={() => {
-                    saveComment();
-                  }}
-                >
-                  <Ionicons name="send-sharp" size={24} color="#FFFFFF" />
-                </TouchableOpacity>
-              </View>
-            </>
           ) : (
-            <UpdateToPremium/>
+            <>
+              <Image style={styles.image} source={{ uri: recipeData.photo }} />
+              <Text style={styles.title}>{recipeData.title}</Text>
+              <View style={{ ...styles.section, alignItems: "center" }}>
+                <View style={styles.iconTextRow}>
+                  <MaterialCommunityIcons
+                    name="account-group"
+                    size={20}
+                    color={Colors.grey}
+                  />
+                  <Text style={styles.infoText}>
+                    Annoskoko: {recipeData.servingSize} hlö
+                  </Text>
+                </View>
+                <View style={styles.iconTextRow}>
+                  <Feather name="clock" size={20} color={Colors.grey} />
+                  <Text style={styles.infoText}>
+                    Valmisteluaika: {recipeData.prepTime}
+                  </Text>
+                </View>
+
+                <View style={styles.iconTextRow}>
+                  <MaterialCommunityIcons
+                    style={styles.icon}
+                    name="toaster-oven"
+                    size={20}
+                    color={Colors.grey}
+                  />
+                  <Text style={styles.infoText}>
+                    Kokkausaika: {recipeData.cookTime}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.section}>
+                <Rating rating={recipeData.rating[0] / recipeData.rating[1]} />
+              </View>
+              {/*Check if recipe is premium but user is not premium. 
+              If true, don't show incredients, instructions or commnets but show window where user can update subscription to premium */}
+              {recipeData.premium === "1" && isUserPremium !== "1" ? (
+                <UpdateToPremium />
+              ) : (
+                <>
+                  <View style={styles.section}>
+                    {recipeData.incredients.map((item, index) => (
+                      <Text key={`${index}-incr`} style={styles.incredient}>
+                        {item}
+                      </Text>
+                    ))}
+                  </View>
+                  <View style={styles.section}>
+                    {recipeData.instructions.map((item, index) => (
+                      <View
+                        key={`${index}-instr`}
+                        style={styles.numberedInstruction}
+                      >
+                        <Text style={styles.stepNumber}>{index + 1}</Text>
+                        <Text style={styles.instruction}>{item}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <RatingBar recipeId={recipeId} />
+                  {comments.map((item) => (
+                    <CommentBox
+                      key={item.id}
+                      commentId={item.id}
+                      comment={item.comment}
+                      created={item.created}
+                      likes={item.likes}
+                      commentUserId={item.commentUserId}
+                    />
+                  ))}
+                  <View style={styles.newComment}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Kirjoita kommentti..."
+                      multiline={true}
+                      value={newComment}
+                      returnKeyType="send"
+                      onSubmitEditing={() => {
+                        if (newComment !== "") {
+                          saveComment(newComment);
+                        }
+                      }}
+                      onChangeText={(text) => setNewComment(text)}
+                    />
+                    <TouchableOpacity
+                      style={styles.sendButton}
+                      onPress={() => {
+                        saveComment();
+                      }}
+                    >
+                      <Ionicons
+                        name="send-sharp"
+                        size={24}
+                        color={Colors.white}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </>
           )}
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  firstContainer: {
-    backgroundColor: "#FFFFFF",
+  container: {
+    backgroundColor: Colors.white,
     flex: 1,
   },
-  container: {
-    backgroundColor: "#FFFFFF",
+  title: {
     flex: 1,
-    paddingBottom: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: 28,
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  image: {
+    width: "100%",
+    height: 250,
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  section: {
+    flex: 1,
+    marginBottom: 12,
+    marginLeft: 16,
+    marginRight: 16,
+  },
+  iconTextRow: {
+    flexDirection: "row",
+  },
+  infoText: {
+    fontSize: 16,
+    paddingLeft: 8,
+  },
+  incredient: {
+    fontSize: 18,
+    marginBottom: 4,
+    marginLeft: 30,
+  },
+  numberedInstruction: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+  },
+  stepNumber: {
+    borderWidth: 1.5,
+    borderColor: Colors.secondary,
+    color: Colors.secondary,
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  instruction: {
+    fontSize: 18,
+    marginBottom: 8,
+    marginRight: 30,
+    flexWrap: "wrap",
   },
   newComment: {
     flexDirection: "row",
@@ -245,17 +317,19 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginRight: 20,
     marginTop: 16,
+    marginBottom: 40,
   },
+
   input: {
     flex: 6,
-    height: "auto",
+    minHeight: 50,
     marginRight: 8,
     borderWidth: 1,
     paddingLeft: 10,
     paddingRight: 10,
     borderRadius: 10,
-    borderColor: "#47A73E",
-    backgroundColor: "white",
+    borderColor: Colors.secondary,
+    backgroundColor: Colors.white,
     shadowColor: "#000000",
     ...Platform.select({
       android: {
@@ -270,7 +344,7 @@ const styles = StyleSheet.create({
   sendButton: {
     flex: 1,
     aspectRatio: 1,
-    backgroundColor: "#FF9C00",
+    backgroundColor: Colors.primary,
     borderRadius: 50,
     padding: 2,
     justifyContent: "center",

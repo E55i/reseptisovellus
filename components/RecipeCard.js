@@ -5,14 +5,14 @@ import { useNavigation } from "@react-navigation/native";
 import { SimpleLineIcons } from '@expo/vector-icons';
 import { Colors } from "../styles/Colors";
 
-export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToImage, recipeName, cookTime, servingSize, premium}) {
+export default function RecipeCard({recipeId, prepTime, urlToImage, recipeName, cookTime, servingSize, premium}) {
 
   const navigation = useNavigation();
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        navigation.navigate("RecipeDetails", {recipeId, backgroundColor});
+        navigation.navigate("RecipeDetails", {recipeId});
       }}
     >
       {urlToImage ? (
@@ -32,7 +32,7 @@ export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToIm
             style={styles.icon}
             name="account-group"
             size={18}
-            color="#8B8B8B"
+            color={Colors.grey}
           />
           <Text style={styles.infoText}>{servingSize} hlö</Text>
           </View>
@@ -40,20 +40,20 @@ export default function RecipeCard({backgroundColor, recipeId, prepTime, urlToIm
           <Feather style={styles.icon} 
           name="clock" 
           size={16} 
-          color="#8B8B8B" 
+          color={Colors.grey} 
           />
           <Text style={styles.infoText}>{prepTime}</Text>
           <MaterialCommunityIcons
             style={styles.icon}
             name="toaster-oven"
             size={18}
-            color="#8B8B8B"
+            color={Colors.grey}
           />
           <Text style={styles.infoText}>{cookTime}</Text>
           </View>
         </View>
         <View style={styles.diamond}> 
-        {premium === "1" && <SimpleLineIcons name="diamond" size={18} color="#00C0D6" />}
+        {premium === "1" && <SimpleLineIcons name="diamond" size={18} color={Colors.diamond} />}
         </View>
         </View>
       </View>
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
     marginTop: 14,
     marginBottom: 4,
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     shadowColor: "#000000",
     ...Platform.select({
       android: {
@@ -113,8 +113,8 @@ const styles = StyleSheet.create({
   },
   recipeInfoAndDiamond:{
     flexDirection: "row",
-    alignItems: "center", // Align items vertically within the container
-    justifyContent: "space-between", // Add space between the recipe info and the diamond
+    alignItems: "center", 
+    justifyContent: "space-between", 
     maxWidth: "80%",
   },
   recipeInfo: {

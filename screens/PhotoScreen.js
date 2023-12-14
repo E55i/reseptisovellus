@@ -7,9 +7,10 @@ import ShowAlert from "../components/ShowAlert";
 import { SquareButtonWithIcon } from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
 
-export default function PhotoScreen() {
+export default function PhotoScreen({ route }) {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const calledFrom = route.params.calledFrom;
 
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -38,12 +39,12 @@ export default function PhotoScreen() {
           );
           console.log(uploadResp);
           navigation.navigate({
-            name: "AddRecipe",
+            name: calledFrom,
             params: {
               photoUrl: uploadResp.downloadUrl,
               photoName: uploadResp.metadata.fullPath,
             },
-            merge: true, // merge params to addrecipe screen
+            merge: true,
           });
         }
         setLoading(false);
@@ -80,12 +81,12 @@ export default function PhotoScreen() {
           );
           console.log(uploadResp);
           navigation.navigate({
-            name: "AddRecipe",
+            name: calledFrom,
             params: {
               photoUrl: uploadResp.downloadUrl,
               photoName: uploadResp.metadata.fullPath,
             },
-            merge: true, // merge params to addrecipe screen
+            merge: true,
           });
         }
         setLoading(false);

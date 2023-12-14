@@ -27,7 +27,7 @@ export default function SearchRecipe({ ...props }) {
   const [isPremium, setIsPremium] = useState("0");
   const [query, setQuery] = useState("");
   const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState([]);
   const [showFilterList, setShowFilterList] = useState(false);
@@ -64,21 +64,37 @@ export default function SearchRecipe({ ...props }) {
     "Vähähiilihydraattinen",
   ];
 
-  // fetch the premium status of the user
   useEffect(() => {
-    const fetchUserData = async () => {
+    let isMounted = true; // Flag to track whether the component is mounted
+    const fetchData = async () => {
       try {
         const userData = await getUser();
-        if (userData) {
+        if (isMounted && userData.length > 0) {
           setIsPremium(userData.premium);
-        } else {
-          console.log("User data not found.");
         }
+
+        // Fetch the recipe data
+        const recipes = await GetAllRecipes();
+        if (isMounted) {
+          setData(recipes);
+          setLoading(false);
+        }
+
+        // Cleanup: Unsubscribe from real-time updates when the component is unmounted
+        return () => {
+          isMounted = false;
+          unsubscribe();
+        };
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchUserData();
+    fetchData();
+    // Cleanup: Ensure that any asynchronous tasks or subscriptions are cleared
+    // when the component is unmounted
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSearch = (text) => {
@@ -96,41 +112,38 @@ export default function SearchRecipe({ ...props }) {
     }
   };
 
-  const filterSearchResults = () => {
-    const filtered = filteredData.filter((item) => {
-      const courseMatch =
-        filters.length === 0 ||
-        filters.some((selectedCourse) => {
-          return item.course.includes(selectedCourse);
-        });
+  const filterRecipes = () => {
+    const filtered =
+      filters.length === 0
+        ? data
+        : data.filter((item) => {
+            const courseMatch = filters.some((selectedCourse) => {
+              return item.course.includes(selectedCourse);
+            });
 
-      const mainIngredientMatch =
-        filters.length === 0 ||
-        filters.some((selectedMainIngredient) => {
-          return item.mainIngredient.includes(selectedMainIngredient);
-        });
+            const mainIngredientMatch = filters.some(
+              (selectedMainIngredient) => {
+                return item.mainIngredient.includes(selectedMainIngredient);
+              }
+            );
 
-      const dietMatch =
-        filters.length === 0 ||
-        filters.some((selectedDiet) => {
-          return item.diet.includes(selectedDiet);
-        });
-      return courseMatch || mainIngredientMatch || dietMatch;
-    });
+            const dietMatch = filters.some((selectedDiet) => {
+              return item.diet.includes(selectedDiet);
+            });
+            return courseMatch || mainIngredientMatch || dietMatch;
+          });
     setFilteredData(filtered);
   };
 
   return (
     <>
       <GoBackAppBar {...props} />
-      <GetAllRecipes
-        setData={(data) => {
-          setData(data);
-          setLoading(false);
-        }}
-      />
       {loading ? (
-        <ActivityIndicator size="large" animating={true} color={Colors.secondary}/>
+        <ActivityIndicator
+          size="large"
+          animating={true}
+          color={Colors.secondary}
+        />
       ) : (
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -263,7 +276,7 @@ export default function SearchRecipe({ ...props }) {
                           library="materialcom"
                           onPress={() => {
                             setShowFilterList(false);
-                            filterSearchResults();
+                            filterRecipes();
                           }}
                         />
                       </View>
@@ -271,9 +284,8 @@ export default function SearchRecipe({ ...props }) {
                   </View>
                 </View>
               </Modal>
-
               <FlatList
-                data={filteredData}
+                data={filteredData.length > 0 ? filteredData : data}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                   <RecipeCard
@@ -284,7 +296,7 @@ export default function SearchRecipe({ ...props }) {
                     recipeName={item.title}
                     cookTime={item.cookTime}
                     servingSize={item.servingSize}
-                    backgroundColor={props.backgroundColor}
+                    premium={item.premium}
                   />
                 )}
               />
@@ -307,6 +319,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   searchBar: {
+    marginTop: 16,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -321,14 +334,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   filterText: {
-    backgroundColor: "#bcbcbc",
+    backgroundColor: Colors.lightgrey,
     paddingTop: 4,
     paddingBottom: 4,
     paddingLeft: 8,
     paddingRight: 8,
     borderRadius: 10,
     overflow: "hidden",
-    color: "#fff",
   },
   buttonRow: {
     flex: 1,

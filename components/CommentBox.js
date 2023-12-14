@@ -10,6 +10,7 @@ import {
   getDoc,
   updateDoc,
 } from "./FirebaseConfig";
+import { Colors } from "../styles/Colors";
 
 export default function CommentBox({ comment, created, likes, commentUserId, commentId }) {
   const [isLiked, setIsLiked] = useState(false)
@@ -24,7 +25,7 @@ export default function CommentBox({ comment, created, likes, commentUserId, com
     if(likedUserIds.includes(auth.currentUser.uid)){
       setIsLiked(true);
     }
-    // Get the username and profile picture of the user who wrote the comment
+    // Get username and profile picture of the user who wrote the comment
     const database = getDatabase();
     const userRef = ref(database, "users/" + commentUserId);
     get(userRef)
@@ -95,24 +96,23 @@ export default function CommentBox({ comment, created, likes, commentUserId, com
         ) : (
           <Image
             style={styles.profilePicture}
-            source={require("../assets/default_profile_picture.png")}
+            source={require('../assets/placeholder-image.png')}
           />
         )}
         {/*If the comment was written by a user whose user account has been deleted, the name will be displayed as "Tuntematon" */}
         <Text style={styles.userNameText}>{userName ? userName : "Tuntematon"} kommentoi</Text>
       </View>
       <Text style={styles.createdText}>{created}</Text>
-      {/*Tee tähän päivämäärän näyttäminen */}
       <Text style={styles.commentText}>{comment}</Text>
       <View style={styles.likeInfo}>
         <Text style={styles.likerText}>{numberOfLikes ? numberOfLikes : "0"} tykkää tästä</Text>
           {isLiked ? (
             <TouchableOpacity onPress={deleteLike}>
-            <AntDesign name="heart" size={30} color="#FF573A" />
+            <AntDesign name="heart" size={30} color={Colors.heart} />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={saveLike}>
-            <AntDesign name="hearto" size={30} color="#8B8B8B" />
+            <AntDesign name="hearto" size={30} color={Colors.grey} />
             </TouchableOpacity>
           )}
       </View>
@@ -123,7 +123,7 @@ export default function CommentBox({ comment, created, likes, commentUserId, com
 const styles = StyleSheet.create({
   box: {
     borderRadius: 20,
-    borderColor: "#47A73E",
+    borderColor: Colors.secondary,
     borderWidth: 2,
     padding: 8,
     marginLeft: 20,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   userNameText: {
     fontSize: 18,
-    color: "#8B8B8B",
+    color: Colors.grey,
     textAlign: "center",
   },
   profilePicture: {

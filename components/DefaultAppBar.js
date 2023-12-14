@@ -4,7 +4,7 @@ import { AppBar, HStack, IconButton } from "@react-native-material/core";
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../styles/Colors";
 
-export default function GoBackAppBar({ navigation }) {
+export default function DefaultAppBar({ navigation }) {
   return (
     <AppBar
       backgroundColor={Colors.primary}
@@ -12,7 +12,7 @@ export default function GoBackAppBar({ navigation }) {
         <HStack style={styles.centerContainer}>
           <IconButton
             style={styles.icon}
-            icon={<Ionicons name="add" size={28} color="white" />}
+            icon={<Ionicons name="add" size={28} color={Colors.white} />}
             onPress={() => {
               navigation.navigate("AddRecipe");
             }}
@@ -20,21 +20,21 @@ export default function GoBackAppBar({ navigation }) {
           />
           <IconButton
           style={styles.icon}
-            icon={<Ionicons name="search-outline" size={28} color="white" />}
+            icon={<Ionicons name="search-outline" size={28} color={Colors.white} />}
             onPress={() => navigation.navigate("SearchRecipe")}
             {...props}
           />
            <IconButton
            style={styles.icon}
             icon={
-              <MaterialIcons name="my-library-books" size={28} color="white" />
+              <MaterialIcons name="my-library-books" size={28} color={Colors.white} />
             }
             onPress={() => navigation.navigate("OwnRecipes")}
             {...props}
           />
           <IconButton
           style={styles.icon}
-            icon={<FontAwesome name="user-circle-o" size={28} color="white" />}
+            icon={<FontAwesome name="user-circle-o" size={28} color={Colors.white} />}
             onPress={() => navigation.navigate("Profile")}
             {...props}
           />

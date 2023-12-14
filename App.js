@@ -13,6 +13,7 @@ import OwnRecipes from "./screens/OwnRecipes";
 import PhotoScreen from "./screens/PhotoScreen";
 import PrivacyPolicy from "./screens/PrivacyPolice";
 import RecipeEdit from "./screens/RecipeEdit";
+import AppInfo from "./screens/AppInfo";
 //import GoogleLogin from "./screens/Googlelogin";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -35,30 +36,31 @@ export default function App() {
           <Stack.Screen name="CreateUser" component={CreateUser} />
           <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
           <Stack.Screen name="UpdateProfile">
-            {(props) => <UpdateProfile backgroundColor="#FF9C00" {...props} />}
+            {(props) => <UpdateProfile {...props} />}
           </Stack.Screen>
           <Stack.Screen name="Welcome">
-            {(props) => <Welcome backgroundColor="#FF9C00" {...props} />}
+            {(props) => <Welcome {...props} />}
           </Stack.Screen>
           <Stack.Screen name="AddRecipe">
-            {(props) => <AddRecipe backgroundColor="#FF9C00" {...props} />}
+            {(props) => <AddRecipe {...props} />}
           </Stack.Screen>
           <Stack.Screen name="SearchRecipe">
-            {(props) => <SearchRecipe backgroundColor="#FF9C00" {...props} />}
+            {(props) => <SearchRecipe {...props} />}
           </Stack.Screen>
           <Stack.Screen name="RecipeDetails">
-            {(props) => <RecipeDetails backgroundColor="#FF9C00" {...props} />}
+            {(props) => <RecipeDetails {...props} />}
           </Stack.Screen>
           <Stack.Screen name="Profile">
-            {(props) => <Profile backgroundColor="#FF9C00" {...props} />}
+            {(props) => <Profile {...props} />}
           </Stack.Screen>
           <Stack.Screen name="OwnRecipes">
-            {(props) => <OwnRecipes backgroundColor="#FF9C00" {...props} />}
+            {(props) => <OwnRecipes {...props} />}
           </Stack.Screen>
           <Stack.Screen name="RecipeEdit">
-            {(props) => <RecipeEdit backgroundColor="#FF9C00" {...props} />}
+            {(props) => <RecipeEdit {...props} />}
           </Stack.Screen>
           <Stack.Screen name="PhotoScreen" component={PhotoScreen} />
+          <Stack.Screen name="AppInfo" component={AppInfo} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>

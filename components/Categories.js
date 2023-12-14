@@ -1,14 +1,13 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import React, { useState } from "react";
-import ShowAlert from "./ShowAlert";
+import React from "react";
+import { Colors } from "../styles/Colors";
 
 export default function Categories({...props}) {
 
+  // when category button is clicked set selected value to category variable
   const handleButtonClick = (value) => {
     props.setCategory(value)
-    console.log("hakusana: "+value) 
   }
-  // säädä elementtien varjostusta, tutki sekä androidin että iosin varjostukset
 
   return (
     <View style={styles.container}>
@@ -58,7 +57,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginBottom: 16,
     marginTop: 8,
-    backgroundColor: "white",
+    backgroundColor: Colors.white,
     shadowColor: "#000000",
     ...Platform.select({
       android: {
@@ -76,7 +75,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderWidth: 2,
-    borderColor: "#47A73E",
+    borderColor: Colors.secondary,
     borderRadius: 10,
   },
 });

@@ -205,9 +205,9 @@ const styles = StyleSheet.create({
   iconButton: {
     justifyContent: "center",
     alignItems: "center",
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     borderWidth: 2,
   },
 });

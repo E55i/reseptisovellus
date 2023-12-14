@@ -5,13 +5,15 @@ import ShowAlert from "./ShowAlert";
 import { Ionicons } from "@expo/vector-icons";
 import { getDatabase, ref, update } from "firebase/database";
 import { auth } from "../components/FirebaseConfig";
+import { Colors } from "../styles/Colors";
 
-// Update users subscription to premium
+
 export default function UpdateToPremium() {
   const [isVisible, setIsVisible] = useState(true);
   const navigation = useNavigation();
   const database = getDatabase();
 
+  // Update premium subscription to current users information
   const handleUpdate = () => {
     setIsVisible(false);
     const userProfileRef = ref(database, "users/" + auth.currentUser.uid);
@@ -49,7 +51,7 @@ export default function UpdateToPremium() {
               style={styles.closeButton}
               onPress={closeModalWindow}
             >
-              <Ionicons name="close" size={20} color="#8B8B8B" />
+              <Ionicons name="close" size={20} color={Colors.grey} />
             </TouchableOpacity>
             <Text style={styles.heading}>
               Päivitä tilauksesi premium versioon ja pääset tarkastelemaan
@@ -82,7 +84,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#00000080",
   },
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: Colors.white,
     width: "100%",
     height: "70%",
     padding: 20,
@@ -105,7 +107,7 @@ const styles = StyleSheet.create({
   information: {
     marginTop: 20,
     marginBottom: 40,
-    color: "gray",
+    color: Colors.grey,
     fontStyle: "italic",
     textAlign: "center",
   },
@@ -114,18 +116,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     fontWeight: "bold",
-    color: "#47A73E",
+    color: Colors.secondary,
     textAlign: "center",
   },
   buttonText: {
     fontSize: 16,
-    color: "#FFFFFF",
+    color: Colors.white,
     fontWeight: "bold",
   },
   button: {
     marginTop: 10,
     padding: 10,
-    backgroundColor: "#FF9C00",
+    backgroundColor: Colors.primary,
     borderRadius: 5,
     alignItems: "center",
   },
