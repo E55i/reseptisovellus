@@ -239,7 +239,11 @@ const UpdateProfile = () => {
 
   return (
     <View style={styles.fullScreenContainer}>
-      {isProfileLoaded && <GoBackAppBar backgroundColor="orange" navigation={navigation} />}
+      {isProfileLoaded ? (
+        <GoBackAppBar backgroundColor="orange" navigation={navigation} />
+      ) : (
+        <View style={styles.fakeAppBar}></View>
+      )}
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
@@ -348,15 +352,15 @@ const UpdateProfile = () => {
             />
           </View>
         )}
-      <TouchableOpacity
-        style={styles.customButton}
-        onPress={() => {
-          setShowDatePicker(true);
-          scrollViewRef.current?.scrollToEnd({ animated: true });
-        }}
-      >
-        <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.customButton}
+          onPress={() => {
+            setShowDatePicker(true);
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+          }}
+        >
+          <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
+        </TouchableOpacity>
   
         {showDatePicker && (
           <DateTimePicker
@@ -378,7 +382,7 @@ const UpdateProfile = () => {
         </TouchableOpacity>
       </ScrollView>
     </View>
-  );  
+  );
 };
 
 const styles = StyleSheet.create({
@@ -387,6 +391,13 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     flexGrow: 1,
     justifyContent: "flex-end",
+  },
+  fakeAppBar: {
+    height: 45, 
+    backgroundColor: Colors.primary,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   container: {
     flex: 1,
