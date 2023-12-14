@@ -334,14 +334,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   filterText: {
-    backgroundColor: "#bcbcbc",
+    backgroundColor: Colors.lightgrey,
     paddingTop: 4,
     paddingBottom: 4,
     paddingLeft: 8,
     paddingRight: 8,
     borderRadius: 10,
     overflow: "hidden",
-    color: "#fff",
   },
   buttonRow: {
     flex: 1,

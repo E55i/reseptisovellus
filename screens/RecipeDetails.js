@@ -21,7 +21,7 @@ import {
   orderBy,
   where,
 } from "../components/FirebaseConfig";
-import { getDatabase, ref, get } from "firebase/database";
+import { getUser } from "../components/FirebaseConfig";
 import GoBackAppBar from "../components/GoBackAppBar";
 import RatingBar from "../components/RatingBar";
 import Rating from "../components/Rating";
@@ -37,15 +37,16 @@ import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 export default function RecipeDetails({ route, ...props }) {
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([]);
-  const [data, setData] = useState([]);
+  const [recipeData, setRecipeData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUserPremium, setIsUserPremium] = useState("0");
 
   const scrollViewRef = useRef();
-  let { recipeId } = route.params;
+  const { recipeId } = route.params;
 
   useEffect(() => {
-    // if page is scrolled down before, it is automatically scrolled to the top of the page when searching new recipe
+    // if page is scrolled down before, it is automatically scrolled to the
+    // top of the page when searching new recipe
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
     }
@@ -53,18 +54,15 @@ export default function RecipeDetails({ route, ...props }) {
     const fetchData = async () => {
       try {
         // Fetch user data
-        const database = getDatabase();
-        const userRef = ref(database, "users/" + auth.currentUser.uid);
-        const userSnapshot = await get(userRef);
-        if (isMounted && userSnapshot.exists()) {
-          const userData = userSnapshot.val();
+        const userData = await getUser();
+        if (isMounted && userData.length > 0) {
           setIsUserPremium(userData.premium);
         }
 
         // Fetch the recipe data
         const recipe = await GetSingleRecipe({ recipeId });
         if (isMounted) {
-          setData(recipe);
+          setRecipeData(recipe);
         }
         // Fetch comments from Firestore feedbacks collection
         const unsubscribe = onSnapshot(
@@ -91,7 +89,6 @@ export default function RecipeDetails({ route, ...props }) {
             }
           }
         );
-
         // Cleanup: Unsubscribe from real-time updates when the component is unmounted
         return () => {
           isMounted = false;
@@ -147,8 +144,8 @@ export default function RecipeDetails({ route, ...props }) {
             />
           ) : (
             <>
-              <Image style={styles.image} source={{ uri: data.photo }} />
-              <Text style={styles.title}>{data.title}</Text>
+              <Image style={styles.image} source={{ uri: recipeData.photo }} />
+              <Text style={styles.title}>{recipeData.title}</Text>
               <View style={{ ...styles.section, alignItems: "center" }}>
                 <View style={styles.iconTextRow}>
                   <MaterialCommunityIcons
@@ -157,13 +154,13 @@ export default function RecipeDetails({ route, ...props }) {
                     color={Colors.grey}
                   />
                   <Text style={styles.infoText}>
-                    Annoskoko: {data.servingSize} hlö
+                    Annoskoko: {recipeData.servingSize} hlö
                   </Text>
                 </View>
                 <View style={styles.iconTextRow}>
                   <Feather name="clock" size={20} color={Colors.grey} />
                   <Text style={styles.infoText}>
-                    Valmisteluaika: {data.prepTime}
+                    Valmisteluaika: {recipeData.prepTime}
                   </Text>
                 </View>
 
@@ -175,28 +172,28 @@ export default function RecipeDetails({ route, ...props }) {
                     color={Colors.grey}
                   />
                   <Text style={styles.infoText}>
-                    Kokkausaika: {data.cookTime}
+                    Kokkausaika: {recipeData.cookTime}
                   </Text>
                 </View>
               </View>
               <View style={styles.section}>
-                <Rating rating={data.rating[0] / data.rating[1]} />
+                <Rating rating={recipeData.rating[0] / recipeData.rating[1]} />
               </View>
               {/*Check if recipe is premium but user is not premium. 
               If true, don't show incredients, instructions or commnets but show window where user can update subscription to premium */}
-              {data.premium === "1" && isUserPremium !== "1" ? (
+              {recipeData.premium === "1" && isUserPremium !== "1" ? (
                 <UpdateToPremium />
               ) : (
                 <>
                   <View style={styles.section}>
-                    {data.incredients.map((item, index) => (
+                    {recipeData.incredients.map((item, index) => (
                       <Text key={`${index}-incr`} style={styles.incredient}>
                         {item}
                       </Text>
                     ))}
                   </View>
                   <View style={styles.section}>
-                    {data.instructions.map((item, index) => (
+                    {recipeData.instructions.map((item, index) => (
                       <View
                         key={`${index}-instr`}
                         style={styles.numberedInstruction}
@@ -237,7 +234,11 @@ export default function RecipeDetails({ route, ...props }) {
                         saveComment();
                       }}
                     >
-                      <Ionicons name="send-sharp" size={24} color={Colors.white} />
+                      <Ionicons
+                        name="send-sharp"
+                        size={24}
+                        color={Colors.white}
+                      />
                     </TouchableOpacity>
                   </View>
                 </>
