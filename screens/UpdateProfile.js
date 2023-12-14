@@ -37,7 +37,7 @@ const UpdateProfile = () => {
   const [bio, setBio] = useState('');
   const [premium, setPremium] = useState("");
   const [isBirthDateSelected, setIsBirthDateSelected] = useState(false);
-
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false);
 
   const auth = getAuth();
   const database = getDatabase();
@@ -126,6 +126,7 @@ const UpdateProfile = () => {
           setUsername(data.username || "");
           setBio(data.bio || "");
           setPremium(data.premium);
+          setIsProfileLoaded(true);
         }
       });
     }
@@ -236,7 +237,7 @@ const UpdateProfile = () => {
 
   return (
     <View style={styles.fullScreenContainer}>
-      <GoBackAppBar backgroundColor="orange" navigation={navigation} />
+      {isProfileLoaded && <GoBackAppBar backgroundColor="orange" navigation={navigation} />}
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
@@ -363,8 +364,10 @@ const UpdateProfile = () => {
 
 const styles = StyleSheet.create({
   fullScreenContainer: {
-    flex: 1,
+    flex: 0,
     backgroundColor: "white",
+    flexGrow: 1,
+    justifyContent: "flex-end",
   },
   container: {
     flex: 1,
