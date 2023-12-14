@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -24,6 +24,7 @@ import { Colors } from "../styles/Colors";
 import { useNavigation } from "@react-navigation/native";
 import GoBackAppBar from "../components/GoBackAppBar";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { CheckBox } from 'react-native-elements';
 
 const UpdateProfile = () => {
   const [username, setUsername] = useState("");
@@ -37,8 +38,8 @@ const UpdateProfile = () => {
   const [bio, setBio] = useState('');
   const [premium, setPremium] = useState("");
   const [isBirthDateSelected, setIsBirthDateSelected] = useState(false);
-
-
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false);
+  const scrollViewRef = useRef(null);
   const auth = getAuth();
   const database = getDatabase();
   const user = auth.currentUser;
@@ -126,6 +127,8 @@ const UpdateProfile = () => {
           setUsername(data.username || "");
           setBio(data.bio || "");
           setPremium(data.premium);
+          setPremium(data.premium || "");
+          setIsProfileLoaded(true);
         }
       });
     }
@@ -236,10 +239,11 @@ const UpdateProfile = () => {
 
   return (
     <View style={styles.fullScreenContainer}>
-      <GoBackAppBar backgroundColor="orange" navigation={navigation} />
+      {isProfileLoaded && <GoBackAppBar backgroundColor="orange" navigation={navigation} />}
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
+        ref={scrollViewRef}
       >
         <View style={styles.profileImageContainer}>
           {profilePictureUri ? (
@@ -259,12 +263,12 @@ const UpdateProfile = () => {
             <Text style={styles.noImageText}>Ei profiilikuvaa</Text>
           )}
         </View>
-
+  
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
             <Text style={styles.photoButtonText}>Ota profiilikuva</Text>
           </TouchableOpacity>
-
+  
           <TouchableOpacity style={styles.photoButton} onPress={selectPhoto}>
             <Text style={styles.photoButtonText}>Valitse profiilikuva</Text>
           </TouchableOpacity>
@@ -327,17 +331,33 @@ const UpdateProfile = () => {
           style={styles.input}
           onFocus={() => setAddress("")}
         />
-
-          <FontAwesome5
-          name="asterisk"
-          size={10}
-          color="orange"
-          style={styles.asterisk}
-        />
-        <TouchableOpacity style={styles.customButton} onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
-        </TouchableOpacity>
-
+        {!isProfileLoaded && (
+          <View>
+            <Text style={styles.label}>Premium:</Text>
+            <CheckBox
+              title="Haluan premium-version"
+              checked={premium === '1'}
+              onPress={() => setPremium(premium === '1' ? '0' : '1')}
+              checkedColor="orange"
+            />
+            <FontAwesome5
+              name="asterisk"
+              size={10}
+              color="orange"
+              style={styles.asterisk}
+            />
+          </View>
+        )}
+      <TouchableOpacity
+        style={styles.customButton}
+        onPress={() => {
+          setShowDatePicker(true);
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }}
+      >
+        <Text style={styles.customButtonText}>Valitse syntymäaika</Text>
+      </TouchableOpacity>
+  
         {showDatePicker && (
           <DateTimePicker
             testID="dateTimePicker"
@@ -347,9 +367,9 @@ const UpdateProfile = () => {
             onChange={onChangeBirthDate}
           />
         )}
-
+  
         {loading && <ActivityIndicator size="large" color={Colors.primary} />}
-
+  
         <TouchableOpacity
           style={styles.customButton}
           onPress={handleUpdateProfile}
@@ -358,13 +378,15 @@ const UpdateProfile = () => {
         </TouchableOpacity>
       </ScrollView>
     </View>
-  );
+  );  
 };
 
 const styles = StyleSheet.create({
   fullScreenContainer: {
-    flex: 1,
+    flex: 0,
     backgroundColor: "white",
+    flexGrow: 1,
+    justifyContent: "flex-end",
   },
   container: {
     flex: 1,
@@ -408,8 +430,8 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: 10,
     padding: 10,
-    borderWidth: 1,
-    borderColor: 'green',
+    borderWidth: 2,
+    borderColor: Colors.secondary,
     borderRadius: 10,
   },
   customButton: {
@@ -448,14 +470,14 @@ const styles = StyleSheet.create({
   bioInput: {
     marginBottom: 10,
     padding: 10,
-    borderWidth: 1,
-    borderColor: 'green',
+    borderWidth: 2,
+    borderColor: Colors.secondary,
     borderRadius: 10,
   },
   label: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'black', // Dark text color
+    color: 'black',
     marginBottom: 5,
   },
 });
