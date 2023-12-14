@@ -1,9 +1,8 @@
 
 # Tervetuloa Reseptisovellus-sovelluksen GitHub-sivulle! 
 
-# Logo
 
-![Logo001](https://github.com/E55i/reseptisovellus/assets/114296942/2b486ff1-ba7c-4010-b779-dd0310dae44c)
+![adaptive-icon](https://github.com/E55i/reseptisovellus/assets/114296942/2b486ff1-ba7c-4010-b779-dd0310dae44c)
 
 
 # Reseptisovellus – Terveellisen Ruokavalion Apuväline

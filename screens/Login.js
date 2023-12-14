@@ -25,7 +25,7 @@ const StartScreen = ({ navigation }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
-            <Image source={require('../assets/Logo001.png')} style={styles.logo} />
+            <Image source={require('../assets/adaptive-icon.png')} style={styles.logo} />
           </View>
         </View>
       </Modal>

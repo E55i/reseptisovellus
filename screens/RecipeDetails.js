@@ -55,7 +55,7 @@ export default function RecipeDetails({ route, ...props }) {
       try {
         // Fetch user data
         const userData = await getUser();
-        if (isMounted && userData.length > 0) {
+        if (isMounted && userData) {
           setIsUserPremium(userData.premium);
         }
 
