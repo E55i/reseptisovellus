@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,15 +14,19 @@ import { getAuth, signOut } from 'firebase/auth';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { useRoute } from '@react-navigation/native';
 import { Colors } from "../styles/Colors";
+import { SimpleLineIcons } from "@expo/vector-icons";
 
 const Profile = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isPremiumVisible, setIsPremiumVisible] = useState(true);
 
   const route = useRoute();
   const auth = getAuth();
   const database = getDatabase();
   const user = auth.currentUser;
+
+  const scrollViewRef = useRef(null);
 
   useEffect(() => {
     if (user) {
@@ -119,6 +123,13 @@ const Profile = ({ navigation }) => {
     });
   };
 
+  const handleScroll = (event) => {
+    const scrollPosition = event.nativeEvent.contentOffset.y;
+    const threshold = 100; // Adjust this value based on when you want the premium icon to hide
+
+    setIsPremiumVisible(scrollPosition < threshold);
+  };
+
   if (loading) {
     return <ActivityIndicator size="large" />;
   }
@@ -126,7 +137,18 @@ const Profile = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <GoBackAppBar backgroundColor={Colors.primary} navigation={navigation} />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        onScroll={handleScroll}
+        ref={scrollViewRef}
+        scrollEventThrottle={16} // Adjust the throttle value as needed
+      >
+        {/* Check if user is premium and render diamond icon */}
+        {isPremiumVisible && userData?.premium === "1" && (
+          <View style={styles.premiumIconContainer}>
+            <SimpleLineIcons name="diamond" size={40} color={Colors.diamond} />
+          </View>
+        )}
         {userData?.profilePicture ? (
           <View style={styles.profileImageContainer}>
             <Image source={{ uri: userData.profilePicture }} style={styles.profileImage} />
@@ -222,6 +244,12 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     fontSize: 16,
+  },
+  premiumIconContainer: {
+    position: 'absolute',
+    top: '1%',
+    left: '1%',
+    zIndex: 1,
   },
 });
 
