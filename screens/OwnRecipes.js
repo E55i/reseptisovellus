@@ -13,13 +13,16 @@ import GoBackAppBar from "../components/GoBackAppBar";
 import RecipeCard from "../components/RecipeCard";
 import { IconButton } from "../components/CustomButtons";
 import { useNavigation } from "@react-navigation/native";
+import ShowAlert from "../components/ShowAlert";
 
 export default function OwnRecipes({ ...props }) {
+  // Initialise necessary states and navigation
   const [recipeData, setRecipeData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
-  
+
+  // Fetch the recipe data from Firestore
   useEffect(() => {
     let isMounted = true; // Flag to track whether the component is mounted
     const fetchData = async () => {
@@ -30,16 +33,18 @@ export default function OwnRecipes({ ...props }) {
           setRecipeData(recipes);
           setLoading(false);
         }
+
         // Cleanup: Unsubscribe from real-time updates when the component is unmounted
         return () => {
           isMounted = false;
           unsubscribe();
         };
       } catch (error) {
-        console.error("Error fetching data:", error);
+        ShowAlert("Tietojen lataus epäonnistui!", "Yritä myöhemmin uudelleen.");
       }
     };
     fetchData();
+
     // Cleanup: Ensure that any asynchronous tasks or subscriptions are cleared
     // when the component is unmounted
     return () => {

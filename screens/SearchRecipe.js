@@ -18,12 +18,13 @@ import { getUser } from "../components/FirebaseConfig";
 import { Colors } from "../styles/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import GetAllRecipes from "../components/GetRecipes";
-import ButtonWithIcon, {
+import ButtonWithTitleAndIcon, {
   RoundButtonWithIcon,
 } from "../components/CustomButtons";
 import CustomCheckBox from "../components/CustomCheckBox";
 
 export default function SearchRecipe({ ...props }) {
+  // Initialise  necessary states
   const [isPremium, setIsPremium] = useState("0");
   const [query, setQuery] = useState("");
   const [data, setData] = useState([]);
@@ -32,6 +33,7 @@ export default function SearchRecipe({ ...props }) {
   const [filters, setFilters] = useState([]);
   const [showFilterList, setShowFilterList] = useState(false);
 
+  // Course options for filter modal
   const courseOptions = [
     "Aamiainen",
     "Alkupala",
@@ -43,6 +45,7 @@ export default function SearchRecipe({ ...props }) {
     "Juoma",
   ];
 
+  // Main incredient options for filter modal
   const mainIngredientOptions = [
     "Nauta",
     "Sika",
@@ -54,6 +57,7 @@ export default function SearchRecipe({ ...props }) {
     "Kasviproteiini",
   ];
 
+  // Diet options for filter modal
   const dietOptions = [
     "Kasvis",
     "Vegaaninen",
@@ -64,10 +68,12 @@ export default function SearchRecipe({ ...props }) {
     "Vähähiilihydraattinen",
   ];
 
+  // Fetch the user data from Realtime Database and recipe data from Firestore
   useEffect(() => {
     let isMounted = true; // Flag to track whether the component is mounted
     const fetchData = async () => {
       try {
+        // Fetch the user data
         const userData = await getUser();
         if (isMounted && userData) {
           setIsPremium(userData.premium);
@@ -86,7 +92,7 @@ export default function SearchRecipe({ ...props }) {
           unsubscribe();
         };
       } catch (error) {
-        console.error("Error fetching data:", error);
+        ShowAlert("Tietojen lataus epäonnistui!", "Yritä myöhemmin uudelleen.");
       }
     };
     fetchData();
@@ -97,6 +103,7 @@ export default function SearchRecipe({ ...props }) {
     };
   }, []);
 
+  // Filter recipes based on input from search bar
   const handleSearch = (text) => {
     setQuery(text);
     if (text.length > 2) {
@@ -112,6 +119,7 @@ export default function SearchRecipe({ ...props }) {
     }
   };
 
+  // Filter recipes based on filters added in the modal
   const filterRecipes = () => {
     const filtered =
       filters.length === 0
@@ -258,7 +266,7 @@ export default function SearchRecipe({ ...props }) {
                         />
                       </View>
                       <View style={styles.modalButtons}>
-                        <ButtonWithIcon
+                        <ButtonWithTitleAndIcon
                           icon={"filter-remove-outline"}
                           color={Colors.grey}
                           width={140}
@@ -268,7 +276,7 @@ export default function SearchRecipe({ ...props }) {
                             setFilters([]);
                           }}
                         />
-                        <ButtonWithIcon
+                        <ButtonWithTitleAndIcon
                           icon={"filter-outline"}
                           color={Colors.secondary}
                           width={140}

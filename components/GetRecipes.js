@@ -13,6 +13,7 @@ import {
 import { convertTimeStampToJS } from "../helpers/Functions";
 import ShowAlert from "../components/ShowAlert";
 
+// Fetch all recipes and order them in ascending alphabetical order of the title
 export default async function GetAllRecipes() {
   const q = query(
     collection(firestore, "recipes"),
@@ -59,6 +60,7 @@ export default async function GetAllRecipes() {
   }
 }
 
+// Fetch users own recipes and order them in descending order of time when created
 export async function GetOwnRecipes() {
   const q = query(
     collection(firestore, "recipes"),
@@ -106,6 +108,7 @@ export async function GetOwnRecipes() {
   }
 }
 
+// Fetch recipe data of one recipe based on the recipeId
 export async function GetSingleRecipe({ recipeId }) {
   try {
     const docRef = await getDoc(doc(firestore, "recipes", recipeId));
@@ -138,6 +141,7 @@ export async function GetSingleRecipe({ recipeId }) {
         userRated: data.recipeData.userRated,
         premium: data.recipeData.premium,
       };
+      // Remove undefined values from the fetched data
       function removeUndefinedValues(obj) {
         Object.entries(obj).forEach(([key, value]) => {
           if (value === undefined) {
@@ -151,7 +155,6 @@ export async function GetSingleRecipe({ recipeId }) {
       removeUndefinedValues(tempData);
       return tempData;
     } else {
-      console.log("Recipe data not found");
       ShowAlert(
         "Hups!",
         "Nyt kävi hassusti. Tämän reseptin tietoja ei löytynyt. Kokeile jotain toista reseptiä."

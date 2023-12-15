@@ -8,13 +8,17 @@ import { SquareButtonWithIcon } from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
 
 export default function PhotoScreen({ route }) {
+  // Initialise necessary state, navigation
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+
+  // Get the origin of function call from the route parameters
   const calledFrom = route.params.calledFrom;
 
+  // Take photo using phone camera
   const takePhoto = async () => {
+    // Request permission to use the phone camera
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    console.log(status);
 
     if (status !== "granted") {
       ShowAlert(
@@ -24,20 +28,20 @@ export default function PhotoScreen({ route }) {
     } else {
       try {
         setLoading(true);
+        // Display phone camera UI to take the photo
         const cameraResp = await ImagePicker.launchCameraAsync({
           allowsEditing: true,
           mediaTypes: ImagePicker.MediaTypeOptions.All,
           quality: 1,
           aspect: [1, 1],
         });
-
+        // Handle the camera response
         if (!cameraResp.canceled) {
           const { uri } = cameraResp.assets[0];
           const fileName = uri.split("/").pop();
-          const uploadResp = await uploadToStorage(uri, fileName, (v) =>
-            console.log(v)
-          );
-          console.log(uploadResp);
+          const uploadResp = await uploadToStorage(uri, fileName);
+          // Navigate back to the component where the function was called
+          // from with the photo information
           navigation.navigate({
             name: calledFrom,
             params: {
@@ -54,9 +58,10 @@ export default function PhotoScreen({ route }) {
     }
   };
 
+  // Select photo from phone media library
   const selectPhoto = async () => {
+    // Request permission to use phone media library
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    console.log(status);
     if (status !== "granted") {
       ShowAlert(
         "Ei lupaa käyttää puhelimen kuvia",
@@ -65,21 +70,20 @@ export default function PhotoScreen({ route }) {
     } else {
       try {
         setLoading(true);
+        // Display the system UI for choosing an image from the phone's library
         const cameraResp = await ImagePicker.launchImageLibraryAsync({
           allowsEditing: true,
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           quality: 1,
           aspect: [1, 1],
         });
-
+        // Handle the camera response
         if (!cameraResp.canceled) {
           const { uri } = cameraResp.assets[0];
           const fileName = uri.split("/").pop();
-
-          const uploadResp = await uploadToStorage(uri, fileName, (v) =>
-            console.log(v)
-          );
-          console.log(uploadResp);
+          // Navigate back to the component where the function was called
+          // from with the photo information
+          const uploadResp = await uploadToStorage(uri, fileName);
           navigation.navigate({
             name: calledFrom,
             params: {
