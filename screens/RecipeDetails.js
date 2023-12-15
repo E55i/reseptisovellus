@@ -262,10 +262,37 @@ export default function RecipeDetails({ route, ...props }) {
                   recipeData.sugar === "" &&
                   recipeData.protein === "" &&
                   recipeData.salt === "" ? (
-                    ShowAlert(
-                      "",
-                      "Valitettavasti tälle reseptille ei ole vielä lisätty ravintosisältöä."
-                    )
+                    <>
+                      <Modal
+                        transparent={true}
+                        animationType="slide"
+                        visible={showModal}
+                        onRequestClose={() => setShowModal(false)}
+                      >
+                        <View style={styles.modalContainer}>
+                          <View style={styles.modalContentNoNutritionalContent}>
+                            <View style={styles.closeButton}>
+                              <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => {
+                                  setShowModal(false);
+                                }}
+                              >
+                                <Ionicons
+                                  name="close"
+                                  size={20}
+                                  color={Colors.grey}
+                                />
+                              </TouchableOpacity>
+                            </View>
+                            <Text style={styles.noNutritionalContentText}>
+                              Valitettavasti tälle reseptille ei ole vielä
+                              lisätty ravintosisältöä.
+                            </Text>
+                          </View>
+                        </View>
+                      </Modal>
+                    </>
                   ) : (
                     <Modal
                       transparent={true}
@@ -423,6 +450,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.white,
     flex: 1,
+    paddingBottom: 20,
   },
   title: {
     flex: 1,
@@ -523,6 +551,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 30,
     marginRight: 39,
+  },
+  modalContentNoNutritionalContent: {
+    backgroundColor: Colors.white,
+    width: "100%",
+    height: "50%",
+    padding: 20,
+    borderRadius: 10,
+  },
+  noNutritionalContentText: {
+    fontSize: 16,
+    textAlign: "center", 
+    textAlignVertical: "center", 
+    marginTop: 50,
   },
   newComment: {
     flexDirection: "row",
