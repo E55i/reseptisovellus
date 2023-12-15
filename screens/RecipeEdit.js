@@ -42,11 +42,16 @@ export default function RecipeEdit({ route, ...props }) {
   const [editTitle, setEditTitle] = useState(false);
   const [editIncredients, setEditIncredients] = useState(false);
   const [editInstructions, setEditInstructions] = useState(false);
+  const [editCategories, setEditCategories] = useState(false);
   const [showIncredientInput, setShowIncredientInput] = useState(false);
   const [showInstructionInput, setShowInstructionInput] = useState(false);
   const [showCheckboxDropdowns, setShowCheckboxDropdowns] = useState(false);
   const [newIngredient, setNewIngredient] = useState("");
   const [newInstruction, setNewInstruction] = useState("");
+
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [selectedMainIngredients, setSelectedMainIngredients] = useState([]);
+  const [selectedDiets, setSelectedDiets] = useState([]);
 
   const scrollViewRef = useRef();
   const navigation = useNavigation();
@@ -56,6 +61,38 @@ export default function RecipeEdit({ route, ...props }) {
     { key: "2", value: "alle 30 min" },
     { key: "3", value: "30-60 min" },
     { key: "4", value: "yli 60 min" },
+  ];
+
+  const courseOptions = [
+    { key: "1", value: "Aamiainen" },
+    { key: "2", value: "Alkupala" },
+    { key: "3", value: "Pääruoka" },
+    { key: "4", value: "Jälkiruoka" },
+    { key: "5", value: "Salaatti" },
+    { key: "6", value: "Keitto" },
+    { key: "7", value: "Lisuke" },
+    { key: "8", value: "Juoma" },
+  ];
+
+  const mainIngredientOptions = [
+    { key: "1", value: "Nauta" },
+    { key: "2", value: "Sika" },
+    { key: "3", value: "Makkara" },
+    { key: "4", value: "Broileri" },
+    { key: "5", value: "Kala" },
+    { key: "6", value: "Äyriäiset" },
+    { key: "7", value: "Kananmuna" },
+    { key: "8", value: "Kasviproteiini" },
+  ];
+
+  const dietOptions = [
+    { key: "1", value: "Kasvis" },
+    { key: "2", value: "Vegaaninen" },
+    { key: "3", value: "Gluteeniton" },
+    { key: "4", value: "Laktoositon" },
+    { key: "5", value: "Maidoton" },
+    { key: "6", value: "Kananmunaton" },
+    { key: "7", value: "Vähähiilihydraattinen" },
   ];
 
   useEffect(() => {
@@ -138,6 +175,18 @@ export default function RecipeEdit({ route, ...props }) {
       });
   };
 
+  const handleCourseSelect = () => {
+    setRecipeData({ ...recipeData, course: selectedCourses });
+  };
+
+  const handleMainIngredientSelect = () => {
+    setRecipeData({ ...recipeData, mainIngredient: selectedMainIngredients });
+  };
+
+  const handleDietSelect = () => {
+    setRecipeData({ ...recipeData, diet: selectedDiets });
+  };
+
   // Update the recipeData to firestore
   const updateRecipeData = async () => {
     if (
@@ -173,7 +222,7 @@ export default function RecipeEdit({ route, ...props }) {
         .then(() => {
           Alert.alert("Resepti tallennettu!");
           console.log("Data saved");
-          navigation.goBack();
+          navigation.navigate("Welcome");
         })
         .catch((error) => {
           console.log(error);
@@ -550,6 +599,92 @@ export default function RecipeEdit({ route, ...props }) {
               </View>
             )}
 
+            {editCategories ? (
+              <View style={styles.section}>
+                <View>
+                  <MultipleSelectList
+                    boxStyles={[styles.input, { height: null }]}
+                    placeholder="Valitse ruokalaji"
+                    badgeStyles={{ backgroundColor: Colors.secondary }}
+                    setSelected={(val) => setSelectedCourses(val)}
+                    data={courseOptions}
+                    search={false}
+                    save="value"
+                    onSelect={handleCourseSelect}
+                    label="Omat valinnat"
+                  />
+                </View>
+                <View>
+                  <MultipleSelectList
+                    boxStyles={[styles.input, { height: null }]}
+                    placeholder="Valitse pääraaka-aine"
+                    badgeStyles={{ backgroundColor: Colors.secondary }}
+                    setSelected={(val) => setSelectedMainIngredients(val)}
+                    data={mainIngredientOptions}
+                    search={false}
+                    save="value"
+                    onSelect={handleMainIngredientSelect}
+                    label="Omat valinnat"
+                  />
+                </View>
+                <View>
+                  <MultipleSelectList
+                    boxStyles={[styles.input, { height: null }]}
+                    placeholder="Valitse ruokavalio"
+                    badgeStyles={{ backgroundColor: Colors.secondary }}
+                    setSelected={(val) => setSelectedDiets(val)}
+                    data={dietOptions}
+                    search={false}
+                    save="value"
+                    onSelect={handleDietSelect}
+                    label="Omat valinnat"
+                  />
+                </View>
+                <View style={styles.editingButton}>
+                  <IconButton
+                    icon="checkcircle"
+                    iconColor={Colors.secondary}
+                    onPress={() => {
+                      setEditCategories(!editCategories);
+                    }}
+                  />
+                </View>
+              </View>
+            ) : (
+              <View style={styles.section}>
+                <Text style={{ fontSize: 16 }}>Kategoriat:</Text>
+                <View style={styles.filtersList}>
+                  {recipeData.course &&
+                    recipeData.course?.map((item, index) => (
+                      <Text key={index} style={styles.filterText}>
+                        {item}
+                      </Text>
+                    ))}
+                  {recipeData.mainIncredient &&
+                    recipeData.mainIncredient?.map((item, index) => (
+                      <Text key={index} style={styles.filterText}>
+                        {item}
+                      </Text>
+                    ))}
+                  {recipeData.diet &&
+                    recipeData.diet?.map((item, index) => (
+                      <Text key={index} style={styles.filterText}>
+                        {item}
+                      </Text>
+                    ))}
+                </View>
+                <View style={styles.editingButton}>
+                  <IconButton
+                    icon="setting"
+                    iconColor={Colors.grey}
+                    onPress={() => {
+                      setEditCategories(!editCategories);
+                    }}
+                  />
+                </View>
+              </View>
+            )}
+
             <View style={styles.sectionButtons}>
               <ButtonWithIcon
                 icon={"back"}
@@ -625,6 +760,7 @@ const styles = StyleSheet.create({
   },
   incredient: {
     fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 4,
     marginLeft: 30,
   },
@@ -632,6 +768,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 4,
     marginRight: 12,
+  },
+  filtersList: {
+    flex: 2,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 12,
+    gap: 4,
+  },
+  filterText: {
+    backgroundColor: Colors.lightgrey,
+    paddingTop: 4,
+    paddingBottom: 4,
+    paddingLeft: 8,
+    paddingRight: 8,
+    borderRadius: 10,
+    overflow: "hidden",
   },
   deleteItem: {
     flex: 1,
