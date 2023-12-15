@@ -315,8 +315,8 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 20,
-    marginLeft: 12,
-    marginRight: 12,
+    marginLeft: 4,
+    marginRight: 4,
   },
   searchBar: {
     marginTop: 16,
