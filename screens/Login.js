@@ -54,12 +54,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#f5f5f5',
   },
-  /*modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },*/
   modalView: {
     marginHorizontal: 20,
     backgroundColor: '#fff',
@@ -79,7 +73,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.secondary,
-    textAlign: 'center', // Varmistetaan, että teksti on keskitetty
+    textAlign: 'center',
   },
   optionsContainer: {
     flex: 1,
