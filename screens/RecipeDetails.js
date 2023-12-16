@@ -34,7 +34,7 @@ import UpdateToPremium from "../components/UpdateToPremium";
 import { Colors } from "../styles/Colors";
 import { GetSingleRecipe } from "../components/GetRecipes";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import ButtonWithIcon from "../components/CustomButtons";
+import ButtonWithTitleAndIcon from "../components/CustomButtons";
 
 export default function RecipeDetails({ route, ...props }) {
   const [newComment, setNewComment] = useState("");
@@ -47,6 +47,8 @@ export default function RecipeDetails({ route, ...props }) {
   const scrollViewRef = useRef();
   const { recipeId } = route.params;
 
+  // Fetch the user data from Realtime Database and recipe data
+  // and comments from Firestore
   useEffect(() => {
     // if page is scrolled down before, it is automatically scrolled to the
     // top of the page when searching new recipe
@@ -56,7 +58,7 @@ export default function RecipeDetails({ route, ...props }) {
     let isMounted = true; // Flag to track whether the component is mounted
     const fetchData = async () => {
       try {
-        // Fetch user data
+        // Fetch the user data
         const userData = await getUser();
         if (isMounted && userData) {
           setIsUserPremium(userData.premium);
@@ -66,7 +68,7 @@ export default function RecipeDetails({ route, ...props }) {
         if (isMounted) {
           setRecipeData(recipe);
         }
-        // Fetch comments from Firestore feedbacks collection
+        // Fetch the comments from Firestore feedbacks collection
         const unsubscribe = onSnapshot(
           query(
             collection(firestore, "feedbacks"),
@@ -97,7 +99,7 @@ export default function RecipeDetails({ route, ...props }) {
           unsubscribe();
         };
       } catch (error) {
-        console.error("Error fetching data:", error);
+        ShowAlert("Tietojen lataus epäonnistui!", "Yritä myöhemmin uudelleen.");
       }
     };
     fetchData();
@@ -242,8 +244,14 @@ export default function RecipeDetails({ route, ...props }) {
                         </Text>
                       ))}
                   </View>
-                  <View style={{ alignItems: "center" }}>
-                    <ButtonWithIcon
+                  <View
+                    style={{
+                      alignItems: "center",
+                      marginTop: 20,
+                      marginBottom: 20,
+                    }}
+                  >
+                    <ButtonWithTitleAndIcon
                       icon={"infocirlceo"}
                       color={Colors.primary}
                       width={200}
@@ -561,8 +569,8 @@ const styles = StyleSheet.create({
   },
   noNutritionalContentText: {
     fontSize: 16,
-    textAlign: "center", 
-    textAlignVertical: "center", 
+    textAlign: "center",
+    textAlignVertical: "center",
     marginTop: 50,
   },
   newComment: {

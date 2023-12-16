@@ -8,6 +8,7 @@ import {
   addDoc,
   getDoc,
   getDocs,
+  deleteDoc,
   updateDoc,
   serverTimestamp,
   query,
@@ -34,14 +35,16 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_APPID,
 };
 
+// Initialise the app
 const app = initializeApp(firebaseConfig);
 
+// Get authentication info and connect to the databases and Storage
 const auth = getAuth(app);
 const realtime = getDatabase();
 const firestore = getFirestore();
 const fbStorage = getStorage();
 
-// Fetch user data
+// Fetch the user data
 const getUser = async () => {
   const userRef = realtimeRef(realtime, "users/" + auth.currentUser.uid);
   try {
@@ -60,6 +63,7 @@ const getUser = async () => {
   }
 };
 
+// Upload file to Firebase Storage
 const uploadToStorage = async (uri, name, onProgress) => {
   const fetchResponse = await fetch(uri);
   const theBlob = await fetchResponse.blob();
@@ -90,6 +94,7 @@ const uploadToStorage = async (uri, name, onProgress) => {
   });
 };
 
+// Delete file from Firebase Storage
 const deleteFromStorage = async (fileUrl) => {
   try {
     const storageRef = ref(fbStorage, fileUrl);
@@ -111,6 +116,7 @@ export {
   addDoc,
   getDoc,
   getDocs,
+  deleteDoc,
   updateDoc,
   serverTimestamp,
   query,

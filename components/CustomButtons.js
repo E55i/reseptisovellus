@@ -9,12 +9,13 @@ import {
 } from "@expo/vector-icons";
 import { Colors } from "../styles/Colors";
 
-export default function ButtonWithIcon({
+export default function ButtonWithTitleAndIcon({
   icon,
   color,
   width,
   title,
   iconColor = "#fff",
+  borderColor = "transparent",
   library = "ant",
   onPress,
 }) {
@@ -23,17 +24,22 @@ export default function ButtonWithIcon({
       style={{
         ...styles.buttonContainer,
         backgroundColor: color,
+        library: "ant",
         width: width || "auto",
+        borderColor: borderColor,
       }}
       onPress={onPress}
     >
       {library == "ant" && (
         <AntDesign name={icon} size={24} color={iconColor} />
       )}
+      {library == "ionicons" && (
+        <Ionicons name={icon} size={24} color={iconColor} />
+      )}
       {library == "materialcom" && (
         <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
       )}
-      <Text style={styles.text}>{title}</Text>
+      <Text style={{ ...styles.text, color: iconColor }}>{title}</Text>
     </TouchableOpacity>
   );
 }
@@ -144,6 +150,7 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingRight: 16,
     borderRadius: 10,
+    borderWidth: 1,
     ...Platform.select({
       android: {
         elevation: 7,
@@ -160,7 +167,6 @@ const styles = StyleSheet.create({
   text: {
     textTransform: "uppercase",
     fontSize: 16,
-    color: "#fff",
   },
   roundButton: {
     justifyContent: "center",

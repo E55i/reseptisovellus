@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
-import ButtonWithIcon from "../components/CustomButtons";
+import ButtonWithTitleAndIcon from "../components/CustomButtons";
 import { Colors } from "../styles/Colors";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -33,6 +33,7 @@ import GoBackAppBar from "../components/GoBackAppBar";
 import ShowAlert from "../components/ShowAlert";
 
 export default function AddRecipe({ route, ...props }) {
+  // Initialise recipe data and other necessary states
   const [recipeData, setRecipeData] = useState({
     userId: auth.currentUser.uid,
     title: "",
@@ -73,6 +74,7 @@ export default function AddRecipe({ route, ...props }) {
   const [showStepInput, setShowStepInput] = useState(false);
   const [stepsNumber, setStepsNumber] = useState(0);
 
+  // Preparation and cooking time options for SelectList
   const timeOptions = [
     { key: "1", value: "alle 15 min" },
     { key: "2", value: "alle 30 min" },
@@ -80,6 +82,7 @@ export default function AddRecipe({ route, ...props }) {
     { key: "4", value: "yli 60 min" },
   ];
 
+  // Course options for MultipleSelectList
   const courseOptions = [
     { key: "1", value: "Aamiainen" },
     { key: "2", value: "Alkupala" },
@@ -91,6 +94,7 @@ export default function AddRecipe({ route, ...props }) {
     { key: "8", value: "Juoma" },
   ];
 
+  // Main incredient options for MultipleSelectList
   const mainIngredientOptions = [
     { key: "1", value: "Nauta" },
     { key: "2", value: "Sika" },
@@ -102,6 +106,7 @@ export default function AddRecipe({ route, ...props }) {
     { key: "8", value: "Kasviproteiini" },
   ];
 
+  // Diet options for MultipleSelectList
   const dietOptions = [
     { key: "1", value: "Kasvis" },
     { key: "2", value: "Vegaaninen" },
@@ -112,26 +117,28 @@ export default function AddRecipe({ route, ...props }) {
     { key: "7", value: "Vähähiilihydraattinen" },
   ];
 
+  // Set selected courses to recipeData
   const handleCourseSelect = () => {
     setRecipeData({ ...recipeData, course: selectedCourses });
   };
 
+  // Set selected main incredients to recipeData
   const handleMainIngredientSelect = () => {
     setRecipeData({ ...recipeData, mainIngredient: selectedMainIngredients });
   };
 
+  // Set selected diets to recipeData
   const handleDietSelect = () => {
     setRecipeData({ ...recipeData, diet: selectedDiets });
   };
 
+  // Set photo url and name to recipeData
   const handlePhoto = (photo, photoName) => {
     setRecipeData({ ...recipeData, photo: photo, photoName: photoName });
   };
 
-  // add new ingredient to recipe
+  // Add new ingredient to recipeData
   const addIngredient = () => {
-    //const newKey = String(tempIngredients.length);
-    //const object = { key: newKey, description: newIngredient };
     const newIngredients = [...tempIngredients, newIngredient];
     setTempIngredients(newIngredients);
     setShowInput(false);
@@ -139,7 +146,7 @@ export default function AddRecipe({ route, ...props }) {
     setNewIngredient("");
   };
 
-  // add instructions to recipe
+  // Add instruction steps to recipeData
   const addInstructionStep = () => {
     const newSteps = [...tempSteps];
     newSteps.splice(stepsNumber - 1, 0, newStep);
@@ -149,28 +156,28 @@ export default function AddRecipe({ route, ...props }) {
     setNewStep("");
   };
 
-  // increase instruction steps number by one
+  // Increase instruction step number by one
   const handleStepUp = () => {
     if (stepsNumber < tempSteps.length + 1) {
       setStepsNumber(stepsNumber + 1);
     }
   };
 
-  // decrease instruction steps number by one
+  // Decrease instruction step number by one
   const handleStepDown = () => {
     if (stepsNumber > 1) {
       setStepsNumber(stepsNumber - 1);
     }
   };
 
-  // delete specific ingredient
+  // Delete specific ingredient
   const deleteItem = (index) => {
     const updatedIngredients = tempIngredients.filter((item, i) => i !== index);
     setTempIngredients(updatedIngredients);
     setRecipeData({ ...recipeData, incredients: updatedIngredients });
   };
 
-  // delete specific instruction step
+  // Delete specific instruction step
   const deleteStep = (index) => {
     const updatedSteps = tempSteps.filter((item, i) => i !== index);
     setTempSteps(updatedSteps);
@@ -178,10 +185,10 @@ export default function AddRecipe({ route, ...props }) {
     setRecipeData({ ...recipeData, instructions: updatedSteps });
   };
 
-  // navigate to main screen after after save
+  // Initialise navigation
   const navigation = useNavigation();
 
-  // save the recipeData
+  // Save the recipeData to Firestore
   const save = async () => {
     if (
       !recipeData.title ||
@@ -198,17 +205,19 @@ export default function AddRecipe({ route, ...props }) {
         recipeData,
         created: serverTimestamp(),
       }).catch((error) => {
-        console.log(error);
-        ShowAlert("Error", error);
+        ShowAlert(
+          "Tallennus epäonnistui!",
+          "Reseptin tallennus epäonnistui. Yritä myöhemmin uudelleen."
+        );
       });
 
       setRecipeData({});
       Alert.alert("Resepti tallennettu!");
-      console.log("Data saved");
       navigation.goBack();
     }
   };
 
+  // Delete photo
   const deletePhoto = () => {
     const photoName = recipeData.photoName;
     let imageRef = ref(fbStorage, `images/${photoName}`);
@@ -222,15 +231,9 @@ export default function AddRecipe({ route, ...props }) {
         setRecipeData({ ...recipeData, photo: "", photoName: "" });
       })
       .catch((error) => {
-        console.log(`Error deleting the photo: ${error}`);
         Alert.alert("Virhe poistettaessa kuvaa! Yritä myöhemmin uudelleen.");
       });
   };
-
-  // monitor changes in the form (remove from final app)
-  useEffect(() => {
-    console.log(recipeData);
-  }, [recipeData]);
 
   return (
     <>
@@ -368,7 +371,7 @@ export default function AddRecipe({ route, ...props }) {
               <Text style={styles.header}>Kuva</Text>
               <View style={{ marginLeft: 12 }}>
                 {!route.params?.photoUrl && (
-                  <ButtonWithIcon
+                  <ButtonWithTitleAndIcon
                     onPress={() => {
                       navigation.navigate("PhotoScreen", {
                         calledFrom: "AddRecipe",
@@ -617,7 +620,7 @@ export default function AddRecipe({ route, ...props }) {
             </View>
 
             <View style={styles.sectionButtons}>
-              <ButtonWithIcon
+              <ButtonWithTitleAndIcon
                 icon={"back"}
                 color={Colors.grey}
                 width={140}
@@ -627,7 +630,7 @@ export default function AddRecipe({ route, ...props }) {
                   navigation.goBack();
                 }}
               />
-              <ButtonWithIcon
+              <ButtonWithTitleAndIcon
                 icon={"arrowdown"}
                 color={Colors.primary}
                 width={140}

@@ -14,12 +14,11 @@ import { useNavigation } from "@react-navigation/native";
 import GoBackAppBar from "../components/GoBackAppBar";
 import { GetSingleRecipe } from "../components/GetRecipes";
 import { Colors } from "../styles/Colors";
-import ButtonWithIcon, {
+import ButtonWithTitleAndIcon, {
   RoundButtonWithIcon,
   IconButton,
 } from "../components/CustomButtons";
 import {
-  auth,
   firestore,
   doc,
   updateDoc,
@@ -27,6 +26,11 @@ import {
   fbStorage,
   ref,
   deleteObject,
+  deleteDoc,
+  query,
+  collection,
+  where,
+  getDocs,
 } from "../components/FirebaseConfig";
 import ShowAlert from "../components/ShowAlert";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -36,7 +40,10 @@ import {
 } from "react-native-dropdown-select-list";
 
 export default function RecipeEdit({ route, ...props }) {
+  // Set recipeId from route parameters
   const recipeId = route.params.recipeId;
+
+  // Initialise the necessary statuses
   const [loading, setLoading] = useState(true);
   const [recipeData, setRecipeData] = useState({});
   const [editTitle, setEditTitle] = useState(false);
@@ -56,6 +63,7 @@ export default function RecipeEdit({ route, ...props }) {
   const scrollViewRef = useRef();
   const navigation = useNavigation();
 
+  // Preparation and cooking time options for SelectList
   const timeOptions = [
     { key: "1", value: "alle 15 min" },
     { key: "2", value: "alle 30 min" },
@@ -63,6 +71,7 @@ export default function RecipeEdit({ route, ...props }) {
     { key: "4", value: "yli 60 min" },
   ];
 
+  // Course options for MultipleSelectList
   const courseOptions = [
     { key: "1", value: "Aamiainen" },
     { key: "2", value: "Alkupala" },
@@ -74,6 +83,7 @@ export default function RecipeEdit({ route, ...props }) {
     { key: "8", value: "Juoma" },
   ];
 
+  // Main incredient options for MultipleSelectList
   const mainIngredientOptions = [
     { key: "1", value: "Nauta" },
     { key: "2", value: "Sika" },
@@ -85,6 +95,7 @@ export default function RecipeEdit({ route, ...props }) {
     { key: "8", value: "Kasviproteiini" },
   ];
 
+  // Diet options for MultipleSelectList
   const dietOptions = [
     { key: "1", value: "Kasvis" },
     { key: "2", value: "Vegaaninen" },
@@ -95,6 +106,7 @@ export default function RecipeEdit({ route, ...props }) {
     { key: "7", value: "Vähähiilihydraattinen" },
   ];
 
+  // Fetch the recipe data from Firestore
   useEffect(() => {
     // if page is scrolled down before, it is automatically scrolled to the
     // top of the page when searching new recipe
@@ -118,7 +130,7 @@ export default function RecipeEdit({ route, ...props }) {
           unsubscribe();
         };
       } catch (error) {
-        console.error("Error fetching data:", error);
+        ShowAlert("Tietojen lataus epäonnistui!", "Yritä myöhemmin uudelleen.");
       }
     };
     fetchData();
@@ -129,7 +141,7 @@ export default function RecipeEdit({ route, ...props }) {
     };
   }, [recipeId]);
 
-  // add new ingredient to recipe
+  // Add new ingredient to recipeData
   const addItem = (type) => {
     if (type === "incredient") {
       const newIngredients = [...recipeData.incredients, newIngredient];
@@ -140,7 +152,7 @@ export default function RecipeEdit({ route, ...props }) {
     }
   };
 
-  // delete specific ingredient or instruction step
+  // Delete specific ingredient or instruction step
   const deleteItem = (index, type) => {
     if (type === "incredient") {
       const updatedIngredients = recipeData.incredients.filter(
@@ -155,34 +167,50 @@ export default function RecipeEdit({ route, ...props }) {
     }
   };
 
+  // Set photo url and name to recipeData
   const handlePhoto = (photo, photoName) => {
     setRecipeData({ ...recipeData, photo: photo, photoName: photoName });
   };
 
+  // Delete photo
   const deletePhoto = () => {
-    const photoName = recipeData.photoName;
-    let imageRef = ref(fbStorage, photoName);
-    console.log("imgRef: ", imageRef);
+    Alert.alert("Poista kuva", "Haluatko varmasti poistaa tämän kuvan?", [
+      {
+        text: "Peruuta",
+        style: "cancel",
+      },
+      {
+        text: "Kyllä",
+        onPress: () => {
+          const photoName = recipeData.photoName;
+          let imageRef = ref(fbStorage, photoName);
 
-    // Delete photo from Firebase Storage
-    deleteObject(imageRef)
-      .then(() => {
-        setRecipeData({ ...recipeData, photo: "", photoName: "" });
-      })
-      .catch((error) => {
-        console.log(`Error deleting the photo: ${error}`);
-        Alert.alert("Virhe poistettaessa kuvaa! Yritä myöhemmin uudelleen.");
-      });
+          // Delete photo from Firebase Storage
+          deleteObject(imageRef)
+            .then(() => {
+              setRecipeData({ ...recipeData, photo: "", photoName: "" });
+            })
+            .catch((error) => {
+              Alert.alert(
+                "Virhe poistettaessa kuvaa! Yritä myöhemmin uudelleen."
+              );
+            });
+        },
+      },
+    ]);
   };
 
+  // Set selected courses to recipeData
   const handleCourseSelect = () => {
     setRecipeData({ ...recipeData, course: selectedCourses });
   };
 
+  // Set selected main incredients to recipeData
   const handleMainIngredientSelect = () => {
     setRecipeData({ ...recipeData, mainIngredient: selectedMainIngredients });
   };
 
+  // Set selected diets to recipeData
   const handleDietSelect = () => {
     setRecipeData({ ...recipeData, diet: selectedDiets });
   };
@@ -203,6 +231,7 @@ export default function RecipeEdit({ route, ...props }) {
       );
       return;
     } else {
+      // Remove undefined values from the fetched data
       function removeUndefinedValues(obj) {
         Object.entries(obj).forEach(([key, value]) => {
           if (value === undefined) {
@@ -221,20 +250,60 @@ export default function RecipeEdit({ route, ...props }) {
       })
         .then(() => {
           Alert.alert("Resepti tallennettu!");
-          console.log("Data saved");
           navigation.navigate("Welcome");
         })
         .catch((error) => {
-          console.log(error);
-          ShowAlert("Error", error);
+          ShowAlert(
+            "Tietojen tallennus epäonnistui!",
+            "Yritä myöhemmin uudelleen."
+          );
         });
     }
   };
 
-  // monitor changes in the form (remove from final app)
-  useEffect(() => {
-    console.log(recipeData);
-  }, [recipeData]);
+  // Delete recipe
+  const deleteRecipe = () => {
+    Alert.alert("Poista resepti", "Haluatko varmasti poistaa tämän reseptin?", [
+      {
+        text: "Peruuta",
+        style: "cancel",
+      },
+      {
+        text: "Kyllä",
+        onPress: async () => {
+          try {
+            // Delete comments associated with the recipe from Firestore
+            const commentsQuery = query(
+              collection(firestore, "feedbacks"),
+              where("recipeId", "==", recipeId)
+            );
+            const commentsSnapshot = await getDocs(commentsQuery);
+            commentsSnapshot.forEach(async (commentDoc) => {
+              await deleteDoc(doc(firestore, "feedbacks", commentDoc.id));
+            });
+
+            // Delete photo from Firebase Storage
+            const photoName = recipeData.photoName;
+            if (photoName) {
+              const imageRef = ref(fbStorage, photoName);
+              await deleteObject(imageRef);
+            }
+
+            // Delete recipe document from Firestore
+            const recipeDocRef = doc(firestore, "recipes", recipeId);
+            await deleteDoc(recipeDocRef);
+
+            Alert.alert("Resepti poistettu!");
+            navigation.navigate("Welcome");
+          } catch (error) {
+            Alert.alert(
+              "Virhe poistettaessa reseptiä! Yritä myöhemmin uudelleen."
+            );
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <>
@@ -684,27 +753,50 @@ export default function RecipeEdit({ route, ...props }) {
                 </View>
               </View>
             )}
-
-            <View style={styles.sectionButtons}>
-              <ButtonWithIcon
-                icon={"back"}
-                color={Colors.grey}
-                width={140}
-                title="Peruuta"
-                onPress={() => {
-                  setRecipeData({});
-                  navigation.goBack();
-                }}
-              />
-              <ButtonWithIcon
-                icon={"arrowdown"}
-                color={Colors.primary}
-                width={140}
-                title="Tallenna"
-                onPress={() => {
-                  updateRecipeData();
-                }}
-              />
+            <View style={{ ...styles.section, alignItems: "center" }}>
+              <View style={styles.sectionButtons}>
+                <View style={styles.buttonRow}>
+                  <ButtonWithTitleAndIcon
+                    icon={"back"}
+                    color={Colors.grey}
+                    width={140}
+                    title="Peruuta"
+                    onPress={() => {
+                      setRecipeData({});
+                      navigation.goBack();
+                    }}
+                  />
+                  <ButtonWithTitleAndIcon
+                    icon={"arrowdown"}
+                    color={Colors.primary}
+                    width={140}
+                    title="Tallenna"
+                    onPress={() => {
+                      updateRecipeData();
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    marginTop: 50,
+                    marginBottom: 40,
+                    alignItems: "center",
+                  }}
+                >
+                  <ButtonWithTitleAndIcon
+                    icon={"trash-sharp"}
+                    library="ionicons"
+                    color={Colors.white}
+                    width={200}
+                    iconColor="red"
+                    borderColor="red"
+                    title="Poista resepti"
+                    onPress={() => {
+                      deleteRecipe();
+                    }}
+                  />
+                </View>
+              </View>
             </View>
           </ScrollView>
         )}
@@ -744,7 +836,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginLeft: 20,
     marginRight: 20,
-    padding: 10,
+    paddingTop: 10,
+    paddingLeft: 10,
     paddingRight: 20,
   },
   title: {
@@ -774,6 +867,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     marginTop: 12,
+    marginBottom: 20,
     gap: 4,
   },
   filterText: {
@@ -837,13 +931,12 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   sectionButtons: {
+    flex: 1,
+  },
+  buttonRow: {
     flexDirection: "row",
-    justifyContent: "center",
-    alignContent: "center",
     gap: 8,
-    marginTop: 20,
-    marginBottom: 40,
-    marginLeft: 12,
-    marginRight: 12,
+    marginBottom: 12,
+    justifyContent: "flex-start",
   },
 });
