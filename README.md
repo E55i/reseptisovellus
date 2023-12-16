@@ -1,8 +1,7 @@
 
 # Tervetuloa ReseptiKirja-sovelluksen GitHub-sivulle! 
 
-
-![adaptive-icon](https://github.com/E55i/reseptisovellus/assets/114296942/2b486ff1-ba7c-4010-b779-dd0310dae44c)
+![resipe logo](https://github.com/E55i/reseptisovellus/assets/114296942/42d7cf38-7aa0-48e7-ba6b-916d59b66708)
 
 
 # ReseptiKirja – Terveellisen Ruokavalion Apuväline
@@ -45,7 +44,4 @@ Tutustu Dokumentaatioon saadaksesi lisätietoja sovelluksen rakenteesta ja toimi
 - [Tuomas](https://github.com/TuomasJurvansuu)
 - [Ilya](https://github.com/Apasov49)
 
-# Yhteystiedot
-Ota yhteyttä meihin sähköpostitse: info@reseptisovellus.com
-
-Kiitos, että tutustuit Reseptisovellukseen – innolla odotamme yhteisiä kokkaushetkiä ja terveellisiä makuelämyksiä kanssasi! 🍲✨
+# Kiitos, että tutustuit ReseptiKirjaan-sovelluksen – innolla odotamme yhteisiä kokkaushetkiä ja terveellisiä makuelämyksiä kanssasi! 🍲✨
