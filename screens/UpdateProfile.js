@@ -1,3 +1,4 @@
+// Importing necessary dependencies from React and React Native
 import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
@@ -11,8 +12,12 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
+
+// Importing Firebase authentication and database functions
 import { getAuth } from "firebase/auth";
 import { getDatabase, ref, onValue, set } from "firebase/database";
+
+// Importing additional components and styles
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -26,7 +31,9 @@ import GoBackAppBar from "../components/GoBackAppBar";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { CheckBox } from 'react-native-elements';
 
+// Functional component definition
 const UpdateProfile = () => {
+  // State variables for various user information
   const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -44,8 +51,10 @@ const UpdateProfile = () => {
   const database = getDatabase();
   const user = auth.currentUser;
 
+  // Navigation hook
   const navigation = useNavigation();
 
+  // Function for taking a photo using the device camera
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -79,6 +88,7 @@ const UpdateProfile = () => {
     }
   };
 
+  // Function for selecting a photo from the device gallery
   const selectPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -112,6 +122,7 @@ const UpdateProfile = () => {
     }
   };
 
+  // useEffect for fetching user profile information on component mount
   useEffect(() => {
     if (user) {
       const userProfileRef = ref(database, "users/" + user.uid);
@@ -134,6 +145,7 @@ const UpdateProfile = () => {
     }
   }, [user, database]);
 
+  // Validation function for name fields
   const validateName = (name, fieldName) => {
     if (name.length > 20) {
       Alert.alert("Virhe", `${fieldName} ei voi olla yli 20 merkkiä pitkä.`);
@@ -148,6 +160,7 @@ const UpdateProfile = () => {
     return true;
   };
 
+  // Function for handling profile picture deletion
   const handleDeleteProfilePicture = async () => {
     if (!profilePictureUri) {
       return;
@@ -171,6 +184,7 @@ const UpdateProfile = () => {
     );
   };
 
+  // Function to confirm profile picture deletion
   const confirmDeleteProfilePicture = async () => {
     try {
       await deleteFromStorage(profilePictureUri);
@@ -181,6 +195,7 @@ const UpdateProfile = () => {
     }
   };
 
+  // Function for handling birthdate change
   const onChangeBirthDate = (event, selectedDate) => {
     const currentDate = selectedDate || birthDate;
     setShowDatePicker(Platform.OS === 'ios');
@@ -203,6 +218,7 @@ const UpdateProfile = () => {
     setIsBirthDateSelected(true);
   };
 
+  // Function for updating the user profile
   const handleUpdateProfile = () => {
     if (!username || !firstName || !lastName || !birthDate) {
       Alert.alert('Virhe', 'Täytä kaikki pakolliset kentät.');
@@ -236,7 +252,7 @@ const UpdateProfile = () => {
         });
     }
   };
-
+  // JSX rendering of the component
   return (
     <View style={styles.fullScreenContainer}>
       {isProfileLoaded ? (
@@ -385,6 +401,7 @@ const UpdateProfile = () => {
   );
 };
 
+// Styles for the component
 const styles = StyleSheet.create({
   fullScreenContainer: {
     flex: 0,
