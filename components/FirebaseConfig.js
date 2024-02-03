@@ -26,13 +26,13 @@ import {
 import { getDatabase, ref as realtimeRef, get } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_APIKEY,
-  authDomain: process.env.EXPO_PUBLIC_AUTHDOMAIN,
-  databaseURL: process.env.EXPO_PUBLIC_DATABASEURL,
-  projectId: process.env.EXPO_PUBLIC_PROJECTID,
-  storageBucket: process.env.EXPO_PUBLIC_STORAGEBUCKET,
-  messagingSenderId: process.env.EXPO_PUBLIC_MESSAGINGSENDERID,
-  appId: process.env.EXPO_PUBLIC_APPID,
+  apiKey: "AIzaSyDIsbSss0td8yHf_-JiKBf75--RQFwI-pM",
+  authDomain: "reseptisovellustwitter.firebaseapp.com",
+  databaseURL: "https://reseptisovellustwitter-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "reseptisovellustwitter",
+  storageBucket: "reseptisovellustwitter.appspot.com",
+  messagingSenderId: "773290742758",
+  appId: "1:773290742758:web:156b14135fcdcfc9f73c27",
 };
 
 // Initialise the app
